@@ -18,10 +18,10 @@ async function prepareImagePart(imagePathOrBuffer) {
       return null;
     }
 
-    // Optimize image with Sharp: cap dimensions to 1600px for speed & compression
+    // Optimize image with Sharp: cap dimensions to 900px and 75% JPEG for blazing fast inference
     const optimized = await sharp(buf)
-      .resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true })
-      .jpeg({ quality: 85 })
+      .resize({ width: 900, height: 900, fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 75 })
       .toBuffer();
 
     return {
@@ -130,7 +130,11 @@ Return ONLY a valid JSON object matching this schema:
       },
     ];
 
-    const candidateModels = ['gemini-3-flash-preview', 'gemini-3.1-flash-lite-preview', 'gemini-flash-latest'];
+    // Priority: Fast 3.1 flash lite models first with 16s timeout
+    const candidateModels = [
+      'gemini-3.1-flash-lite-preview',
+      'gemini-3-flash-preview',
+    ];
     let candidateText = null;
 
     for (const modelName of candidateModels) {
@@ -148,6 +152,7 @@ Return ONLY a valid JSON object matching this schema:
               temperature: 0.1,
             },
           }),
+          signal: AbortSignal.timeout(16000), // 16-second hard timeout
         });
 
         if (!res.ok) {
@@ -163,7 +168,7 @@ Return ONLY a valid JSON object matching this schema:
           break;
         }
       } catch (reqErr) {
-        console.warn(`[Gemini Vision ${modelName} Network Error]:`, reqErr.message);
+        console.warn(`[Gemini Vision ${modelName} Error]:`, reqErr.message);
       }
     }
     if (!candidateText) {
