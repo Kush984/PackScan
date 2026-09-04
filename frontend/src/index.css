@@ -3,6 +3,21 @@
 @tailwind utilities;
 
 :root {
+  --bg-app: #f0fdfc;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fefe;
+  --bg-card-subtle: #f0fdfa;
+  --border-card: #ccfbf1;
+  --border-card-subtle: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --accent-turquoise: #47d1cc;
+  --accent-turquoise-dark: #0d9488;
+  --accent-coral: #ea580c;
+}
+
+body.theme-midnight {
   --bg-app: #0b1120;
   --bg-card: #111c33;
   --bg-card-hover: #152340;
@@ -12,22 +27,9 @@
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
-  --accent-teal: #0ea5e9;
-  --accent-cyan: #06b6d4;
-}
-
-body.theme-steel-ice {
-  --bg-app: #dce7f3;
-  --bg-card: #e8f1fa;
-  --bg-card-hover: #dfeaf5;
-  --bg-card-subtle: #d6e3f2;
-  --border-card: #b4c9e0;
-  --border-card-subtle: #c2d4e7;
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
-  --accent-teal: #0e7490;
-  --accent-cyan: #0284c7;
+  --accent-turquoise: #47d1cc;
+  --accent-turquoise-dark: #06b6d4;
+  --accent-coral: #ea580c;
 }
 
 @layer base {
