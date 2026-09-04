@@ -12,6 +12,7 @@ import DemoPresetBar from './components/DemoPresetBar';
 import RawLabelViewer from './components/RawLabelViewer';
 import DataSourceBadge from './components/DataSourceBadge';
 import EnforcementDashboard from './components/EnforcementDashboard';
+import MedicalProfileView from './components/MedicalProfileView';
 import {
   Scale,
   ShieldCheck,
@@ -70,10 +71,30 @@ export default function App() {
     sugar_threshold: 15.0,
     sodium_threshold: 400.0,
   });
-  const [activeTab, setActiveTab] = useState('scan'); // 'scan' | 'medical' | 'allergies' | 'forum'
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace('#', '');
+      if (['scan', 'medical', 'allergies', 'forum'].includes(hash)) return hash;
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (['scan', 'medical', 'allergies', 'forum'].includes(tab)) return tab;
+    }
+    return 'scan';
+  });
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (['scan', 'medical', 'allergies', 'forum'].includes(hash)) {
+        setActiveTab(hash);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
   const [unlistedBarcode, setUnlistedBarcode] = useState('');
   const [presets, setPresets] = useState([]);
   const [scanResult, setScanResult] = useState(null);
@@ -329,7 +350,10 @@ export default function App() {
 
   const handleSelectTab = (tabId) => {
     setActiveTab(tabId);
-    if (tabId === 'medical' || tabId === 'allergies') {
+    if (typeof window !== 'undefined') {
+      window.location.hash = tabId;
+    }
+    if (tabId === 'allergies') {
       setIsProfileOpen(true);
     } else if (tabId === 'forum') {
       setIsFeedbackOpen(true);
@@ -349,7 +373,14 @@ export default function App() {
 
       {/* MAIN WRAPPER */}
       <main className="w-full pt-32 max-w-[1280px] mx-auto px-4 sm:px-6 flex-1">
-        <div className="flex flex-col w-full pb-16 space-y-6">
+        {activeTab === 'medical' ? (
+          <MedicalProfileView
+            userProfile={userProfile}
+            onSaveProfile={handleSaveProfile}
+            onNavigateTab={handleSelectTab}
+          />
+        ) : (
+          <div className="flex flex-col w-full pb-16 space-y-6">
 
           {/* SECTION 1: Compliance Banner (Refined Calm Card) */}
           <section className="w-full bg-white rounded-xl p-6 sm:p-7 border border-[#cbd5e1] shadow-xs relative overflow-hidden">
@@ -644,6 +675,7 @@ export default function App() {
             </div>
           )}
         </div>
+        )}
       </main>
 
       {/* FOOTER (UNIFIED GLOBAL FOOTER) */}
