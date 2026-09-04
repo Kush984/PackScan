@@ -13,6 +13,7 @@ import RawLabelViewer from './components/RawLabelViewer';
 import DataSourceBadge from './components/DataSourceBadge';
 import EnforcementDashboard from './components/EnforcementDashboard';
 import MedicalProfileView from './components/MedicalProfileView';
+import AllergiesThresholdView from './components/AllergiesThresholdView';
 import {
   Scale,
   ShieldCheck,
@@ -375,6 +376,12 @@ export default function App() {
       <main className="w-full pt-32 max-w-[1280px] mx-auto px-4 sm:px-6 flex-1">
         {activeTab === 'medical' ? (
           <MedicalProfileView
+            userProfile={userProfile}
+            onSaveProfile={handleSaveProfile}
+            onNavigateTab={handleSelectTab}
+          />
+        ) : activeTab === 'allergies' ? (
+          <AllergiesThresholdView
             userProfile={userProfile}
             onSaveProfile={handleSaveProfile}
             onNavigateTab={handleSelectTab}
