@@ -225,56 +225,52 @@ app.post('/api/scan/extract-barcode', upload.single('frame'), async (req, res) =
         .toBuffer();
 
       const candidateModels = [
-        'gemini-flash-latest',
-        'gemini-3.6-flash',
         'gemini-3.1-flash-lite-preview',
+        'gemini-3.6-flash',
       ];
 
-      for (const model of candidateModels) {
-        try {
-          console.log(`[AI Barcode Extractor] Attempting detection with ${model}...`);
-          const aiRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [
-                  {
-                    parts: [
-                      {
-                        inlineData: {
-                          mimeType: 'image/jpeg',
-                          data: optimized.toString('base64'),
-                        },
+      const tasks = candidateModels.map(async (model) => {
+        const aiRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    {
+                      inlineData: {
+                        mimeType: 'image/jpeg',
+                        data: optimized.toString('base64'),
                       },
-                      {
-                        text: 'Look closely at the product packaging in this photo, especially any barcode stripes and the printed numbers directly under or beside them. Read the barcode digits (EAN-13, EAN-8, or UPC). Return ONLY the clean numeric digits (e.g. 8901393019469). If no barcode digits are visible, return NONE.',
-                      },
-                    ],
-                  },
-                ],
-              }),
-              signal: AbortSignal.timeout(9000),
-            }
-          );
-
-          if (aiRes.ok) {
-            const data = await aiRes.json();
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-            const match = text.match(/\b\d{8,14}\b/);
-            if (match) {
-              console.log(`[AI Barcode Extractor] Successfully detected barcode via ${model}: ${match[0]}`);
-              // Clean up uploaded temp file
-              try { fs.unlinkSync(req.file.path); } catch (_) {}
-              return res.json({ success: true, barcode: match[0], model });
-            }
-          } else {
-            console.warn(`[AI Barcode Extractor] ${model} returned HTTP ${aiRes.status}`);
+                    },
+                    {
+                      text: 'Look closely at the product packaging in this photo, especially any barcode stripes and the printed numbers directly under or beside them. Read the barcode digits (EAN-13, EAN-8, or UPC). Return ONLY the clean numeric digits (e.g. 8901393019469). If no barcode digits are visible, return NONE.',
+                    },
+                  ],
+                },
+              ],
+            }),
+            signal: AbortSignal.timeout(15000),
           }
-        } catch (mErr) {
-          console.warn(`[AI Barcode Extractor] ${model} failed/timeout:`, mErr.message);
-        }
+        );
+
+        if (!aiRes.ok) throw new Error(`${model} HTTP ${aiRes.status}`);
+        const data = await aiRes.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+        const match = text.match(/\b\d{8,14}\b/);
+        if (!match) throw new Error(`${model} found no numeric barcode: ${text}`);
+        return { barcode: match[0], model };
+      });
+
+      try {
+        const winner = await Promise.any(tasks);
+        console.log(`[AI Barcode Extractor] Successfully detected barcode via ${winner.model}: ${winner.barcode}`);
+        try { fs.unlinkSync(req.file.path); } catch (_) {}
+        return res.json({ success: true, barcode: winner.barcode, model: winner.model });
+      } catch (raceErr) {
+        console.warn('[AI Barcode Extractor] All parallel model tasks failed:', raceErr.message);
       }
     }
 
