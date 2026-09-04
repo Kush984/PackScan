@@ -1,21 +1,45 @@
 const { createWorker } = require('tesseract.js');
 const sharp = require('sharp');
 const fs = require('fs');
+const path = require('path');
 
 let workerInstance = null;
+let workerInitPromise = null;
 
 async function getWorker() {
-  if (!workerInstance) {
-    workerInstance = await createWorker('eng');
+  if (workerInstance) return workerInstance;
+  if (!workerInitPromise) {
+    workerInitPromise = (async () => {
+      const trainedDataDir = path.resolve(__dirname, '..');
+      const hasLocalTrainedData = fs.existsSync(path.join(trainedDataDir, 'eng.traineddata'));
+      const options = hasLocalTrainedData
+        ? { langPath: trainedDataDir, gzip: false }
+        : {};
+
+      console.log(`[OCR] Initializing Tesseract worker (local traineddata: ${hasLocalTrainedData})...`);
+      const worker = await createWorker('eng', 1, options);
+      workerInstance = worker;
+      return worker;
+    })().catch((err) => {
+      workerInitPromise = null;
+      console.error('[OCR Worker Init Failed]:', err.message);
+      throw err;
+    });
   }
-  return workerInstance;
+  return workerInitPromise;
 }
 
 async function preprocessImage(inputPath) {
   try {
+    const metadata = await sharp(inputPath).metadata();
+    if (!metadata || !metadata.width || !metadata.height || metadata.width < 10 || metadata.height < 10) {
+      console.warn('[Image Preprocessing] Image too small for advanced filters:', metadata);
+      return null;
+    }
+
     // 1. Grayscale + Normalized Contrast + Sharpened
     const enhancedBuffer = await sharp(inputPath)
-      .resize({ width: 2800, withoutEnlargement: false, fit: 'inside' })
+      .resize({ width: Math.min(metadata.width, 2800), withoutEnlargement: true, fit: 'inside' })
       .grayscale()
       .normalize()
       .sharpen({ sigma: 2.0, m1: 2.0, m2: 0.8 })
@@ -23,14 +47,14 @@ async function preprocessImage(inputPath) {
 
     // 2. High-contrast binarized (Threshold)
     const binarizedBuffer = await sharp(inputPath)
-      .resize({ width: 2800, withoutEnlargement: false, fit: 'inside' })
+      .resize({ width: Math.min(metadata.width, 2800), withoutEnlargement: true, fit: 'inside' })
       .grayscale()
       .threshold(135)
       .toBuffer();
 
     // 3. Dot-Matrix Inkjet Dot-Connector (bridges gaps between inkjet dots)
     const dotMatrixBuffer = await sharp(inputPath)
-      .resize({ width: 2800, withoutEnlargement: false, fit: 'inside' })
+      .resize({ width: Math.min(metadata.width, 2800), withoutEnlargement: true, fit: 'inside' })
       .grayscale()
       .linear(2.0, -40)
       .blur(0.6)

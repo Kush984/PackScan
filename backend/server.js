@@ -10,6 +10,14 @@ const fs = require('fs');
 const dotenv = require('dotenv');
 dotenv.config();
 
+process.on('uncaughtException', (err) => {
+  console.error('🔥 [CRITICAL UNCAUGHT EXCEPTION]:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('⚠️ [UNHANDLED PROMISE REJECTION]:', reason);
+});
+
 const db = require('./database/db');
 const { analyzeLegalMetrologyCompliance } = require('./services/legalMetrologyService');
 const { evaluateAllergiesAndHealth, getAllergenData, getDiseaseData } = require('./services/allergyHealthService');
@@ -247,16 +255,24 @@ app.post(
       console.log('[OCR] Processing all captured photos concurrently...');
       const ocrTasks = [
         req.files?.frontPhoto?.[0]
-          ? extractTextFromImage(req.files.frontPhoto[0].path).then((r) => ({ key: 'front', angle: 'Front of Pack', r }))
+          ? extractTextFromImage(req.files.frontPhoto[0].path)
+              .then((r) => ({ key: 'front', angle: 'Front of Pack', r }))
+              .catch((err) => ({ key: 'front', angle: 'Front of Pack', r: { cleanedText: '', confidence: 0, error: err.message } }))
           : null,
         req.files?.backPhoto?.[0]
-          ? extractTextFromImage(req.files.backPhoto[0].path).then((r) => ({ key: 'back', angle: 'Back of Pack', r }))
+          ? extractTextFromImage(req.files.backPhoto[0].path)
+              .then((r) => ({ key: 'back', angle: 'Back of Pack', r }))
+              .catch((err) => ({ key: 'back', angle: 'Back of Pack', r: { cleanedText: '', confidence: 0, error: err.message } }))
           : null,
         req.files?.sidePhoto?.[0]
-          ? extractTextFromImage(req.files.sidePhoto[0].path).then((r) => ({ key: 'side', angle: 'Side / Edge of Pack', r }))
+          ? extractTextFromImage(req.files.sidePhoto[0].path)
+              .then((r) => ({ key: 'side', angle: 'Side / Edge of Pack', r }))
+              .catch((err) => ({ key: 'side', angle: 'Side / Edge of Pack', r: { cleanedText: '', confidence: 0, error: err.message } }))
           : null,
         req.files?.additionalPhoto?.[0]
-          ? extractTextFromImage(req.files.additionalPhoto[0].path).then((r) => ({ key: 'additional', angle: 'Additional Photo Angle', r }))
+          ? extractTextFromImage(req.files.additionalPhoto[0].path)
+              .then((r) => ({ key: 'additional', angle: 'Additional Photo Angle', r }))
+              .catch((err) => ({ key: 'additional', angle: 'Additional Photo Angle', r: { cleanedText: '', confidence: 0, error: err.message } }))
           : null,
       ].filter(Boolean);
 

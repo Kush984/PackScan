@@ -218,7 +218,14 @@ export default function App() {
         }),
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (_) {
+        throw new Error(`Server connection issue (${res.status}: ${res.statusText || 'Unexpected response'})`);
+      }
+
       if (res.status === 404 || data.status === 'NOT_FOUND') {
         setNotFoundInfo({
           barcode: data.barcode || barcode,
@@ -229,7 +236,7 @@ export default function App() {
       }
 
       if (!res.ok) {
-        throw new Error(data.message || data.error || 'Failed to lookup product');
+        throw new Error(data.message || data.error || `Product lookup failed (Status: ${res.status})`);
       }
 
       setScanResult(data);
@@ -272,12 +279,18 @@ export default function App() {
         body: formData,
       });
 
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.message || errData.error || `Scan processing failed (Status: ${response.status})`);
+      const text = await response.text();
+      let result = {};
+      try {
+        result = text ? JSON.parse(text) : {};
+      } catch (_) {
+        throw new Error(`Scan processing failed (${response.status}: ${response.statusText || 'Invalid response from server'})`);
       }
 
-      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || result.error || `Scan processing failed (Status: ${response.status})`);
+      }
+
       setScanResult(result);
       scrollToResult();
     } catch (err) {
@@ -356,12 +369,18 @@ export default function App() {
         body: formData,
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || errData.error || 'Image OCR processing failed');
+      const text = await res.text();
+      let data = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (_) {
+        throw new Error(`Image processing failed (${res.status}: ${res.statusText || 'Invalid response from server'})`);
       }
 
-      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || data.error || `Image OCR processing failed (Status: ${res.status})`);
+      }
+
       setScanResult(data);
       scrollToResult();
     } catch (err) {
