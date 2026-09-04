@@ -7,6 +7,7 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const sharp = require('sharp');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -206,6 +207,65 @@ app.post('/api/profile', async (req, res) => {
     );
     res.json({ status: 'SUCCESS' });
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── EXTRACT BARCODE FROM FRAME VIA AI ───────────────────────────────────────
+app.post('/api/scan/extract-barcode', upload.single('frame'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No frame provided' });
+    }
+    const imageBuffer = fs.readFileSync(req.file.path);
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (apiKey) {
+      const optimized = await sharp(imageBuffer)
+        .resize({ width: 600, height: 600, fit: 'inside' })
+        .jpeg({ quality: 75 })
+        .toBuffer();
+
+      const aiRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    inlineData: {
+                      mimeType: 'image/jpeg',
+                      data: optimized.toString('base64'),
+                    },
+                  },
+                  {
+                    text: 'Look closely at the product barcode in this photo. Read the printed barcode number (EAN-13, EAN-8, or UPC). Return ONLY the clean numeric digits (e.g. 8901393019469). If no barcode is visible or readable, return NONE.',
+                  },
+                ],
+              },
+            ],
+          }),
+          signal: AbortSignal.timeout(10000),
+        }
+      );
+
+      if (aiRes.ok) {
+        const data = await aiRes.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+        const match = text.match(/\b\d{8,14}\b/);
+        if (match) {
+          console.log(`[AI Barcode Extractor] Successfully detected barcode: ${match[0]}`);
+          return res.json({ success: true, barcode: match[0] });
+        }
+      }
+    }
+
+    res.json({ success: false, barcode: null, message: 'No barcode recognized in this frame' });
+  } catch (err) {
+    console.warn('[Extract Barcode Error]:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ── BARCODE SCAN ──────────────────────────────────────────────────────────────

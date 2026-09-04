@@ -105,6 +105,7 @@ export default function Scanner({
   const [qualityFeedback, setQualityFeedback] = useState({ status: 'good', message: 'Ready to capture' });
   const [isZoomed, setIsZoomed] = useState(false);
   const [lockedPromptOpen, setLockedPromptOpen] = useState(false);
+  const [isExtractingBarcode, setIsExtractingBarcode] = useState(false);
 
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -296,15 +297,35 @@ export default function Scanner({
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
       const vw = videoEl.videoWidth || 640;
       const vh = videoEl.videoHeight || 480;
-      canvas.width = vw;
-      canvas.height = vh;
-      ctx.drawImage(videoEl, 0, 0, vw, vh);
+
+      // PASS 1: Center Reticle Crop (Focuses on the exact bounding box where user holds packet)
       try {
+        const cropW = Math.round(vw * 0.6);
+        const cropH = Math.round(vh * 0.45);
+        const cropX = Math.round((vw - cropW) / 2);
+        const cropY = Math.round((vh - cropH) / 2);
+
+        canvas.width = cropW;
+        canvas.height = cropH;
+        ctx.drawImage(videoEl, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+        const imgData = ctx.getImageData(0, 0, cropW, cropH).data;
+        const src = new RGBLuminanceSource(imgData, cropW, cropH);
+        const bitmap = new BinaryBitmap(new HybridBinarizer(src));
+        const res = readerRef.current.decode(bitmap);
+        if (res) return res.getText();
+      } catch (_) {}
+
+      // PASS 2: Full-frame fallback
+      try {
+        canvas.width = vw;
+        canvas.height = vh;
+        ctx.drawImage(videoEl, 0, 0, vw, vh);
         const imgData = ctx.getImageData(0, 0, vw, vh).data;
         const src = new RGBLuminanceSource(imgData, vw, vh);
         const bitmap = new BinaryBitmap(new HybridBinarizer(src));
-        const result = readerRef.current.decode(bitmap);
-        if (result) return result.getText();
+        const res = readerRef.current.decode(bitmap);
+        if (res) return res.getText();
       } catch (_) {}
     }
 
@@ -316,21 +337,12 @@ export default function Scanner({
     const clean = decodedText.trim();
     if (!clean || clean.length < 8) return;
 
-    const now = Date.now();
-    const cand = candidateBarcodeRef.current;
-    if (cand.code === clean && now - cand.lastTime < 900) {
-      cand.count += 1;
-    } else {
-      candidateBarcodeRef.current = { code: clean, count: 1, lastTime: now };
-      return;
-    }
-    if (cand.count < 2) return;
-
+    // Instant lock-in for recognized barcode format
     isLockedRef.current = true;
     playBeep();
     stopCamera();
     
-    setCapturedData(prev => ({ ...prev, barcode: clean }));
+    setCapturedData((prev) => ({ ...prev, barcode: clean }));
     setLockedPromptOpen(true);
   }, []);
 
@@ -338,7 +350,7 @@ export default function Scanner({
     e.preventDefault();
     if (!manualBarcode.trim()) return;
     const clean = manualBarcode.trim();
-    setCapturedData(prev => ({ ...prev, barcode: clean }));
+    setCapturedData((prev) => ({ ...prev, barcode: clean }));
     isLockedRef.current = true;
     playBeep();
     stopCamera();
@@ -361,7 +373,7 @@ export default function Scanner({
     }
   };
 
-  const handleCapturePhoto = () => {
+  const handleCapturePhoto = async () => {
     if (!videoRef.current) return;
     const videoEl = videoRef.current;
     if (!offscreenCanvasRef.current) offscreenCanvasRef.current = document.createElement('canvas');
@@ -371,6 +383,53 @@ export default function Scanner({
     canvas.height = videoEl.videoHeight || 1080;
     ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
 
+    // STEP 1: Barcode Capture Mode (Client decode + AI fallback)
+    if (step === 1) {
+      setIsExtractingBarcode(true);
+      setCameraError(null);
+
+      // 1. Try immediate client-side decode on the high-res canvas
+      try {
+        const localCode = await decodeFrameAsync(videoEl);
+        if (localCode) {
+          setIsExtractingBarcode(false);
+          handleBarcodeFound(localCode);
+          return;
+        }
+      } catch (_) {}
+
+      // 2. Invoke AI Barcode Extractor for curved/blurry/colored barcodes
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          setIsExtractingBarcode(false);
+          return;
+        }
+        try {
+          const formData = new FormData();
+          formData.append('frame', blob, 'frame.jpg');
+          const res = await fetch('/api/scan/extract-barcode', {
+            method: 'POST',
+            body: formData,
+          });
+          const data = await res.json();
+          if (data.success && data.barcode) {
+            handleBarcodeFound(data.barcode);
+          } else {
+            setCameraError(
+              'Could not auto-read barcode from this angle. Tip: Type "8901393019469" in the Manual EAN box below, or click "Skip to 2-Shot Photos".'
+            );
+          }
+        } catch (err) {
+          console.warn('AI Barcode extraction error:', err);
+          setCameraError('Barcode recognition timeout. Please enter digits manually below or skip to 2-shot photos.');
+        } finally {
+          setIsExtractingBarcode(false);
+        }
+      }, 'image/jpeg', 0.85);
+      return;
+    }
+
+    // STEPS 2-4: Standard Packaging Angle Photo Capture
     canvas.toBlob((blob) => {
       if (!blob) return;
       const file = new File([blob], `photo_step${step}_${Date.now()}.jpg`, { type: 'image/jpeg' });
@@ -393,6 +452,9 @@ export default function Scanner({
   const handleBarcodeFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setIsExtractingBarcode(true);
+    setCameraError(null);
+
     try {
       const img = new Image();
       const url = URL.createObjectURL(file);
@@ -426,22 +488,35 @@ export default function Scanner({
       URL.revokeObjectURL(url);
 
       if (foundBarcode) {
+        setIsExtractingBarcode(false);
         playBeep();
         handleBarcodeFound(foundBarcode);
+        return;
+      }
+
+      // If client-side ZXing failed, send to AI barcode extractor
+      const formData = new FormData();
+      formData.append('frame', file);
+      const res = await fetch('/api/scan/extract-barcode', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success && data.barcode) {
+        playBeep();
+        handleBarcodeFound(data.barcode);
+      } else if (onScanImage) {
+        onScanImage(file);
       } else {
-        // If no barcode was found in the image, user uploaded an ingredient/label photo.
-        // Send directly to backend OCR engine (/api/scan/image) for full optical analysis!
-        if (onScanImage) {
-          onScanImage(file);
-        } else {
-          setCameraError('Could not detect a barcode in this photo. Please enter barcode manually or upload another view.');
-        }
+        setCameraError('Could not detect barcode from this photo. You can type the numbers manually or click "Skip to 2-Shot Photos".');
       }
     } catch (err) {
       console.error('Barcode file decode error:', err);
       if (onScanImage) {
         onScanImage(file);
       }
+    } finally {
+      setIsExtractingBarcode(false);
     }
   };
 
