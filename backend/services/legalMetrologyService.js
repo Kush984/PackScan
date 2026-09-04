@@ -47,11 +47,13 @@ function analyzeLegalMetrologyCompliance(text, metadata = {}) {
   let statusBadgeColor = 'red';
   let summary = '';
 
+  const hasLabelText = Boolean(normalizedText && normalizedText.trim().length > 0);
+
   if (detectedCount === 8) {
     overallStatus = 'COMPLIANT';
     statusBadgeColor = 'emerald';
     summary = 'All 8 mandatory declarations under Legal Metrology Rules, 2011 are verified.';
-  } else if (metadata.scanType === 'barcode') {
+  } else if (metadata.scanType === 'barcode' && !hasLabelText) {
     overallStatus = 'DIGITAL_RECORD_VERIFIED';
     statusBadgeColor = 'sky';
     summary = `Digital registry verified (${detectedCount}/8 fields). Physical batch declarations (printed MRP, Net Weight, Mfg Date) require physical label photo audit.`;
