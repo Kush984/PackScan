@@ -1,0 +1,146 @@
+[
+  {
+    "additive": "Red 40 / Allura Red AC / E129 / INS 129",
+    "aliases": ["allura red", "red 40", "e129", "ins 129", "allura red ac", "ci 16035"],
+    "india_status": "Permitted in specified foods with maximum limit (FSSAI Regulations 2011)",
+    "eu_status": "Permitted with mandatory warning label: 'May have an adverse effect on activity and attention in children' (EFSA Regulation EC 1333/2008)",
+    "au_status": "Permitted within prescribed limits (FSANZ Standard 1.3.1)",
+    "note": "EU requires mandatory Southampton warning for hyperactivity in children, while India and Australia permit under max limits without warning labels.",
+    "source": "EFSA Scientific Opinion 2009; FSSAI Food Safety Standards (Food Products Standards and Food Additives) Regulations; FSANZ Standard 1.3.1"
+  },
+  {
+    "additive": "Titanium Dioxide / E171 / INS 171",
+    "aliases": ["titanium dioxide", "e171", "ins 171", "ci 77891"],
+    "india_status": "Permitted as colouring agent under GMP / specified limits (FSSAI Regulations)",
+    "eu_status": "Banned as food additive since 2022 (EU Regulation 2022/63 - genotoxicity concerns)",
+    "au_status": "Currently permitted; reviewed by FSANZ (found safety concerns not substantiated for typical dietary intake)",
+    "note": "Completely banned in EU due to particle accumulation and DNA damage concerns, but remains legal in India and Australia.",
+    "source": "EFSA Panel on Food Additives and Flavourings (FAF) 2021; EU Commission Regulation 2022/63; FSANZ 2022 Statement"
+  },
+  {
+    "additive": "Potassium Bromate / E924 / INS 924",
+    "aliases": ["potassium bromate", "e924", "ins 924"],
+    "india_status": "Banned in bread and bakery products since 2016 by FSSAI",
+    "eu_status": "Banned across the EU (classified as potential carcinogen)",
+    "au_status": "Banned in Australia / New Zealand",
+    "note": "Prohibited across India, EU, and Australia due to carcinogenic classification by IARC.",
+    "source": "FSSAI Notification June 2016; IARC Monographs Vol 73; FSANZ Food Standards Code"
+  },
+  {
+    "additive": "Tartrazine / Yellow 5 / E102 / INS 102",
+    "aliases": ["tartrazine", "yellow 5", "e102", "ins 102", "fd&c yellow no. 5"],
+    "india_status": "Permitted in specific food categories (max 100 mg/kg under FSSAI)",
+    "eu_status": "Permitted but requires mandatory child hyperactivity warning label",
+    "au_status": "Permitted under FSANZ Standard 1.3.1 with specific maximum levels",
+    "note": "Synthetic azo dye requiring warning labels in EU for child attention impact; widely used in Indian sweets/packaged snacks.",
+    "source": "EU Regulation 1333/2008 Annex V; FSSAI Standards Regulations 2011; FSANZ Standard 1.3.1"
+  },
+  {
+    "additive": "Sunset Yellow FCF / Yellow 6 / E110 / INS 110",
+    "aliases": ["sunset yellow", "yellow 6", "e110", "ins 110", "sunset yellow fcf"],
+    "india_status": "Permitted in specified foods with maximum limit (FSSAI)",
+    "eu_status": "Permitted with mandatory child hyperactivity warning label; ADI reduced to 1 mg/kg bw",
+    "au_status": "Permitted with maximum permitted levels (FSANZ)",
+    "note": "Part of the 'Southampton Six' colors requiring warning in Europe; permitted under standard limits in India and Australia.",
+    "source": "EFSA Journal 2014;12(7):3765; FSSAI Chapter 3.2.1; FSANZ Schedule 15"
+  },
+  {
+    "additive": "BHA (Butylated Hydroxyanisole) / E320 / INS 320",
+    "aliases": ["butylated hydroxyanisole", "bha", "e320", "ins 320", "antioxidant 320"],
+    "india_status": "Permitted as antioxidant in fats/oils up to 200 ppm (FSSAI)",
+    "eu_status": "Permitted with strict limits (EFSA re-evaluated ADI 1.0 mg/kg bw)",
+    "au_status": "Permitted under maximum levels in specified foods (FSANZ Standard 1.3.1)",
+    "note": "Synthetic antioxidant allowed across regions within strict parts-per-million limits due to endocrine disruption investigations.",
+    "source": "EFSA ANS Panel 2011; FSSAI Food Additives Regulations; FSANZ Code Schedule 15"
+  },
+  {
+    "additive": "BHT (Butylated Hydroxytoluene) / E321 / INS 321",
+    "aliases": ["butylated hydroxytoluene", "bht", "e321", "ins 321", "antioxidant 321"],
+    "india_status": "Permitted in fats/oils and chewing gum (max 100-200 ppm)",
+    "eu_status": "Permitted with reduced ADI (0.25 mg/kg bw)",
+    "au_status": "Permitted with specific max limits (FSANZ)",
+    "note": "Commonly paired with BHA; permitted with strict ADI caps across all three jurisdictions.",
+    "source": "EFSA Journal 2012;10(3):2588; FSSAI Regulations 2011; FSANZ Schedule 15"
+  },
+  {
+    "additive": "Azodicarbonamide (ADA) / E927a",
+    "aliases": ["azodicarbonamide", "ada", "e927a", "ins 927a", "dough conditioner 927a"],
+    "india_status": "Banned as a flour treatment agent / bleaching agent",
+    "eu_status": "Banned for use in food and food-contact materials (Directive 2004/1/EC)",
+    "au_status": "Banned for use as food additive in Australia/New Zealand",
+    "note": "Prohibited in India, EU, and Australia due to thermal breakdown byproduct (semicarbazide).",
+    "source": "FSSAI Gazette Notification; European Commission Directive 2004/1/EC; FSANZ"
+  },
+  {
+    "additive": "Potassium Sorbate / E202 / INS 202",
+    "aliases": ["potassium sorbate", "sorbate", "e202", "ins 202", "preservative 202"],
+    "india_status": "Permitted preservative Class II across multiple food categories (FSSAI)",
+    "eu_status": "Permitted food additive with established ADI of 11 mg/kg bw (EFSA)",
+    "au_status": "Permitted preservative under FSANZ Standard 1.3.1",
+    "note": "Widely permitted antimicrobial preservative across India, EU, and Australia with high safety consensus.",
+    "source": "EFSA Journal 2019;17(3):5625; FSSAI Table 1 Preservatives; FSANZ Standard 1.3.1"
+  },
+  {
+    "additive": "Sodium Benzoate / E211 / INS 211",
+    "aliases": ["sodium benzoate", "benzoate", "e211", "ins 211", "preservative 211"],
+    "india_status": "Permitted Class II preservative in beverages/sauces up to specified limits (FSSAI)",
+    "eu_status": "Permitted with strict max limits; caution advised when combined with Ascorbic Acid (Vitamin C)",
+    "au_status": "Permitted under FSANZ Standard 1.3.1 with category limits",
+    "note": "Permitted in all three jurisdictions; when combined with Vitamin C (ascorbic acid), can form trace benzene under heat/light.",
+    "source": "EFSA ANS Panel 2016; FSSAI Regulations Schedule 1; FSANZ Standard 1.3.1"
+  },
+  {
+    "additive": "Monosodium Glutamate (MSG) / E621 / INS 621",
+    "aliases": ["monosodium glutamate", "msg", "e621", "ins 621", "flavour enhancer 621"],
+    "india_status": "Permitted under GMP in specified foods; mandatory declaration 'Contains Added MSG' on label",
+    "eu_status": "Permitted as flavour enhancer with group ADI of 30 mg/kg bw/day (EFSA)",
+    "au_status": "Permitted flavour enhancer with mandatory ingredient declaration (FSANZ)",
+    "note": "Permitted across all three jurisdictions under GMP/ADI; India specifically enforces mandatory front/back label declaration.",
+    "source": "FSSAI Packaging & Labelling Reg 2.2.1; EFSA Journal 2017;15(7):4911; FSANZ Standard 1.2.4"
+  },
+  {
+    "additive": "Aspartame / E951 / INS 951",
+    "aliases": ["aspartame", "e951", "ins 951", "artificial sweetener 951"],
+    "india_status": "Permitted non-nutritive sweetener; mandatory phenylketonurics advisory warning",
+    "eu_status": "Permitted with ADI 40 mg/kg bw; mandatory warning for phenylketonuria sufferers",
+    "au_status": "Permitted sweetener with mandatory warning statement for phenylalanine",
+    "note": "Permitted across all 3 regions with universally mandatory 'Contains Phenylalanine / Not for Phenylketonurics' warning.",
+    "source": "WHO/IARC/JECFA Evaluation 2023; EFSA 2013 Re-evaluation; FSSAI Rule 2.4.5; FSANZ Standard 1.2.3"
+  },
+  {
+    "additive": "Sucralose / E955 / INS 955",
+    "aliases": ["sucralose", "e955", "ins 955", "sweetener 955"],
+    "india_status": "Permitted artificial sweetener with category limits and mandatory label declaration",
+    "eu_status": "Permitted non-caloric sweetener (ADI 15 mg/kg bw)",
+    "au_status": "Permitted intense sweetener under FSANZ Standard 1.3.1",
+    "note": "High-intensity sweetener permitted globally; requires 'Contains Non-Caloric Sweetener' declaration in India.",
+    "source": "EFSA ANS Panel; FSSAI Food Safety Standards Regulations; FSANZ Standard 1.3.1"
+  },
+  {
+    "additive": "Caramel Color Class IV (Ammonia Sulphite) / E150d / INS 150d",
+    "aliases": ["caramel iv", "caramel color iv", "e150d", "ins 150d", "ammonia sulphite caramel"],
+    "india_status": "Permitted in carbonated beverages and foods under GMP / specified limits",
+    "eu_status": "Permitted with group ADI 300 mg/kg bw; 4-MEI byproduct strictly monitored",
+    "au_status": "Permitted coloring agent under FSANZ Standard 1.3.1",
+    "note": "Permitted across all 3 regions with regulatory limits on trace byproduct 4-Methylimidazole (4-MEI).",
+    "source": "EFSA Journal 2011;9(3):2004; FSSAI Food Additives Schedule; FSANZ Standard 1.3.1"
+  },
+  {
+    "additive": "Brominated Vegetable Oil (BVO)",
+    "aliases": ["brominated vegetable oil", "bvo"],
+    "india_status": "Banned under FSSAI regulations for use in any food or beverage",
+    "eu_status": "Banned as a food additive (Directive 70/524/EEC)",
+    "au_status": "Banned / Not permitted in Australia & New Zealand (FSANZ Standard 1.3.1)",
+    "note": "Prohibited in India, EU, and Australia due to bromine bioaccumulation and organ toxicity concerns.",
+    "source": "FSSAI Regulation 2.3.14; European Union Regulation EC 1333/2008; FSANZ Standard 1.3.1"
+  },
+  {
+    "additive": "Olestra / Olean",
+    "aliases": ["olestra", "olean", "sucrose polyester"],
+    "india_status": "Not approved for use in food products by FSSAI",
+    "eu_status": "Not approved / Banned as a novel food ingredient in the EU",
+    "au_status": "Not permitted under FSANZ Food Standards Code",
+    "note": "Zero-calorie fat replacer prohibited in India, EU, and Australia due to gastrointestinal disruption and fat-soluble vitamin depletion.",
+    "source": "FSSAI Non-Permitted Substances; EFSA Novel Foods Registry; FSANZ Standard 1.3.1"
+  }
+]

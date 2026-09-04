@@ -1,0 +1,119 @@
+{
+  "conditions": [
+    {
+      "id": "diabetic",
+      "name": "Diabetic / Pre-Diabetic",
+      "category": "Metabolic",
+      "description": "Flags high sugar (>15g / 100g) and rapid glycemic spike ingredients (maltodextrin, liquid glucose, corn syrup)",
+      "default_threshold": 15.0,
+      "unit": "g/100g",
+      "metric_key": "sugars_100g",
+      "flagged_ingredients": ["sugar", "liquid glucose", "glucose", "sucrose", "high fructose corn syrup", "hfcs", "maltodextrin", "invert sugar", "dextrose", "maltose", "corn syrup solids"],
+      "warning_message": "Contains high sugars or high-glycemic ingredients capable of triggering rapid postprandial blood glucose spikes."
+    },
+    {
+      "id": "hypertension",
+      "name": "Hypertension (High Blood Pressure)",
+      "category": "Cardiovascular",
+      "description": "Flags elevated sodium levels (>400mg / 100g) and added salt/sodium preservatives",
+      "default_threshold": 400.0,
+      "unit": "mg/100g",
+      "metric_key": "sodium_100g",
+      "flagged_ingredients": ["salt", "sodium chloride", "monosodium glutamate", "msg", "sodium benzoate", "sodium nitrate", "sodium bicarbonate", "baking soda", "ins 621", "ins 211"],
+      "warning_message": "Contains elevated sodium content which may exacerbate arterial pressure and fluid retention."
+    },
+    {
+      "id": "celiac",
+      "name": "Celiac Disease (Gluten Sensitivity)",
+      "category": "Digestive & Autoimmune",
+      "description": "Strict zero-tolerance for gluten, wheat, maida, barley, rye, malt, and triticale",
+      "default_threshold": 0,
+      "unit": "strict",
+      "flagged_ingredients": ["wheat", "wheat flour", "refined wheat flour", "maida", "atta", "semolina", "suji", "barley", "barley malt", "malt extract", "rye", "oats", "wheat gluten", "spelt", "triticale", "hydrolyzed wheat protein"],
+      "warning_message": "Strict Celiac Contraindication: Contains gluten-bearing grains or derivatives capable of triggering small-intestinal villous atrophy."
+    },
+    {
+      "id": "kidney_disease",
+      "name": "Chronic Kidney Disease (CKD)",
+      "category": "Renal",
+      "description": "Flags high sodium, potassium chloride salt substitutes (hyperkalemia risk), and inorganic phosphorus additives",
+      "default_threshold": 300.0,
+      "unit": "mg/100g",
+      "metric_key": "sodium_100g",
+      "flagged_ingredients": ["potassium chloride", "potassium sorbate", "ins 508", "ins 202", "phosphoric acid", "sodium phosphate", "potassium phosphate", "disodium phosphate", "ins 338", "ins 339", "ins 340", "ins 450", "ins 451", "ins 452"],
+      "warning_message": "Contains added potassium or inorganic phosphate additives which can accumulate dangerously in patients with compromised glomerular filtration."
+    },
+    {
+      "id": "high_cholesterol",
+      "name": "High Cholesterol / Cardiovascular Disease",
+      "category": "Cardiovascular",
+      "description": "Flags high saturated fats (>5g / 100g), industrial trans fats, palm oil, and hydrogenated vegetable fats",
+      "default_threshold": 5.0,
+      "unit": "g/100g sat fat",
+      "metric_key": "saturated_fat_100g",
+      "flagged_ingredients": ["palm oil", "palmolein", "palm kernel oil", "hydrogenated vegetable oil", "partially hydrogenated oil", "vanaspati", "interesterified fat", "butter oil", "ghee", "lard"],
+      "warning_message": "High in palmitic acid saturated fats or industrial hydrogenated fractions that increase serum LDL cholesterol and arterial plaque risk."
+    },
+    {
+      "id": "gout",
+      "name": "Gout & Hyperuricemia",
+      "category": "Metabolic & Joint",
+      "description": "Flags purine-rich extracts (yeast extract, autolyzed yeast, hydrolyzed protein) and high-fructose syrups that accelerate uric acid synthesis",
+      "default_threshold": 0,
+      "unit": "purine/fructose",
+      "flagged_ingredients": ["yeast extract", "autolyzed yeast", "hydrolyzed yeast", "high fructose corn syrup", "hfcs", "anchovy", "sardine", "shellfish", "crab", "prawn", "monosodium glutamate"],
+      "warning_message": "Contains purine precursors or high-fructose sweeteners that stimulate hepatic ATP degradation into uric acid, risking painful gout flares."
+    },
+    {
+      "id": "pku",
+      "name": "Phenylketonuria (PKU)",
+      "category": "Genetic / Metabolic",
+      "description": "Strict contraindication for artificial sweetener Aspartame (INS 951) and concentrated phenylalanine",
+      "default_threshold": 0,
+      "unit": "strict",
+      "flagged_ingredients": ["aspartame", "ins 951", "e951", "phenylalanine", "nutrasweet", "equal"],
+      "warning_message": "Strict PKU Contraindication: Contains Aspartame which hydrolyzes into phenylalanine, toxic for individuals lacking phenylalanine hydroxylase."
+    },
+    {
+      "id": "lactose_intolerance",
+      "name": "Lactose Intolerance",
+      "category": "Digestive",
+      "description": "Flags dairy, milk solids, whey powder, lactose, cheese, and cream",
+      "default_threshold": 0,
+      "unit": "strict",
+      "flagged_ingredients": ["milk solids", "skimmed milk powder", "whole milk powder", "whey powder", "whey protein", "lactose", "curd", "paneer", "cheese", "cream", "milk fat", "casein", "butter"],
+      "warning_message": "Contains dairy milk solids or lactose that may trigger gastrointestinal distress, cramping, and bloating."
+    },
+    {
+      "id": "ibs",
+      "name": "IBS (Irritable Bowel Syndrome / FODMAP)",
+      "category": "Digestive",
+      "description": "Flags high-FODMAP ingredients including polyols, inulin, chicory root, high fructose corn syrup, and onion/garlic concentrates",
+      "default_threshold": 0,
+      "unit": "strict",
+      "flagged_ingredients": ["inulin", "chicory root extract", "sorbitol", "maltitol", "xylitol", "isomalt", "high fructose corn syrup", "garlic powder", "onion powder", "ins 420", "ins 965"],
+      "warning_message": "Contains fermentable oligosaccharides, disaccharides, monosaccharides, or polyols (FODMAPs) that can exacerbate abdominal distension and pain."
+    },
+    {
+      "id": "gerd",
+      "name": "GERD / Acid Reflux",
+      "category": "Digestive",
+      "description": "Flags high citric acid, concentrated vinegar/acetic acid, high caffeine, and pungent spices",
+      "default_threshold": 0,
+      "unit": "strict",
+      "flagged_ingredients": ["citric acid", "ins 330", "acetic acid", "ins 260", "caffeine", "red chilli powder", "black pepper oleoresin", "peppermint oil", "capsicum extract"],
+      "warning_message": "Contains strong acidulants or pungent irritants capable of relaxing the lower esophageal sphincter and inducing acid regurgitation."
+    },
+    {
+      "id": "fatty_liver",
+      "name": "Fatty Liver (NAFLD / Metabolic Liver)",
+      "category": "Hepatic",
+      "description": "Flags concentrated fructose, liquid glucose, trans fats, and ultra-processed seed oils",
+      "default_threshold": 10.0,
+      "unit": "g/100g",
+      "metric_key": "sugars_100g",
+      "flagged_ingredients": ["high fructose corn syrup", "liquid glucose", "corn syrup", "hydrogenated fat", "invert sugar"],
+      "warning_message": "Contains concentrated simple sugars and hepatic lipogenesis stimulators that exacerbate hepatic steatosis and insulin resistance."
+    }
+  ]
+}

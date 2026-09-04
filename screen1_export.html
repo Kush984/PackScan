@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "teal-primary": "#0e7490",
+            "teal-dark": "#155e75",
+            "teal-light": "#ecfeff",
+            "teal-border": "#a5f3fc",
+            "canvas-bg": "#f1f5f9",
+            "alert-coral": "#ea580c",
+            "alert-coral-bg": "#fff7ed",
+            "alert-coral-border": "#ffedd5"
+          },
+          fontFamily: {
+            "spaceGrotesk": ["'Space Grotesk'", "sans-serif"],
+            "inter": ["'Inter'", "sans-serif"],
+            "jetbrainsMono": ["'JetBrains Mono'", "monospace"]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-[#f1f5f9] text-[#1e293b] font-['Inter'] antialiased min-h-screen flex flex-col selection:bg-[#0e7490] selection:text-white">
+<!-- TOP APP NAVIGATION (UNIFIED GLOBAL HEADER - REFINED LIGHT THEME) -->
+<header class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-[#cbd5e1] shadow-xs">
+<div class="w-full max-w-[1280px] mx-auto px-4 sm:px-6">
+<!-- Upper Status Bar -->
+<div class="h-14 border-b border-[#e2e8f0] flex items-center justify-between py-2">
+<!-- Left Brand Area -->
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center w-9 h-9 rounded-lg bg-[#0e7490] text-white shadow-xs">
+<span class="material-symbols-outlined text-[22px] font-bold">document_scanner</span>
+</div>
+<div class="flex flex-col">
+<span class="font-['Space_Grotesk'] font-extrabold text-[18px] leading-tight text-[#0f172a] tracking-tight">PackScan</span>
+<span class="font-['JetBrains_Mono'] text-[9.5px] font-bold text-[#64748b] uppercase tracking-widest leading-none mt-0.5">LEGAL METROLOGY &amp; HEALTH SCANNER</span>
+</div>
+</div>
+<!-- Right Controls -->
+<div class="flex items-center gap-2.5">
+<!-- Officer Jurisdiction Pill -->
+<div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-md text-[12px] font-medium text-[#334155]">
+<span class="w-2 h-2 rounded-full bg-[#0e7490]"></span>
+<span>Officer Jurisdiction:</span>
+<span class="font-['JetBrains_Mono'] font-bold text-[#0f172a]">DL/MH Central</span>
+</div>
+<!-- Health Guardian Alert Badge -->
+<div class="flex items-center gap-1.5 px-3 py-1.5 bg-[#fff7ed] border border-[#fdba74] text-[#c2410c] rounded-md text-[12px] font-semibold">
+<span class="material-symbols-outlined text-[16px] text-[#ea580c]">warning</span>
+<span>Health Guardian: <strong class="font-['JetBrains_Mono'] font-bold text-[#c2410c]">4 Conditions Flagged</strong></span>
+</div>
+<!-- Consistent Officer Avatar with DL -->
+<div class="w-8 h-8 rounded-full bg-[#e0f2fe] border border-[#0e7490]/30 flex items-center justify-center text-[#0e7490] text-[12px] font-['Space_Grotesk'] font-bold">
+            DL
+          </div>
+</div>
+</div>
+<!-- Main Navigation Tabs -->
+<div class="h-11 flex items-center justify-between">
+<nav class="flex items-center gap-1 sm:gap-2">
+<!-- 1. Scan & Verify (ACTIVE) -->
+<a aria-current="page" class="h-11 flex items-center px-3.5 border-b-2 border-[#0e7490] text-[#0e7490] font-['Space_Grotesk'] font-bold text-[13.5px] bg-[#f0fdfa]" data-path="audit-console" href="#">
+            Scan &amp; Verify
+          </a>
+<!-- 2. Medical & Chronic Profile -->
+<a class="h-11 flex items-center px-3.5 text-[#64748b] hover:text-[#0f172a] font-medium text-[13.5px] transition-colors border-b-2 border-transparent" data-path="medical-profile" href="#">
+            Medical &amp; Chronic Profile
+          </a>
+<!-- 3. Allergies & Custom Thresholds -->
+<a class="h-11 flex items-center px-3.5 text-[#64748b] hover:text-[#0f172a] font-medium text-[13.5px] transition-colors border-b-2 border-transparent" data-path="allergen-matrix" href="#">
+            Allergies &amp; Custom Thresholds
+          </a>
+<!-- 4. Product Forum & Ledger -->
+<a class="h-11 flex items-center px-3.5 text-[#64748b] hover:text-[#0f172a] font-medium text-[13.5px] transition-colors border-b-2 border-transparent" data-path="metrology-ledger" href="#">
+            Product Forum &amp; Ledger
+          </a>
+</nav>
+<!-- Secondary Subheader status text inside bar -->
+<div class="hidden lg:flex items-center gap-2">
+<span class="font-['JetBrains_Mono'] text-[11px] text-[#64748b]">Government of India Legal Metrology (Packaged Commodities) Rules, 2011</span>
+<span class="w-1.5 h-1.5 rounded-full bg-[#0e7490]"></span>
+</div>
+</div>
+</div>
+<!-- Secondary Thin Subheader Strip (Mobile) -->
+<div class="lg:hidden bg-[#f8fafc] border-t border-[#e2e8f0] px-4 py-1.5 flex items-center justify-between text-[11px] font-['JetBrains_Mono'] text-[#475569]">
+<span>Govt of India LM (Packaged Commodities) Rules, 2011</span>
+<span class="flex items-center gap-1 font-semibold text-[#0e7490]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#0e7490]"></span> Active
+      </span>
+</div>
+</header>
+<!-- MAIN WRAPPER -->
+<main class="w-full pt-32 max-w-[1280px] mx-auto px-4 sm:px-6 flex-1">
+<div class="flex flex-col w-full pb-16 space-y-6">
+<!-- SECTION 1: Compliance Banner (Refined Calm Card) -->
+<section class="w-full bg-white rounded-xl p-6 sm:p-7 border border-[#cbd5e1] shadow-xs relative overflow-hidden">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+<div class="max-w-3xl space-y-3">
+<div class="flex flex-wrap items-center gap-2">
+<span class="px-2.5 py-1 bg-[#f0fdfa] text-[#0e7490] border border-[#ccfbf1] font-['JetBrains_Mono'] text-[10.5px] font-bold uppercase tracking-wider rounded">
+                LEGAL METROLOGY ACT, 2011
+              </span>
+<span class="text-[#cbd5e1] font-mono">|</span>
+<span class="font-['JetBrains_Mono'] text-[11.5px] font-semibold text-[#64748b]">DIRECTIVE 2024/LM-8B</span>
+</div>
+<h1 class="font-['Space_Grotesk'] text-[26px] sm:text-[30px] leading-tight text-[#0f172a] font-extrabold tracking-tight">
+              Legal Metrology Compliance &amp; Health Guardian
+            </h1>
+<p class="text-[14px] leading-relaxed text-[#475569] max-w-2xl font-normal">
+              Instant automated audit for mandatory declarations under Rule 6 &amp; 9, coupled with personalized allergen and additive checking.
+            </p>
+<!-- 3-Tier Badges Standardized -->
+<div class="flex flex-wrap items-center gap-2 pt-1">
+<div class="flex items-center gap-1.5 px-2.5 py-1 bg-[#f0fdfa] border border-[#99f6e4] text-[#0f766e] rounded-md font-['Space_Grotesk'] text-[12px] font-semibold">
+<span class="material-symbols-outlined text-[16px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Rule 6 &amp; 9 Mandatory Verification</span>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-1 bg-[#fff7ed] border border-[#fed7aa] text-[#c2410c] rounded-md font-['Space_Grotesk'] text-[12px] font-semibold">
+<span class="material-symbols-outlined text-[16px] text-[#ea580c]">warning</span>
+<span>Allergen &amp; Additive Guard</span>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-1 bg-[#f8fafc] border border-[#e2e8f0] text-[#334155] rounded-md font-['Space_Grotesk'] text-[12px] font-semibold">
+<span class="material-symbols-outlined text-[16px] text-[#64748b]">gavel</span>
+<span>Section 36 Notice Exporter</span>
+</div>
+</div>
+</div>
+<!-- Telemetry Readouts -->
+<div class="grid grid-cols-3 lg:grid-cols-1 gap-3 w-full lg:w-72 shrink-0">
+<div class="bg-[#f8fafc] border border-[#e2e8f0] p-3.5 rounded-lg flex items-center justify-between shadow-xs">
+<div>
+<div class="font-['JetBrains_Mono'] text-[10.5px] font-bold text-[#64748b] uppercase tracking-wider">Total Audited</div>
+<div class="font-['Space_Grotesk'] text-[28px] font-extrabold text-[#0f172a] leading-none mt-1">1,248</div>
+<div class="font-['JetBrains_Mono'] text-[11px] font-semibold text-[#0e7490] mt-1.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-[#0e7490] font-bold">trending_up</span> Batch Q4 Complete
+                </div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-[#e0f2fe] border border-[#bae6fd] flex items-center justify-center text-[#0e7490]">
+<span class="material-symbols-outlined text-[24px]">inventory_2</span>
+</div>
+</div>
+<div class="bg-[#f8fafc] border border-[#e2e8f0] p-3.5 rounded-lg flex items-center justify-between shadow-xs">
+<div>
+<div class="font-['JetBrains_Mono'] text-[10.5px] font-bold text-[#64748b] uppercase tracking-wider">Non-Compliance Ratio</div>
+<div class="font-['Space_Grotesk'] text-[28px] font-extrabold text-[#ea580c] leading-none mt-1">8.4%</div>
+<div class="font-['JetBrains_Mono'] text-[11px] font-semibold text-[#c2410c] mt-1.5">105 Violations Logged</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-[#fff7ed] border border-[#fdba74] flex items-center justify-center text-[#ea580c]">
+<span class="material-symbols-outlined text-[24px]">report_problem</span>
+</div>
+</div>
+<div class="bg-[#f8fafc] border border-[#e2e8f0] p-3.5 rounded-lg flex items-center justify-between shadow-xs">
+<div>
+<div class="font-['JetBrains_Mono'] text-[10.5px] font-bold text-[#64748b] uppercase tracking-wider">Avg Latency</div>
+<div class="font-['Space_Grotesk'] text-[28px] font-extrabold text-[#0f172a] leading-none mt-1">&lt;12ms</div>
+<div class="font-['JetBrains_Mono'] text-[11px] font-semibold text-[#64748b] mt-1.5">Hardware OCR Engine</div>
+</div>
+<div class="w-10 h-10 rounded-lg bg-[#f0fdfa] border border-[#ccfbf1] flex items-center justify-center text-[#0e7490]">
+<span class="material-symbols-outlined text-[24px]">bolt</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 2: Precision Viewfinder Workspace & Plain Language Rule 6 Checklist -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+<!-- Left: Precision Metrology Viewfinder -->
+<div class="lg:col-span-8 bg-white rounded-xl p-5 sm:p-6 border border-[#cbd5e1] shadow-xs flex flex-col justify-between relative overflow-hidden min-h-[410px]">
+<!-- Header inside panel -->
+<div class="flex items-center justify-between pb-3 border-b border-[#e2e8f0]">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-[#0e7490]"></span>
+<span class="font-['Space_Grotesk'] text-[13px] text-[#0f172a] font-bold tracking-wider uppercase">Metrology Viewfinder // Rule 9 Optical Micrometer</span>
+</div>
+<div class="flex items-center gap-2 text-[#64748b] font-['JetBrains_Mono'] text-[11px]">
+<span>CALIBRATION: 0.05MM / PX</span>
+<span>•</span>
+<span class="text-[#0e7490] font-semibold">AUTO-FOCUS LOCK</span>
+</div>
+</div>
+<!-- Viewfinder Stage (Light calm steel stage) -->
+<div class="relative w-full flex-1 bg-[#f8fafc] rounded-lg flex items-center justify-center p-6 my-4 overflow-hidden select-none border border-[#cbd5e1]">
+<svg class="absolute inset-0 w-full h-full opacity-30 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<pattern height="36" id="grid-light" patternunits="userSpaceOnUse" width="36">
+<path class="text-[#94a3b8]" d="M 36 0 L 0 0 0 36" fill="none" stroke="currentColor" stroke-width="0.5"></path>
+</pattern>
+</defs>
+<rect fill="url(#grid-light)" height="100%" width="100%"></rect>
+</svg>
+<div class="absolute inset-x-0 h-0.5 bg-[#0e7490]/40 top-1/3 pointer-events-none"></div>
+<!-- Target Corners -->
+<div class="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-[#0e7490]"></div>
+<div class="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-[#0e7490]"></div>
+<div class="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-[#0e7490]"></div>
+<div class="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-[#0e7490]"></div>
+<!-- Mock Scanned Label Inside Viewfinder -->
+<div class="relative w-full max-w-lg bg-white text-[#0f172a] rounded-lg p-4 shadow-sm border border-[#cbd5e1]">
+<div class="flex items-start justify-between border-b border-[#e2e8f0] pb-2 mb-2">
+<div>
+<span class="px-2 py-0.5 bg-[#f0fdfa] border border-[#ccfbf1] text-[#0e7490] font-['JetBrains_Mono'] text-[10px] font-bold rounded uppercase">PREPACKAGED RETAIL UNIT</span>
+<div class="font-['Space_Grotesk'] text-[15px] font-bold text-[#0f172a] mt-1">Nestlé Maggi 2-Minute Masala</div>
+</div>
+<span class="px-2 py-0.5 bg-[#f8fafc] text-[#475569] border border-[#e2e8f0] font-['JetBrains_Mono'] text-[11px] font-semibold rounded">
+                  EAN: 8901058852371
+                </span>
+</div>
+<!-- Bounding Boxes mapped to Rule 6 Plain Language -->
+<div class="grid grid-cols-2 gap-2 font-['JetBrains_Mono'] text-[11px]">
+<div class="p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[#334155] font-medium">Price (MRP)</span>
+</div>
+<span class="font-bold text-[#0f172a]">₹14.00 (3.2mm)</span>
+</div>
+<div class="p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[#334155] font-medium">Net Quantity &amp; Weight</span>
+</div>
+<span class="font-bold text-[#0f172a]">70 g (2.8mm)</span>
+</div>
+<div class="p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[#334155] font-medium">Month &amp; Year of Mfg</span>
+</div>
+<span class="font-bold text-[#0f172a]">10/2024</span>
+</div>
+<div class="p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[#334155] font-medium">Consumer Helpline</span>
+</div>
+<span class="font-bold text-[#0f172a]">1800-103-1947</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Plain language guidance & Action Footer -->
+<div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+<div class="flex items-center gap-1.5 text-[#475569] font-['JetBrains_Mono'] text-[11.5px] font-medium">
+<span class="material-symbols-outlined text-[17px] text-[#0e7490]">center_focus_strong</span>
+<span>Point your camera at the barcode • Hold steady</span>
+</div>
+<div class="flex items-center gap-2.5">
+<button class="px-4 py-2 bg-[#f8fafc] hover:bg-[#f1f5f9] text-[#1e293b] border border-[#cbd5e1] font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs">
+<span class="material-symbols-outlined text-[18px] text-[#64748b]">photo_camera</span>
+<span>Capture High-Res</span>
+</button>
+<button class="px-4 py-2 bg-[#0e7490] hover:bg-[#155e75] text-white font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs">
+<span class="material-symbols-outlined text-[18px]">photo_camera_back</span>
+<span>Capture Photo &amp; Check Rules</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Right: Rule 6 Checklist (8 Plain-Language Declarations) -->
+<div class="lg:col-span-4 bg-white rounded-xl p-5 sm:p-6 border border-[#cbd5e1] shadow-xs flex flex-col justify-between space-y-4">
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="font-['Space_Grotesk'] text-[16px] text-[#0f172a] font-bold">Rule 6 Checklist (8 Declarations)</span>
+<span class="px-2.5 py-0.5 bg-[#f0fdfa] text-[#0f766e] border border-[#99f6e4] font-['JetBrains_Mono'] text-[11px] font-bold rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> 8/8 PASSED
+              </span>
+</div>
+<p class="text-[13px] text-[#64748b] font-normal">
+              Mandatory label standards verification under Legal Metrology Rules, 2011.
+            </p>
+<!-- 8 Checks List with Plain Language Titles -->
+<div class="mt-4 space-y-1.5">
+<div class="flex items-center justify-between p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded">
+<span class="font-['JetBrains_Mono'] text-[11.5px] text-[#1e293b] font-medium">1. Manufacturer / Packer Name &amp; Address</span>
+<span class="px-1.5 py-0.5 bg-[#f0fdfa] text-[#0f766e] border border-[#ccfbf1] font-['JetBrains_Mono'] text-[10px] font-bold rounded">RULE 6(1)(a) ✓</span>
+</div>
+<div class="flex items-center justify-between p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded">
+<span class="font-['JetBrains_Mono'] text-[11.5px] text-[#1e293b] font-medium">2. Common / Generic Product Name</span>
+<span class="px-1.5 py-0.5 bg-[#f0fdfa] text-[#0f766e] border border-[#ccfbf1] font-['JetBrains_Mono'] text-[10px] font-bold rounded">RULE 6(1)(b) ✓</span>
+</div>
+<div class="flex items-center justify-between p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded">
+<span class="font-['JetBrains_Mono'] text-[11.5px] text-[#1e293b] font-medium">3. Net Quantity &amp; Standard Weight</span>
+<span class="px-1.5 py-0.5 bg-[#f0fdfa] text-[#0f766e] border border-[#ccfbf1] font-['JetBrains_Mono'] text-[10px] font-bold rounded">RULE 6(1)(c) ✓</span>
+</div>
+<div class="flex items-center justify-between p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded">
+<span class="font-['JetBrains_Mono'] text-[11.5px] text-[#1e293b] font-medium">4. Month and Year of Manufacture / Pack</span>
+<span class="px-1.5 py-0.5 bg-[#f0fdfa] text-[#0f766e] border border-[#ccfbf1] font-['JetBrains_Mono'] text-[10px] font-bold rounded">RULE 6(1)(d) ✓</span>
+</div>
+<div class="flex items-center justify-between p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded">
+<span class="font-['JetBrains_Mono'] text-[11.5px] text-[#1e293b] font-medium">5. Price (MRP inclusive of all taxes)</span>
+<span class="px-1.5 py-0.5 bg-[#f0fdfa] text-[#0f766e] border border-[#ccfbf1] font-['JetBrains_Mono'] text-[10px] font-bold rounded">RULE 6(1)(e) ✓</span>
+</div>
+<div class="flex items-center justify-between p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded">
+<span class="font-['JetBrains_Mono'] text-[11.5px] text-[#1e293b] font-medium">6. Package Dimensions &amp; Size</span>
+<span class="px-1.5 py-0.5 bg-[#f0fdfa] text-[#0f766e] border border-[#ccfbf1] font-['JetBrains_Mono'] text-[10px] font-bold rounded">RULE 6(1)(f) ✓</span>
+</div>
+<div class="flex items-center justify-between p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded">
+<span class="font-['JetBrains_Mono'] text-[11.5px] text-[#1e293b] font-medium">7. Consumer Helpline &amp; Grievance Info</span>
+<span class="px-1.5 py-0.5 bg-[#f0fdfa] text-[#0f766e] border border-[#ccfbf1] font-['JetBrains_Mono'] text-[10px] font-bold rounded">RULE 6(1)(g) ✓</span>
+</div>
+<div class="flex items-center justify-between p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded">
+<span class="font-['JetBrains_Mono'] text-[11.5px] text-[#1e293b] font-medium">8. Country of Origin (Imported units)</span>
+<span class="px-1.5 py-0.5 bg-[#f0fdfa] text-[#0f766e] border border-[#ccfbf1] font-['JetBrains_Mono'] text-[10px] font-bold rounded">RULE 6(1)(h) ✓</span>
+</div>
+</div>
+</div>
+<!-- Section 36 Action Notice Panel -->
+<div class="p-3.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg space-y-2">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[#0e7490] text-[18px]">verified_user</span>
+<span class="font-['Space_Grotesk'] text-[12px] font-bold text-[#0f172a] uppercase">Instant Audit Dossier</span>
+</div>
+<p class="text-[12px] text-[#64748b] leading-relaxed">
+              Section 36 penalty exporter auto-generates statutory notices for state enforcement when discrepancies exceed legal limits.
+            </p>
+<button class="w-full mt-2 py-2 px-3 bg-[#0e7490] hover:bg-[#155e75] text-white font-['Space_Grotesk'] text-[12px] font-bold rounded transition-colors flex items-center justify-center gap-1.5 shadow-xs">
+<span class="material-symbols-outlined text-[16px]">print</span>
+<span>GENERATE SEC 36 AUDIT REPORT</span>
+</button>
+</div>
+</div>
+</section>
+<!-- SECTION 3: QUICK 1-CLICK FMCG DEMO CATALOG -->
+<section class="w-full space-y-4">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-4 sm:p-5 rounded-xl border border-[#cbd5e1] shadow-xs">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 bg-[#f0fdfa] text-[#0e7490] border border-[#ccfbf1] font-['JetBrains_Mono'] text-[10px] font-bold rounded uppercase">
+                PRE-INDEXED CACHE
+              </span>
+<span class="font-['JetBrains_Mono'] text-[11px] text-[#64748b]">● REAL-TIME AUDIT ACCELERATOR</span>
+</div>
+<h2 class="font-['Space_Grotesk'] text-[20px] font-bold text-[#0f172a] tracking-tight">
+              Quick 1-Click FMCG Demo Catalog (Instant &lt;10ms Speed Mode)
+            </h2>
+</div>
+<!-- Quick filters with Standard 3-Tier Badges -->
+<div class="flex items-center gap-1.5">
+<span class="font-['JetBrains_Mono'] text-[11px] font-bold text-[#64748b] uppercase mr-1">FILTER:</span>
+<button class="px-3 py-1 bg-[#0e7490] text-white font-['Space_Grotesk'] text-[12px] font-bold rounded shadow-xs">ALL (13)</button>
+<button class="px-3 py-1 bg-[#f8fafc] hover:bg-[#f1f5f9] text-[#334155] font-['Space_Grotesk'] text-[12px] font-semibold rounded border border-[#cbd5e1]">COMPLIANT (12)</button>
+<button class="px-3 py-1 bg-[#fff7ed] text-[#c2410c] hover:bg-[#ffedd5] font-['Space_Grotesk'] text-[12px] font-bold rounded border border-[#fed7aa]">VIOLATIONS (1)</button>
+</div>
+</div>
+<!-- Catalog Grid: Light Cards with Refined Hairline Borders -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<!-- 1. Nestlé Maggi -->
+<div class="bg-white rounded-xl p-5 border border-[#cbd5e1] shadow-xs hover:shadow-md hover:border-[#0e7490] transition-all group cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-[#f8fafc] text-[#475569] border border-[#e2e8f0] font-['JetBrains_Mono'] text-[10.5px] font-semibold rounded uppercase">Instant Noodles</span>
+<span class="px-2 py-0.5 bg-[#f0fdfa] border border-[#99f6e4] text-[#0f766e] font-['Space_Grotesk'] text-[11px] font-bold rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span> RULE 6 VERIFIED
+                </span>
+</div>
+<h3 class="font-['Space_Grotesk'] text-[16px] text-[#0f172a] font-bold mt-2.5 group-hover:text-[#0e7490] transition-colors">
+                Nestlé Maggi 2-Minute Masala
+              </h3>
+<div class="font-['JetBrains_Mono'] text-[12px] text-[#64748b] mt-1">EAN: 8901058852371</div>
+</div>
+<div class="mt-4 pt-3 border-t border-[#e2e8f0] flex items-center justify-between font-['JetBrains_Mono'] text-[11px]">
+<span class="text-[#64748b]">Net Wt: 70g • Font: 2.8mm</span>
+<span class="text-[#0e7490] font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#0e7490]"></span> ZERO ALLERGEN THREAT
+              </span>
+</div>
+</div>
+<!-- 2. Coca-Cola Original Taste -->
+<div class="bg-white rounded-xl p-5 border border-[#cbd5e1] shadow-xs hover:shadow-md hover:border-[#0e7490] transition-all group cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-[#f8fafc] text-[#475569] border border-[#e2e8f0] font-['JetBrains_Mono'] text-[10.5px] font-semibold rounded uppercase">Carbonated Beverages</span>
+<span class="px-2 py-0.5 bg-[#f0fdfa] border border-[#99f6e4] text-[#0f766e] font-['Space_Grotesk'] text-[11px] font-bold rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span> COMPLIANT
+                </span>
+</div>
+<h3 class="font-['Space_Grotesk'] text-[16px] text-[#0f172a] font-bold mt-2.5 group-hover:text-[#0e7490] transition-colors">
+                Coca-Cola Original Taste
+              </h3>
+<div class="font-['JetBrains_Mono'] text-[12px] text-[#64748b] mt-1">EAN: 8901764012297</div>
+</div>
+<div class="mt-4 pt-3 border-t border-[#e2e8f0] flex items-center justify-between font-['JetBrains_Mono'] text-[11px]">
+<span class="text-[#64748b]">Vol: 750ml • Font: 4.0mm</span>
+<span class="text-[#ea580c] font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">warning</span> SUGAR &gt; 10g WATCH
+              </span>
+</div>
+</div>
+<!-- 3. Coca-Cola Zero Sugar -->
+<div class="bg-white rounded-xl p-5 border border-[#cbd5e1] shadow-xs hover:shadow-md hover:border-[#ea580c] transition-all group cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-[#f8fafc] text-[#475569] border border-[#e2e8f0] font-['JetBrains_Mono'] text-[10.5px] font-semibold rounded uppercase">Diet Carbonated</span>
+<span class="px-2 py-0.5 bg-[#fff7ed] border border-[#fed7aa] text-[#c2410c] font-['Space_Grotesk'] text-[11px] font-bold rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">warning</span> ASPARTAME FLAGGED
+                </span>
+</div>
+<h3 class="font-['Space_Grotesk'] text-[16px] text-[#0f172a] font-bold mt-2.5 group-hover:text-[#ea580c] transition-colors">
+                Coca-Cola Zero Sugar
+              </h3>
+<div class="font-['JetBrains_Mono'] text-[12px] text-[#64748b] mt-1">EAN: 8901764022203</div>
+</div>
+<div class="mt-4 pt-3 border-t border-[#e2e8f0] flex items-center justify-between font-['JetBrains_Mono'] text-[11px]">
+<span class="text-[#64748b]">Vol: 300ml • Cal: 0.9kcal</span>
+<span class="text-[#c2410c] font-bold">NON-CALORIC SWEETENER</span>
+</div>
+</div>
+<!-- 4. Thums Up Charged -->
+<div class="bg-white rounded-xl p-5 border border-[#cbd5e1] shadow-xs hover:shadow-md hover:border-[#0e7490] transition-all group cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-[#f8fafc] text-[#475569] border border-[#e2e8f0] font-['JetBrains_Mono'] text-[10.5px] font-semibold rounded uppercase">Carbonated</span>
+<span class="px-2 py-0.5 bg-[#f0fdfa] border border-[#99f6e4] text-[#0f766e] font-['Space_Grotesk'] text-[11px] font-bold rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span> COMPLIANT
+                </span>
+</div>
+<h3 class="font-['Space_Grotesk'] text-[16px] text-[#0f172a] font-bold mt-2.5 group-hover:text-[#0e7490] transition-colors">
+                Thums Up Charged
+              </h3>
+<div class="font-['JetBrains_Mono'] text-[12px] text-[#64748b] mt-1">EAN: 8901764032295</div>
+</div>
+<div class="mt-4 pt-3 border-t border-[#e2e8f0] flex items-center justify-between font-['JetBrains_Mono'] text-[11px]">
+<span class="text-[#64748b]">Vol: 250ml • Caffeinated</span>
+<span class="text-[#334155] font-bold">STATUTORY AUDIT: CLEAN</span>
+</div>
+</div>
+<!-- 5. Lay's India's Magic Masala -->
+<div class="bg-white rounded-xl p-5 border border-[#cbd5e1] shadow-xs hover:shadow-md hover:border-[#0e7490] transition-all group cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-[#f8fafc] text-[#475569] border border-[#e2e8f0] font-['JetBrains_Mono'] text-[10.5px] font-semibold rounded uppercase">Potato Chips</span>
+<span class="px-2 py-0.5 bg-[#f0fdfa] border border-[#99f6e4] text-[#0f766e] font-['Space_Grotesk'] text-[11px] font-bold rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span> COMPLIANT
+                </span>
+</div>
+<h3 class="font-['Space_Grotesk'] text-[16px] text-[#0f172a] font-bold mt-2.5 group-hover:text-[#0e7490] transition-colors">
+                Lay's India's Magic Masala
+              </h3>
+<div class="font-['JetBrains_Mono'] text-[12px] text-[#64748b] mt-1">EAN: 8901491101830</div>
+</div>
+<div class="mt-4 pt-3 border-t border-[#e2e8f0] flex items-center justify-between font-['JetBrains_Mono'] text-[11px]">
+<span class="text-[#64748b]">Net Wt: 50g • Font: 2.5mm</span>
+<span class="text-[#334155] font-bold">SODIUM WITHIN CAP</span>
+</div>
+</div>
+<!-- 6. Kurkure Masala Munch -->
+<div class="bg-white rounded-xl p-5 border border-[#cbd5e1] shadow-xs hover:shadow-md hover:border-[#0e7490] transition-all group cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-[#f8fafc] text-[#475569] border border-[#e2e8f0] font-['JetBrains_Mono'] text-[10.5px] font-semibold rounded uppercase">Corn Snacks</span>
+<span class="px-2 py-0.5 bg-[#f0fdfa] border border-[#99f6e4] text-[#0f766e] font-['Space_Grotesk'] text-[11px] font-bold rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span> COMPLIANT
+                </span>
+</div>
+<h3 class="font-['Space_Grotesk'] text-[16px] text-[#0f172a] font-bold mt-2.5 group-hover:text-[#0e7490] transition-colors">
+                Kurkure Masala Munch
+              </h3>
+<div class="font-['JetBrains_Mono'] text-[12px] text-[#64748b] mt-1">EAN: 8901491102837</div>
+</div>
+<div class="mt-4 pt-3 border-t border-[#e2e8f0] flex items-center justify-between font-['JetBrains_Mono'] text-[11px]">
+<span class="text-[#64748b]">Net Wt: 85g • Font: 3.0mm</span>
+<span class="text-[#334155] font-bold">FSSAI / METROLOGY OK</span>
+</div>
+</div>
+<!-- 7. Cadbury Dairy Milk -->
+<div class="bg-white rounded-xl p-5 border border-[#cbd5e1] shadow-xs hover:shadow-md hover:border-[#0e7490] transition-all group cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-[#f8fafc] text-[#475569] border border-[#e2e8f0] font-['JetBrains_Mono'] text-[10.5px] font-semibold rounded uppercase">Chocolates</span>
+<span class="px-2 py-0.5 bg-[#f0fdfa] border border-[#99f6e4] text-[#0f766e] font-['Space_Grotesk'] text-[11px] font-bold rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span> COMPLIANT
+                </span>
+</div>
+<h3 class="font-['Space_Grotesk'] text-[16px] text-[#0f172a] font-bold mt-2.5 group-hover:text-[#0e7490] transition-colors">
+                Cadbury Dairy Milk
+              </h3>
+<div class="font-['JetBrains_Mono'] text-[12px] text-[#64748b] mt-1">EAN: 7622201744853</div>
+</div>
+<div class="mt-4 pt-3 border-t border-[#e2e8f0] flex items-center justify-between font-['JetBrains_Mono'] text-[11px]">
+<span class="text-[#64748b]">Net Wt: 52g • Milk Solids</span>
+<span class="text-[#ea580c] font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">warning</span> ALLERGEN: MILK
+              </span>
+</div>
+</div>
+<!-- 8. Britannia Good Day Cashew -->
+<div class="bg-white rounded-xl p-5 border border-[#cbd5e1] shadow-xs hover:shadow-md hover:border-[#0e7490] transition-all group cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-[#f8fafc] text-[#475569] border border-[#e2e8f0] font-['JetBrains_Mono'] text-[10.5px] font-semibold rounded uppercase">Biscuits</span>
+<span class="px-2 py-0.5 bg-[#f0fdfa] border border-[#99f6e4] text-[#0f766e] font-['Space_Grotesk'] text-[11px] font-bold rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span> COMPLIANT
+                </span>
+</div>
+<h3 class="font-['Space_Grotesk'] text-[16px] text-[#0f172a] font-bold mt-2.5 group-hover:text-[#0e7490] transition-colors">
+                Britannia Good Day Cashew
+              </h3>
+<div class="font-['JetBrains_Mono'] text-[12px] text-[#64748b] mt-1">EAN: 8901063012487</div>
+</div>
+<div class="mt-4 pt-3 border-t border-[#e2e8f0] flex items-center justify-between font-['JetBrains_Mono'] text-[11px]">
+<span class="text-[#64748b]">Net Wt: 120g • Font: 3.2mm</span>
+<span class="text-[#ea580c] font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">warning</span> ALLERGEN: TREE NUTS
+              </span>
+</div>
+</div>
+<!-- 9. Haldiram's Nagpur Aloo Bhujia -->
+<div class="bg-white rounded-xl p-5 border border-[#cbd5e1] shadow-xs hover:shadow-md hover:border-[#0e7490] transition-all group cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-[#f8fafc] text-[#475569] border border-[#e2e8f0] font-['JetBrains_Mono'] text-[10.5px] font-semibold rounded uppercase">Savory Snacks</span>
+<span class="px-2 py-0.5 bg-[#f0fdfa] border border-[#99f6e4] text-[#0f766e] font-['Space_Grotesk'] text-[11px] font-bold rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span> COMPLIANT
+                </span>
+</div>
+<h3 class="font-['Space_Grotesk'] text-[16px] text-[#0f172a] font-bold mt-2.5 group-hover:text-[#0e7490] transition-colors">
+                Haldiram's Nagpur Aloo Bhujia
+              </h3>
+<div class="font-['JetBrains_Mono'] text-[12px] text-[#64748b] mt-1">EAN: 8904063200142</div>
+</div>
+<div class="mt-4 pt-3 border-t border-[#e2e8f0] flex items-center justify-between font-['JetBrains_Mono'] text-[11px]">
+<span class="text-[#64748b]">Net Wt: 200g • Font: 3.0mm</span>
+<span class="text-[#ea580c] font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">warning</span> ALLERGEN: PEANUT TRACES
+              </span>
+</div>
+</div>
+<!-- 10. Amul Pasteurised Salted Butter -->
+<div class="bg-white rounded-xl p-5 border border-[#cbd5e1] shadow-xs hover:shadow-md hover:border-[#0e7490] transition-all group cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-[#f8fafc] text-[#475569] border border-[#e2e8f0] font-['JetBrains_Mono'] text-[10.5px] font-semibold rounded uppercase">Dairy &amp; Fats</span>
+<span class="px-2 py-0.5 bg-[#f0fdfa] border border-[#99f6e4] text-[#0f766e] font-['Space_Grotesk'] text-[11px] font-bold rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span> COMPLIANT
+                </span>
+</div>
+<h3 class="font-['Space_Grotesk'] text-[16px] text-[#0f172a] font-bold mt-2.5 group-hover:text-[#0e7490] transition-colors">
+                Amul Pasteurised Salted Butter
+              </h3>
+<div class="font-['JetBrains_Mono'] text-[12px] text-[#64748b] mt-1">EAN: 8901262010057</div>
+</div>
+<div class="mt-4 pt-3 border-t border-[#e2e8f0] flex items-center justify-between font-['JetBrains_Mono'] text-[11px]">
+<span class="text-[#64748b]">Net Wt: 100g • Dairy Grade A</span>
+<span class="text-[#ea580c] font-bold">HYPERTENSION SODIUM WATCH</span>
+</div>
+</div>
+<!-- 11. Parle-G Original Gluco -->
+<div class="bg-white rounded-xl p-5 border border-[#cbd5e1] shadow-xs hover:shadow-md hover:border-[#0e7490] transition-all group cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-[#f8fafc] text-[#475569] border border-[#e2e8f0] font-['JetBrains_Mono'] text-[10.5px] font-semibold rounded uppercase">Biscuits</span>
+<span class="px-2 py-0.5 bg-[#f0fdfa] border border-[#99f6e4] text-[#0f766e] font-['Space_Grotesk'] text-[11px] font-bold rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span> COMPLIANT
+                </span>
+</div>
+<h3 class="font-['Space_Grotesk'] text-[16px] text-[#0f172a] font-bold mt-2.5 group-hover:text-[#0e7490] transition-colors">
+                Parle-G Original Gluco
+              </h3>
+<div class="font-['JetBrains_Mono'] text-[12px] text-[#64748b] mt-1">EAN: 8901719101038</div>
+</div>
+<div class="mt-4 pt-3 border-t border-[#e2e8f0] flex items-center justify-between font-['JetBrains_Mono'] text-[11px]">
+<span class="text-[#64748b]">Net Wt: 130g • Font: 2.8mm</span>
+<span class="text-[#334155] font-bold">WHEAT GLUTEN IDENTIFIED</span>
+</div>
+</div>
+<!-- 12. DEFECTIVE / NON-COMPLIANT LOCAL BRAND (Refined Amber Alert Card) -->
+<div class="bg-[#fff7ed] rounded-xl p-5 border-2 border-[#ea580c] shadow-xs hover:shadow-md transition-all group cursor-pointer flex flex-col justify-between relative overflow-hidden">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-[#ffedd5] text-[#9a3412] font-['JetBrains_Mono'] text-[10.5px] font-bold rounded uppercase">Snacks - Local Pack</span>
+<span class="px-2.5 py-0.5 bg-[#ea580c] text-white font-['Space_Grotesk'] text-[11px] font-extrabold rounded flex items-center gap-1 shadow-xs">
+<span class="material-symbols-outlined text-[13px]">warning</span> VIOLATION DETECTED
+                </span>
+</div>
+<h3 class="font-['Space_Grotesk'] text-[16px] text-[#9a3412] font-extrabold mt-2.5">
+                Defective / Non-Compliant Local Brand
+              </h3>
+<div class="font-['JetBrains_Mono'] text-[12px] text-[#c2410c] mt-1">EAN: 8909999000111</div>
+<div class="mt-2.5 p-2.5 bg-white border border-[#fed7aa] rounded font-['JetBrains_Mono'] text-[11px] text-[#9a3412] font-medium shadow-xs">
+                Missing Rule 6(1)(e) Net Quantity &amp; Font &lt; 2.0mm. Penalty Sec 36 applicable.
+              </div>
+</div>
+<div class="mt-4 pt-3 border-t border-[#fed7aa] flex items-center justify-between font-['JetBrains_Mono'] text-[11px]">
+<span class="text-[#c2410c] font-bold">SEC 36 PENALTY: ₹25,000 FINE</span>
+<span class="text-[#ea580c] font-extrabold uppercase tracking-wide underline">EXPORT NOTICE</span>
+</div>
+</div>
+<!-- 13. Sugar-Free High Protein Nut Bar -->
+<div class="bg-white rounded-xl p-5 border border-[#cbd5e1] shadow-xs hover:shadow-md hover:border-[#0e7490] transition-all group cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-[#f8fafc] text-[#475569] border border-[#e2e8f0] font-['JetBrains_Mono'] text-[10.5px] font-semibold rounded uppercase">Health &amp; Wellness</span>
+<span class="px-2 py-0.5 bg-[#f0fdfa] border border-[#99f6e4] text-[#0f766e] font-['Space_Grotesk'] text-[11px] font-bold rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-[#0e7490]" style="font-variation-settings: 'FILL' 1;">check_circle</span> COMPLIANT
+                </span>
+</div>
+<h3 class="font-['Space_Grotesk'] text-[16px] text-[#0f172a] font-bold mt-2.5 group-hover:text-[#0e7490] transition-colors">
+                Sugar-Free High Protein Nut Bar
+              </h3>
+<div class="font-['JetBrains_Mono'] text-[12px] text-[#64748b] mt-1">EAN: 8906054120999</div>
+</div>
+<div class="mt-4 pt-3 border-t border-[#e2e8f0] flex items-center justify-between font-['JetBrains_Mono'] text-[11px]">
+<span class="text-[#64748b]">Net Wt: 45g • Polyols Checked</span>
+<span class="text-[#0e7490] font-bold">HEALTH GUARDIAN: 100% SAFE</span>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: Execution Pipeline Tracker -->
+<section class="w-full bg-white rounded-xl p-4 sm:p-5 border border-[#cbd5e1] shadow-xs">
+<div class="flex flex-col md:flex-row items-center justify-between gap-4">
+<div class="flex items-center gap-2 text-[#475569] font-['JetBrains_Mono'] text-[12px]">
+<span class="material-symbols-outlined text-[18px] text-[#0e7490]">memory</span>
+<span class="uppercase tracking-wider font-bold text-[#0f172a]">Statutory Execution Pipeline</span>
+</div>
+<!-- Steps Pipeline with Standardized Neutral + Active Teal -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full md:w-auto font-['JetBrains_Mono'] text-[12px]">
+<div class="flex items-center gap-2 bg-[#f8fafc] border border-[#e2e8f0] px-3 py-1.5 rounded-md">
+<span class="w-5 h-5 rounded-full bg-[#e2e8f0] text-[#475569] flex items-center justify-center font-bold text-[11px]">01</span>
+<span class="text-[#334155] font-medium">Label Ingestion</span>
+</div>
+<div class="flex items-center gap-2 bg-[#f8fafc] border border-[#e2e8f0] px-3 py-1.5 rounded-md">
+<span class="w-5 h-5 rounded-full bg-[#e2e8f0] text-[#475569] flex items-center justify-center font-bold text-[11px]">02</span>
+<span class="text-[#334155] font-medium">OCR Extraction</span>
+</div>
+<div class="flex items-center gap-2 bg-[#f8fafc] border border-[#e2e8f0] px-3 py-1.5 rounded-md">
+<span class="w-5 h-5 rounded-full bg-[#e2e8f0] text-[#475569] flex items-center justify-center font-bold text-[11px]">03</span>
+<span class="text-[#334155] font-medium">Rule 9 Optical</span>
+</div>
+<div class="flex items-center gap-2 bg-[#0e7490] text-white px-3 py-1.5 rounded-md shadow-xs">
+<span class="w-5 h-5 rounded-full bg-white text-[#0e7490] flex items-center justify-center font-bold text-[11px]">04</span>
+<span class="font-bold">Health Match</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-[#475569] font-['JetBrains_Mono'] text-[11.5px] font-semibold">
+<span class="w-2 h-2 rounded-full bg-[#0e7490]"></span>
+<span>LATENCY: 8.2MS READY</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- FOOTER -->
+<footer class="w-full bg-white border-t border-[#cbd5e1] py-4 mt-auto">
+<div class="max-w-[1280px] mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-3 font-['JetBrains_Mono'] text-[11.5px] text-[#64748b]">
+<div class="flex items-center gap-2">
+<span class="font-medium text-[#0f172a]">PackScan Node ID: 26034-IN</span>
+<span>•</span>
+<span>Legal Metrology (Packaged Commodities) Rules, 2011 Enforcement Console</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-[#0e7490] font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#0e7490]"></span> Systems Operational
+        </span>
+<span class="text-[#cbd5e1]">|</span>
+<span>FSSAI Lab Matrix v2.4</span>
+</div>
+</div>
+</footer>
+</body></html>
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-09-04T13:59:53+05:30.
+</ADDITIONAL_METADATA>

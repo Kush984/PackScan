@@ -1,0 +1,50 @@
+[
+  {
+    "original_ingredient": "Sugar",
+    "common_substitute": "Maltodextrin",
+    "caveat": "Maltodextrin has a Glycemic Index (GI ~110–185) significantly higher than table sugar (GI ~65). Products marketed as 'No Added Sugar' containing maltodextrin can trigger rapid blood glucose spikes in diabetic consumers.",
+    "source": "American Diabetes Association; Harvard Health Publishing Glycemic Index Guidelines"
+  },
+  {
+    "original_ingredient": "Sugar",
+    "common_substitute": "High Fructose Corn Syrup (HFCS) / Liquid Glucose",
+    "caveat": "Liquid glucose/HFCS is rapidly processed by the liver, promoting hepatic lipogenesis and elevated triglyceride levels compared to natural whole-food sugars.",
+    "source": "NIH National Library of Medicine - Fructose Metabolism and Hepatic Steatosis"
+  },
+  {
+    "original_ingredient": "Sugar",
+    "common_substitute": "Sucralose / INS 955",
+    "caveat": "While zero-calorie, recent clinical studies indicate high habitual intake may alter gut microbiome composition and modulate insulin sensitivity.",
+    "source": "Nature Microbiology & WHO Guideline on Non-Sugar Sweeteners (NSS)"
+  },
+  {
+    "original_ingredient": "Sugar",
+    "common_substitute": "Aspartame / INS 951",
+    "caveat": "Strictly contraindicated for individuals with Phenylketonuria (PKU) due to inability to metabolize phenylalanine. Classified as 2B 'possibly carcinogenic' by IARC.",
+    "source": "WHO / IARC / JECFA Joint Statement 2023"
+  },
+  {
+    "original_ingredient": "Sugar",
+    "common_substitute": "Sorbitol / Maltitol / Polyols",
+    "caveat": "Sugar alcohols may cause severe osmotic bloating, gas, and laxative effects in sensitive individuals when consumed in quantities exceeding 10–20g/day.",
+    "source": "European Food Safety Authority (EFSA) Polyol Evaluation"
+  },
+  {
+    "original_ingredient": "Butter / Dairy Fat",
+    "common_substitute": "Palm Oil / Hydrogenated Vegetable Fat",
+    "caveat": "Palm fractions contain up to 50% palmitic acid (saturated fat) and industrial processing may introduce trace MCPD esters; increases LDL cholesterol.",
+    "source": "WHO Guidelines on Saturated Fatty Acid Intake; EFSA Contaminants in Food Chain"
+  },
+  {
+    "original_ingredient": "Table Salt (Sodium Chloride)",
+    "common_substitute": "Potassium Chloride (Low Sodium Salt)",
+    "caveat": "Presents severe hyperkalemia risks for individuals with chronic kidney disease (CKD) or those taking ACE inhibitors and potassium-sparing diuretics.",
+    "source": "American Heart Association Potassium Salt Advisory"
+  },
+  {
+    "original_ingredient": "Wheat Flour (Whole Grain)",
+    "common_substitute": "Refined Corn Starch / Tapioca Starch",
+    "caveat": "Gluten-free substitutes often rely on pure refined starches with near-zero dietary fiber, resulting in rapid postprandial glycemic excursions.",
+    "source": "Celiac Disease Foundation Dietary Guidelines"
+  }
+]

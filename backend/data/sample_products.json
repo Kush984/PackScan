@@ -1,0 +1,236 @@
+[
+  {
+    "id": "maggi-2min-classic",
+    "name": "Nestlé Maggi 2-Minute Masala Instant Noodles (70g)",
+    "brand": "Nestlé India Limited",
+    "barcode": "8901058852371",
+    "barcodes": ["8901058852371", "8901058017687", "901058017687", "08901058852371", "08901058017687", "8901058852388", "8901058863612", "981638017687", "9810580176870", "901058852371"],
+    "category": "Instant Noodles & Quick Meals",
+    "image_url": "https://images.openfoodfacts.org/images/products/890/105/885/2371/front_en.15.400.jpg",
+    "label_text": "NESTLÉ MAGGI 2-MINUTE NOODLES - MASALA (WITH GOODNESS OF IRON)\nNet Qty: 70 g\nMRP: Rs. 14.00 (Inclusive of all taxes)\nUnit Sale Price: Rs. 0.20 per g\nManufactured by: Nestlé India Limited, 100/101, World Trade Centre, Barakhamba Lane, New Delhi - 110001, India.\nManufacturing Date: 08/2026\nConsumer Care Officer: Nestlé Consumer Care, P.O. Box 711, New Delhi - 110001. Phone: 1800 103 1947, Email: wecare@in.nestle.com\nGeneric Name: Instant Noodles with Tastemaker\nCountry of Origin: India\n\nINGREDIENTS NOODLES: Refined Wheat Flour (Maida) (79.6%), Palm Oil, Wheat Gluten, Iodised Salt, Thickeners (INS 508, INS 412), Acidity Regulators [INS 501(i), INS 500(i)], Humectant [INS 451(i)].\nTASTEMAKER: Hydrolysed Groundnut (Peanut) Protein, Mixed Spices (23.6%) (Dehydrated Onion, Coriander Powder, Red Chilli Powder, Turmeric Powder, Cumin, Aniseed, Fenugreek, Ginger, Clove, Nutmeg, Cardamom), Noodle Powder, Sugar, Edible Starch, Palm Oil, Thickener (INS 508), Caramel Color Class IV (INS 150d), Flavor Enhancer (INS 635), Acidity Regulator (INS 330), Mineral (Ferric Pyrophosphate).\nCONTAINS WHEAT AND PEANUT. MAY CONTAIN TRACES OF MILK, SOY AND MUSTARD.\n\nNUTRITION INFORMATION PER 100g:\nEnergy: 427 kcal, Protein: 8.0g, Carbohydrate: 63.5g, Total Sugars: 2.2g, Added Sugars: 1.2g, Total Fat: 15.7g, Saturated Fat: 6.8g, Trans Fat: 0.1g, Sodium: 1040mg, Iron: 4.8mg.",
+    "nutriments": {
+      "sugars_100g": 2.2,
+      "sodium_100g": 1040,
+      "fat_100g": 15.7,
+      "saturated_fat_100g": 6.8,
+      "proteins_100g": 8.0,
+      "energy_100g": 427
+    }
+  },
+  {
+    "id": "coca-cola-original",
+    "name": "Coca-Cola Original Taste Carbonated Beverage (750ml)",
+    "brand": "Coca-Cola India Pvt. Ltd.",
+    "barcode": "8901764012297",
+    "barcodes": ["8901764012297", "5449000000996", "05449000000996", "8901764011030", "8901764012204", "8901764012211", "8901764012228", "8901764012235", "901764012297"],
+    "category": "Carbonated Beverages & Soft Drinks",
+    "image_url": "https://images.openfoodfacts.org/images/products/890/176/401/2297/front_en.11.400.jpg",
+    "label_text": "COCA-COLA ORIGINAL TASTE - REFRESHING CARBONATED BEVERAGE\nNet Quantity: 750 ml\nMRP: Rs. 40.00 (Inclusive of all taxes)\nUnit Sale Price: Rs. 0.053 per ml (Rs. 5.33 / 100 ml)\nManufactured by: Hindustan Coca-Cola Beverages Pvt. Ltd., Plot No. 20-21, Bidadi Industrial Area, Ramanagara District, Karnataka - 562109, India.\nMonth & Year of Mfg: 08/2026\nBest before 6 months from manufacture.\nConsumer Feedback / Complaints: Consumer Response Coordinator, Toll Free: 1800-208-2653, Email: indiahelpline@coca-cola.com, Address: HCCBPL, B-9, DLF Cyber City, Gurugram - 122002, Haryana.\nGeneric Name: Carbonated Water / Sweetened Carbonated Beverage\nCountry of Origin: India\n\nINGREDIENTS: Carbonated Water, Sugar, Acidity Regulator (INS 338 - Phosphoric Acid), Permitted Natural Colour (INS 150d - Caramel Color Class IV), Caffeine (Added Flavour - 10mg / 100ml), Natural Flavouring Substances.\n\nNUTRITION INFORMATION PER 100ml:\nEnergy: 44 kcal, Carbohydrates: 10.6g, Total Sugars: 10.6g, Added Sugars: 10.6g, Total Fat: 0g, Saturated Fat: 0g, Sodium: 14mg, Protein: 0g.",
+    "nutriments": {
+      "sugars_100g": 10.6,
+      "sodium_100g": 14,
+      "fat_100g": 0,
+      "saturated_fat_100g": 0,
+      "proteins_100g": 0,
+      "energy_100g": 44
+    }
+  },
+  {
+    "id": "coca-cola-zero",
+    "name": "Coca-Cola Zero Sugar / Diet Coke (300ml Can)",
+    "brand": "Coca-Cola India Pvt. Ltd.",
+    "barcode": "8901764022203",
+    "barcodes": ["8901764022203", "5449000131805", "8901764022104"],
+    "category": "Diet Carbonated Beverages",
+    "image_url": "https://images.openfoodfacts.org/images/products/890/176/402/2203/front_en.10.400.jpg",
+    "label_text": "COCA-COLA ZERO SUGAR - ZERO CALORIE CARBONATED BEVERAGE\nNet Quantity: 300 ml\nMRP: Rs. 40.00 (Incl. of all taxes)\nUnit Sale Price: Rs. 0.133 / ml\nManufactured by: Hindustan Coca-Cola Beverages Pvt. Ltd., Ennore Express Highway, Ernavoor, Chennai - 600057, Tamil Nadu, India.\nMonth of Packing: 08/2026\nConsumer Helpline: Toll Free 1800-208-2653, indiahelpline@coca-cola.com\nGeneric Name: Carbonated Water (Diet Beverage)\nCountry of Origin: India\n\nINGREDIENTS: Carbonated Water, Acidity Regulators (INS 338, INS 331), Permitted Natural Colour (INS 150d), Non-Caloric Sweeteners (INS 951 - Aspartame 240 ppm, INS 950 - Acesulfame Potassium 160 ppm), Preservative (INS 211 - Sodium Benzoate), Caffeine (10 mg / 100 ml).\nCONTAINS ASPARTAME. NOT RECOMMENDED FOR PHENYLKETONURICS (PKU). NOT RECOMMENDED FOR CHILDREN.\n\nNUTRITION INFORMATION PER 100ml:\nEnergy: 0.3 kcal, Carbohydrates: 0g, Total Sugars: 0g, Added Sugars: 0g, Protein: 0g, Total Fat: 0g, Sodium: 18mg.",
+    "nutriments": {
+      "sugars_100g": 0.0,
+      "sodium_100g": 18,
+      "fat_100g": 0,
+      "saturated_fat_100g": 0,
+      "proteins_100g": 0,
+      "energy_100g": 0.3
+    }
+  },
+  {
+    "id": "thums-up-charged",
+    "name": "Thums Up Charged Carbonated Soft Drink (750ml)",
+    "brand": "The Coca-Cola Company (Thums Up)",
+    "barcode": "8901764032295",
+    "barcodes": ["8901764032295", "8901764031038", "8901764032202"],
+    "category": "Carbonated Beverages & Soft Drinks",
+    "image_url": "",
+    "label_text": "THUMS UP - TOOFANI TASTE CARBONATED BEVERAGE\nNet Quantity: 750 ml\nMRP Rs. 40.00 (Incl. of all taxes)\nUSP: Rs. 0.053/ml\nManufactured By: Hindustan Coca-Cola Beverages Pvt Ltd, Phase II, GIDC Industrial Estate, Sanand, Ahmedabad, Gujarat - 382110, India.\nMonth & Year of Mfg: 08/2026\nConsumer Care Contact: 1800-208-2653, indiahelpline@coca-cola.com\nGeneric Name: Sweetened Carbonated Water\nCountry of Origin: India\n\nINGREDIENTS: Carbonated Water, Sugar, Acidity Regulator (INS 338), Permitted Natural Colour (INS 150d), Added Flavours (Natural, Nature-Identical Flavouring Substances), Caffeine (12 mg / 100 ml).\n\nNUTRITION PER 100ml:\nEnergy: 40 kcal, Carbohydrates: 10.0g, Total Sugars: 10.0g, Added Sugars: 10.0g, Sodium: 12mg, Fat: 0g, Protein: 0g.",
+    "nutriments": {
+      "sugars_100g": 10.0,
+      "sodium_100g": 12,
+      "fat_100g": 0,
+      "saturated_fat_100g": 0,
+      "proteins_100g": 0,
+      "energy_100g": 40
+    }
+  },
+  {
+    "id": "lays-magic-masala",
+    "name": "Lay's India's Magic Masala Potato Chips (50g)",
+    "brand": "PepsiCo India Holdings Pvt. Ltd.",
+    "barcode": "8901491101830",
+    "barcodes": ["8901491101830", "8901491101847", "8901491001833", "8901491001840"],
+    "category": "Potato Chips & Crispy Snacks",
+    "image_url": "https://images.openfoodfacts.org/images/products/890/149/110/1830/front_en.12.400.jpg",
+    "label_text": "LAY'S INDIA'S MAGIC MASALA POTATO CHIPS\nNet Quantity: 50 g\nMRP: Rs. 20.00 (Inclusive of all taxes)\nUnit Sale Price: Rs. 0.40 per g\nManufactured by: PepsiCo India Holdings Pvt. Ltd., Village Channo, Patiala-Sangrur Road, Sangrur, Punjab - 148026, India.\nMonth and Year of Pkg: 08/2026\nConsumer Services: Consumer Response Executive, PepsiCo India, P.O. Box 27, DLF Qutab Enclave, Gurugram - 122002, Haryana. Toll Free: 1800 22 4020, Email: feedback@pepsico.com\nGeneric Name: Potato Chips (Fried Snack)\nCountry of Origin: India\n\nINGREDIENTS: Potato (52%), Edible Vegetable Oil (Palmolein Oil, Rice Bran Oil), Seasoning [Spices and Condiments (Onion Powder, Chilli Powder, Dry Mango Powder, Coriander Powder, Ginger Powder, Garlic Powder, Black Pepper, Turmeric, Cumin), Iodised Salt, Black Salt, Sugar, Tomato Powder, Acidity Regulators (INS 330, INS 296, INS 334), Flavour Enhancers (INS 627, INS 631), Anticaking Agent (INS 551)].\nCONTAINS NO ADDED MSG. MAY CONTAIN TRACES OF MILK, WHEAT AND SOY.\n\nNUTRITION INFORMATION PER 100g:\nEnergy: 555 kcal, Protein: 6.9g, Carbohydrates: 52.6g, Total Sugars: 4.0g, Added Sugars: 2.5g, Total Fat: 35.2g, Saturated Fat: 14.5g, Sodium: 780mg.",
+    "nutriments": {
+      "sugars_100g": 4.0,
+      "sodium_100g": 780,
+      "fat_100g": 35.2,
+      "saturated_fat_100g": 14.5,
+      "proteins_100g": 6.9,
+      "energy_100g": 555
+    }
+  },
+  {
+    "id": "kurkure-masala-munch",
+    "name": "Kurkure Masala Munch Crunchy Snack (90g)",
+    "brand": "PepsiCo India Holdings Pvt. Ltd.",
+    "barcode": "8901491102837",
+    "barcodes": ["8901491102837", "8901491002830", "8901491502835"],
+    "category": "Corn & Grain Savory Snacks",
+    "image_url": "https://images.openfoodfacts.org/images/products/890/149/110/2837/front_en.10.400.jpg",
+    "label_text": "KURKURE MASALA MUNCH - TEDHA HAI PAR MERA HAI\nNet Qty: 90 g\nMRP: Rs. 20.00 (Incl. of all taxes)\nUSP: Rs. 0.222 / g\nManufactured by: PepsiCo India Holdings Pvt. Ltd., JLN Industrial Area, Panipat, Haryana - 132103, India.\nDate of Packing: 08/2026\nCustomer Care: 1800 22 4020, feedback@pepsico.com\nGeneric Name: Extruded Snack (Namkeen)\nCountry of Origin: India\n\nINGREDIENTS: Rice Meal (42.8%), Edible Vegetable Oil (Palmolein Oil), Corn Meal (19.8%), Gram Meal (Bengal Gram - 3.3%), Seasoning [Spices and Condiments, Iodised Salt, Sugar, Onion Powder, Garlic Powder, Tomato Powder, Acidity Regulator (INS 330), Flavour Enhancers (INS 627, INS 631)].\nCONTAINS SOY. MAY CONTAIN TRACES OF MILK, PEANUTS AND WHEAT.\n\nNUTRITION PER 100g:\nEnergy: 561 kcal, Protein: 5.8g, Carbohydrate: 55.4g, Sugars: 1.8g, Total Fat: 35.1g, Saturated Fat: 15.8g, Sodium: 890mg.",
+    "nutriments": {
+      "sugars_100g": 1.8,
+      "sodium_100g": 890,
+      "fat_100g": 35.1,
+      "saturated_fat_100g": 15.8,
+      "proteins_100g": 5.8,
+      "energy_100g": 561
+    }
+  },
+  {
+    "id": "cadbury-dairy-milk",
+    "name": "Cadbury Dairy Milk Chocolate (50g)",
+    "brand": "Mondelez India Foods Pvt. Ltd.",
+    "barcode": "7622201744853",
+    "barcodes": ["7622201744853", "8901233024847", "8901233024854", "8901233001855"],
+    "category": "Chocolates & Confectionery",
+    "image_url": "https://images.openfoodfacts.org/images/products/762/220/174/4853/front_en.14.400.jpg",
+    "label_text": "CADBURY DAIRY MILK - MILK CHOCOLATE BAR\nNet Quantity: 50 g\nMRP: Rs. 45.00 (Inclusive of all taxes)\nUnit Sale Price: Rs. 0.90 per g\nManufactured by: Mondelez India Foods Private Limited, Unit No. 2001, 20th Floor, Tower-3, Indiabulls Finance Centre, Parel, Mumbai - 400013, Maharashtra, India.\nMonth & Year of Mfg: 08/2026\nConsumer Care: Consumer Grievance Officer, Toll Free: 1800 22 7080, Email: suggestions@mdlz.com\nGeneric Name: Milk Chocolate\nCountry of Origin: India\n\nINGREDIENTS: Sugar, Milk Solids (22%), Cocoa Butter, Cocoa Solids, Emulsifiers [INS 442, INS 476 (Polyglycerol Polyricinoleate)], Nature Identical and Artificial Flavouring Substances (Vanilla).\nCONTAINS MILK. MAY CONTAIN TRACES OF TREE NUTS, WHEAT AND SOY.\n\nNUTRITION INFORMATION PER 100g:\nEnergy: 532 kcal, Protein: 8.0g, Carbohydrate: 58.5g, Total Sugars: 57.0g, Added Sugars: 47.4g, Total Fat: 30.5g, Saturated Fat: 18.5g, Sodium: 140mg.",
+    "nutriments": {
+      "sugars_100g": 57.0,
+      "sodium_100g": 140,
+      "fat_100g": 30.5,
+      "saturated_fat_100g": 18.5,
+      "proteins_100g": 8.0,
+      "energy_100g": 532
+    }
+  },
+  {
+    "id": "britannia-good-day",
+    "name": "Britannia Good Day Cashew Cookies (120g)",
+    "brand": "Britannia Industries Ltd.",
+    "barcode": "8901063012487",
+    "barcodes": ["8901063012487", "8901063012494", "8901063012500", "8901063012517"],
+    "category": "Biscuits & Cookies",
+    "image_url": "https://images.openfoodfacts.org/images/products/890/106/301/2487/front_en.11.400.jpg",
+    "label_text": "BRITANNIA GOOD DAY CASHEW COOKIES\nNet Qty: 120 g (100g + 20g Free)\nMRP Rs. 30.00 (Incl. of all taxes)\nUSP: Rs. 0.25 / g\nMfd. By: Britannia Industries Limited, 5/1A Hungerford Street, Kolkata - 700017, West Bengal, India.\nPkd / Mfg Date: 07/2026\nUse By: 6 months from packaging\nConsumer Care Cell: Executive, Britannia Consumer Care, P.O. Box 7100, Bengaluru - 560047. Phone: 1800-425-4449. Email: feedback@britindia.com\nGeneric Name: Butter & Nut Cookies\nCountry of Origin: India\n\nINGREDIENTS: Refined Wheat Flour (Maida) (54%), Sugar, Refined Palm Oil, Cashew Bits (4.5%), Butter (2%), Milk Solids, Invert Sugar Syrup, Raising Agents [INS 503(ii), INS 500(ii)], Emulsifier [INS 322 (Soy Lecithin)], Iodised Salt, Artificial Flavouring Substances (Butter, Cashew, Vanilla).\nCONTAINS WHEAT, MILK, TREE NUTS (CASHEW) AND SOY. MAY CONTAIN TRACES OF PEANUTS AND SESAME.\n\nNUTRITION PER 100g:\nEnergy: 504 kcal, Protein: 7.2g, Carbohydrates: 68g, Total Sugars: 28.5g, Added Sugars: 26.0g, Total Fat: 22.8g, Saturated Fat: 10.5g, Sodium: 320mg.",
+    "nutriments": {
+      "sugars_100g": 28.5,
+      "sodium_100g": 320,
+      "fat_100g": 22.8,
+      "saturated_fat_100g": 10.5,
+      "proteins_100g": 7.2,
+      "energy_100g": 504
+    }
+  },
+  {
+    "id": "haldirams-aloo-bhujia",
+    "name": "Haldiram's Nagpur Aloo Bhujia (200g)",
+    "brand": "Haldiram Snacks Pvt. Ltd.",
+    "barcode": "8904063200142",
+    "barcodes": ["8904063200142", "8904063200159", "8904063200166"],
+    "category": "Savory Snacks & Namkeen",
+    "image_url": "https://images.openfoodfacts.org/images/products/890/406/320/0142/front_en.18.400.jpg",
+    "label_text": "HALDIRAM'S NAGPUR ALOO BHUJIA - SPICY POTATO NOODLES\nNet Quantity: 200 g\nMaximum Retail Price: ₹ 55.00 (Inclusive of all taxes)\nUnit Sale Price: ₹ 0.275 per g\nManufactured By: Haldiram Snacks Pvt. Ltd., B-1/H-3, Mohan Co-op Industrial Estate, Main Mathura Road, New Delhi - 110044, India.\nMonth and Year of Mfg: 08/2026\nFor Consumer Complaints / Feedback: Consumer Care Manager, Phone: 011-45204100, Toll Free: 1800-102-4400, Email: customercare@haldirams.com\nGeneric Name of Commodity: Potato Bhujia (Fried Snack)\nCountry of Origin: India\n\nINGREDIENTS: Potatoes (44%), Edible Vegetable Oil (Palmolein Oil, Cotton Seed Oil), Bengal Gram Flour (Besan), Tepary Bean Flour (Moth Dal), Rice Flour, Iodised Salt, Red Chilli Powder, Black Pepper, Acidity Regulator (INS 330 - Citric Acid), Spices & Condiments.\nALLERGY ADVICE: Manufactured in a facility that also processes Peanuts, Tree Nuts, Soy, Wheat and Milk Solids.\n\nNUTRITION INFORMATION PER 100g:\nEnergy: 576 kcal, Carbohydrates: 42.5g, Sugars: 1.2g, Total Fat: 41.6g, Saturated Fat: 18.2g, Sodium: 860mg.",
+    "nutriments": {
+      "sugars_100g": 1.2,
+      "sodium_100g": 860,
+      "fat_100g": 41.6,
+      "saturated_fat_100g": 18.2,
+      "proteins_100g": 8.0,
+      "energy_100g": 576
+    }
+  },
+  {
+    "id": "amul-butter",
+    "name": "Amul Pasteurised Salted Butter (500g)",
+    "brand": "GCMMF Ltd. (Amul)",
+    "barcode": "8901262010057",
+    "barcodes": ["8901262010057", "8901262010019", "8901262010026", "8901262010040"],
+    "category": "Dairy & Spreads",
+    "image_url": "https://images.openfoodfacts.org/images/products/890/126/201/0057/front_en.4.400.jpg",
+    "label_text": "AMUL PASTEURISED BUTTER - UTTERLY BUTTERLY DELICIOUS\nNet Weight: 500 g\nMRP: Rs. 275.00 (Inclusive of all taxes)\nUnit Sale Price: Rs. 55.00 / 100 g\nManufactured by: Kaira District Co-operative Milk Producers' Union Ltd., Anand - 388001, Gujarat, India.\nMarketed by: Gujarat Co-operative Milk Marketing Federation Ltd., Amul Dairy Road, Anand - 388001, India.\nPkg Date: 08/2026\nBest before 12 months from packaging when stored at 4°C or below.\nCustomer Care: Toll Free 1800 258 3333, Email: customercare@amul.coop, Address: GCMMF Ltd., Anand 388001.\nCommodity: Pasteurised Table Butter\nCountry of Origin: India\n\nINGREDIENTS: Butter (Milk Fat 80%), Moisture (16% max), Common Salt (Salt 2.5%), Curd (1.5%), Permitted Natural Colour [INS 160a(i) - Annatto / Carotene].\nCONTAINS MILK (DAIRY).\n\nNUTRITION VALUE PER 100g:\nEnergy: 722 kcal, Fat: 80.2g, Saturated Fat: 51.0g, Carbohydrates: 0.0g, Total Sugar: 0.0g, Protein: 0.6g, Sodium: 830mg.",
+    "nutriments": {
+      "sugars_100g": 0.0,
+      "sodium_100g": 830,
+      "fat_100g": 80.2,
+      "saturated_fat_100g": 51.0,
+      "proteins_100g": 0.6,
+      "energy_100g": 722
+    }
+  },
+  {
+    "id": "parle-g-biscuits",
+    "name": "Parle-G Original Gluco Biscuits (250g)",
+    "brand": "Parle Products Pvt. Ltd.",
+    "barcode": "8901719101038",
+    "barcodes": ["8901719101038", "8901719101014", "8901719101021"],
+    "category": "Biscuits & Cookies",
+    "image_url": "https://images.openfoodfacts.org/images/products/890/171/910/1038/front_en.14.400.jpg",
+    "label_text": "PARLE-G ORIGINAL GLUCO BISCUITS - G FOR GENIUS\nNet Weight: 250 g\nMRP Rs. 25.00 (Incl. of all taxes)\nUSP: Rs. 0.10 / g\nMfd. By: Parle Products Pvt. Ltd., North Level Crossing, Vile Parle (East), Mumbai - 400057, Maharashtra, India.\nDate of Mfg: 08/2026\nConsumer Helpline: Toll Free 1800 22 2090, Email: cs@parle.biz\nGeneric Name: Glucose Biscuits\nCountry of Origin: India\n\nINGREDIENTS: Refined Wheat Flour (Maida) (67%), Sugar, Refined Palm Oil, Invert Sugar Syrup, Raising Agents [INS 503(ii), INS 500(ii)], Milk Solids, Iodised Salt, Emulsifiers [INS 322 (Soy Lecithin)], Dough Conditioner (INS 223 - Sodium Metabisulphite), Artificial Vanilla Flavour.\nCONTAINS WHEAT, MILK, SOY AND SULFITES.\n\nNUTRITION PER 100g:\nEnergy: 460 kcal, Protein: 6.5g, Carbohydrates: 78.0g, Total Sugars: 26.5g, Added Sugars: 24.0g, Total Fat: 13.5g, Saturated Fat: 6.2g, Sodium: 260mg.",
+    "nutriments": {
+      "sugars_100g": 26.5,
+      "sodium_100g": 260,
+      "fat_100g": 13.5,
+      "saturated_fat_100g": 6.2,
+      "proteins_100g": 6.5,
+      "energy_100g": 460
+    }
+  },
+  {
+    "id": "defective-local-snack",
+    "name": "Defective / Non-Compliant Local Brand Chips (Illegal Packaging)",
+    "brand": "Super Crunch Snacks",
+    "barcode": "8909999000111",
+    "barcodes": ["8909999000111", "9999000111"],
+    "category": "Snacks",
+    "image_url": "",
+    "label_text": "SUPER CRUNCH MASALA CHIPS\nNet Wt: 50g\nMRP 20\nMade in Delhi\nINGREDIENTS: Potato, Vegetable Oil, Masala Mix, Salt, Tartrazine E102, Monosodium Glutamate E621.\nCrispy and crunchy anytime snack!",
+    "nutriments": {
+      "sugars_100g": 3.5,
+      "sodium_100g": 620,
+      "fat_100g": 32.0,
+      "saturated_fat_100g": 14.0,
+      "proteins_100g": 5.5,
+      "energy_100g": 520
+    }
+  },
+  {
+    "id": "protein-bar-substitute",
+    "name": "Sugar-Free High Protein Nut Bar (45g)",
+    "brand": "NutriFit Labs",
+    "barcode": "8906054120999",
+    "barcodes": ["8906054120999", "906054120999"],
+    "category": "Health & Nutrition Bars",
+    "image_url": "",
+    "label_text": "NUTRIFIT NO-ADDED-SUGAR ALMOND CRUNCH PROTEIN BAR\nNet Quantity: 45 g\nMRP: ₹ 90.00 (Incl. of all taxes)\nUSP: ₹ 2.00 per g\nManufactured By: NutriFit Health Foods Pvt Ltd, Plot 42, Sector 8, IMT Manesar, Gurugram, Haryana - 122050, India.\nDate of Packing: 08/2026\nConsumer Helpline: 1800-889-9000, care@nutrifitlabs.in\nGeneric Name: Energy & Protein Cereal Bar\nCountry of Origin: India\n\nINGREDIENTS: Roasted Almonds (22%), Soy Protein Isolate (18%), Whey Protein Concentrate (12%), Maltodextrin (15%), Polydextrose, Dark Chocolate Compound (Cocoa solids, Maltitol, Emulsifier INS 322), Chia Seeds, Sucralose (INS 955), Humectant (INS 422).\nCONTAINS: TREE NUTS (ALMONDS), MILK (WHEY), SOY.\n\nNUTRITION PER 100g:\nEnergy: 410 kcal, Protein: 30.0g, Carbohydrates: 40.0g, Total Sugar: 2.1g, Added Sugar: 0.0g, Dietary Fiber: 12g, Total Fat: 14g, Saturated Fat: 3.5g, Sodium: 180mg.",
+    "nutriments": {
+      "sugars_100g": 2.1,
+      "sodium_100g": 180,
+      "fat_100g": 14.0,
+      "saturated_fat_100g": 3.5,
+      "proteins_100g": 30.0,
+      "energy_100g": 410
+    }
+  }
+]
