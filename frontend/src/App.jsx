@@ -14,6 +14,7 @@ import DataSourceBadge from './components/DataSourceBadge';
 import EnforcementDashboard from './components/EnforcementDashboard';
 import MedicalProfileView from './components/MedicalProfileView';
 import AllergiesThresholdView from './components/AllergiesThresholdView';
+import ProductForumLedgerView from './components/ProductForumLedgerView';
 import {
   Scale,
   ShieldCheck,
@@ -385,6 +386,14 @@ export default function App() {
             userProfile={userProfile}
             onSaveProfile={handleSaveProfile}
             onNavigateTab={handleSelectTab}
+          />
+        ) : activeTab === 'forum' ? (
+          <ProductForumLedgerView
+            deviceId={deviceId}
+            onSelectProductForAudit={(p) => {
+              handleSelectTab('scan');
+              if (p?.barcode) handleScanBarcode(p.barcode);
+            }}
           />
         ) : (
           <div className="flex flex-col w-full pb-16 space-y-6">
