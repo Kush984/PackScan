@@ -121,6 +121,11 @@ async function runUnifiedAnalysis({
     console.error('History save error:', err.message);
   }
 
+  const mrpField = complianceReport.fields?.find((f) => f.id === 'mrp');
+  const netQtyField = complianceReport.fields?.find((f) => f.id === 'net_quantity');
+  const mfgField = complianceReport.fields?.find((f) => f.id === 'mfg_date');
+  const careField = complianceReport.fields?.find((f) => f.id === 'consumer_care');
+
   return {
     scanId,
     product: {
@@ -130,6 +135,10 @@ async function runUnifiedAnalysis({
       imageUrl: productData?.image_url || null,
       category: productData?.categories || 'Packaged Commodity',
       nutriments,
+      mrp: mrpField?.status === 'DETECTED' ? mrpField.value : null,
+      netQuantity: netQtyField?.status === 'DETECTED' ? netQtyField.value : null,
+      mfgDate: mfgField?.status === 'DETECTED' ? mfgField.value : null,
+      consumerCare: careField?.status === 'DETECTED' ? careField.value : null,
       // Data provenance fields (used by UI DataSourceBadge)
       dataSource: productData?.dataSource || 'unknown',
       confidence: productData?.confidence || 'needs_verification',

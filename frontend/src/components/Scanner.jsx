@@ -24,6 +24,7 @@ import {
   Plus,
   Sparkles,
   Layers,
+  HelpCircle,
   X
 } from 'lucide-react';
 import {
@@ -547,14 +548,12 @@ export default function Scanner({
   const score = scanResult?.complianceReport?.score ?? 8;
   const isViolationState = scanResult?.complianceReport?.overallStatus === 'NON_COMPLIANT' || (scanResult && score < 8);
 
-  // Active or mock packaging unit values
+  // Active product and field details directly derived from scanResult
   const activeProduct = scanResult?.product;
-  const displayName = activeProduct?.name || 'Nestlé Maggi 2-Minute Masala';
-  const displayEan = activeProduct?.barcode || '8901058852371';
-  const displayMrp = activeProduct?.mrp ? `₹${activeProduct.mrp} (3.2mm)` : '₹14.00 (3.2mm)';
-  const displayWeight = activeProduct?.netQuantity ? `${activeProduct.netQuantity} (2.8mm)` : '70 g (2.8mm)';
-  const displayMfg = activeProduct?.mfgDate || '10/2024';
-  const displayHelpline = activeProduct?.consumerCare || '1800-103-1947';
+  const mrpField = reportFields.find((f) => f.id === 'mrp');
+  const weightField = reportFields.find((f) => f.id === 'net_quantity');
+  const mfgField = reportFields.find((f) => f.id === 'mfg_date');
+  const helplineField = reportFields.find((f) => f.id === 'consumer_care');
 
   return (
     <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch w-full">
@@ -1016,58 +1015,156 @@ export default function Scanner({
             </div>
           )}
 
-          {/* E. Scanned Label Card (Idle State / Scanned Result Preview) */}
+          {/* E. Scanned Label Card (Active Scanned Result Preview or Standby Prompt) */}
           {!isCameraActive && !currentPreviewUrl && !lockedPromptOpen && !isLoading && step !== 5 && (
-            <div className="relative w-full max-w-lg bg-white text-[#0f172a] rounded-lg p-4 shadow-xs border border-[#ccfbf1] z-10">
-              <div className="flex items-start justify-between border-b border-[#ccfbf1] pb-2 mb-2">
-                <div>
-                  <span className="px-2 py-0.5 bg-[#e6fbf9] border border-[#99f6e4] text-[#0f766e] font-['JetBrains_Mono'] text-[10px] font-bold rounded uppercase">
-                    PREPACKAGED RETAIL UNIT
+            scanResult ? (
+              <div className="relative w-full max-w-lg bg-white text-[#0f172a] rounded-lg p-4 shadow-xs border border-[#ccfbf1] z-10">
+                <div className="flex items-start justify-between border-b border-[#ccfbf1] pb-2 mb-2">
+                  <div>
+                    <span className="px-2 py-0.5 bg-[#e6fbf9] border border-[#99f6e4] text-[#0f766e] font-['JetBrains_Mono'] text-[10px] font-bold rounded uppercase">
+                      PREPACKAGED RETAIL UNIT
+                    </span>
+                    <div className="font-['Space_Grotesk'] text-[15px] font-bold text-[#0f172a] mt-1">
+                      {activeProduct?.name || 'Scanned Packaged Commodity'}
+                    </div>
+                  </div>
+                  <span className={`px-2 py-0.5 font-['JetBrains_Mono'] text-[11px] font-semibold rounded border ${
+                    activeProduct?.barcode 
+                      ? 'bg-[#f0fdfc] text-[#334155] border-[#ccfbf1]' 
+                      : 'bg-[#fff7ed] text-[#c2410c] border-[#fed7aa]'
+                  }`}>
+                    {activeProduct?.barcode ? `EAN: ${activeProduct.barcode}` : 'NO BARCODE (VISUAL AUDIT)'}
                   </span>
-                  <div className="font-['Space_Grotesk'] text-[15px] font-bold text-[#0f172a] mt-1">
-                    {displayName}
+                </div>
+
+                {/* Bounding Boxes mapped to Rule 6 Plain Language */}
+                <div className="grid grid-cols-2 gap-2 font-['JetBrains_Mono'] text-[11px]">
+                  {/* MRP */}
+                  <div className={`p-2 border rounded flex items-center justify-between ${
+                    mrpField?.status === 'DETECTED'
+                      ? 'bg-[#f0fdfc] border-[#ccfbf1]'
+                      : 'bg-[#fff7ed] border-[#fed7aa]'
+                  }`}>
+                    <div className="flex items-center gap-1.5">
+                      {mrpField?.status === 'DETECTED' ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#0d9488] shrink-0" />
+                      ) : (
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#ea580c] shrink-0" />
+                      )}
+                      <span className="text-[#475569] font-medium">Price (MRP)</span>
+                    </div>
+                    <span className={`font-bold ${
+                      mrpField?.status === 'DETECTED' ? 'text-[#0f172a]' : 'text-[#c2410c] text-[10px]'
+                    }`}>
+                      {mrpField?.status === 'DETECTED'
+                        ? (mrpField.value?.startsWith('₹') ? mrpField.value : `₹${mrpField.value}`)
+                        : 'NOT DETECTED'}
+                    </span>
+                  </div>
+
+                  {/* Net Quantity & Weight */}
+                  <div className={`p-2 border rounded flex items-center justify-between ${
+                    weightField?.status === 'DETECTED'
+                      ? 'bg-[#f0fdfc] border-[#ccfbf1]'
+                      : 'bg-[#fff7ed] border-[#fed7aa]'
+                  }`}>
+                    <div className="flex items-center gap-1.5">
+                      {weightField?.status === 'DETECTED' ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#0d9488] shrink-0" />
+                      ) : (
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#ea580c] shrink-0" />
+                      )}
+                      <span className="text-[#475569] font-medium">Net Quantity</span>
+                    </div>
+                    <span className={`font-bold ${
+                      weightField?.status === 'DETECTED' ? 'text-[#0f172a]' : 'text-[#c2410c] text-[10px]'
+                    }`}>
+                      {weightField?.status === 'DETECTED'
+                        ? (weightField.value?.replace(/^NET\s*(?:WEIGHT|QTY|QUANTITY)?\s*:\s*/i, '') || 'Detected')
+                        : 'NOT DETECTED'}
+                    </span>
+                  </div>
+
+                  {/* Month & Year of Mfg */}
+                  <div className={`p-2 border rounded flex items-center justify-between ${
+                    mfgField?.status === 'DETECTED'
+                      ? 'bg-[#f0fdfc] border-[#ccfbf1]'
+                      : mfgField?.status === 'UNCLEAR'
+                      ? 'bg-[#fffbeb] border-[#fde68a]'
+                      : 'bg-[#fff7ed] border-[#fed7aa]'
+                  }`}>
+                    <div className="flex items-center gap-1.5">
+                      {mfgField?.status === 'DETECTED' ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#0d9488] shrink-0" />
+                      ) : mfgField?.status === 'UNCLEAR' ? (
+                        <HelpCircle className="w-3.5 h-3.5 text-[#d97706] shrink-0" />
+                      ) : (
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#ea580c] shrink-0" />
+                      )}
+                      <span className="text-[#475569] font-medium">Mfg Date</span>
+                    </div>
+                    <span className={`font-bold ${
+                      mfgField?.status === 'DETECTED' 
+                        ? 'text-[#0f172a]' 
+                        : mfgField?.status === 'UNCLEAR'
+                        ? 'text-[#b45309] text-[10px]'
+                        : 'text-[#c2410c] text-[10px]'
+                    }`}>
+                      {mfgField?.status === 'DETECTED'
+                        ? mfgField.value
+                        : mfgField?.status === 'UNCLEAR'
+                        ? 'UNCLEAR'
+                        : 'NOT DETECTED'}
+                    </span>
+                  </div>
+
+                  {/* Consumer Helpline */}
+                  <div className={`p-2 border rounded flex items-center justify-between ${
+                    helplineField?.status === 'DETECTED'
+                      ? 'bg-[#f0fdfc] border-[#ccfbf1]'
+                      : 'bg-[#fff7ed] border-[#fed7aa]'
+                  }`}>
+                    <div className="flex items-center gap-1.5">
+                      {helplineField?.status === 'DETECTED' ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#0d9488] shrink-0" />
+                      ) : (
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#ea580c] shrink-0" />
+                      )}
+                      <span className="text-[#475569] font-medium">Helpline</span>
+                    </div>
+                    <span className={`font-bold ${
+                      helplineField?.status === 'DETECTED' ? 'text-[#0f172a]' : 'text-[#c2410c] text-[10px]'
+                    }`}>
+                      {helplineField?.status === 'DETECTED'
+                        ? helplineField.value
+                        : 'NOT DETECTED'}
+                    </span>
                   </div>
                 </div>
-                <span className="px-2 py-0.5 bg-[#f0fdfc] text-[#334155] border border-[#ccfbf1] font-['JetBrains_Mono'] text-[11px] font-semibold rounded">
-                  EAN: {displayEan}
-                </span>
               </div>
-
-              {/* Bounding Boxes mapped to Rule 6 Plain Language */}
-              <div className="grid grid-cols-2 gap-2 font-['JetBrains_Mono'] text-[11px]">
-                <div className="p-2 bg-[#f0fdfc] border border-[#ccfbf1] rounded flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#0d9488] shrink-0" />
-                    <span className="text-[#475569] font-medium">Price (MRP)</span>
-                  </div>
-                  <span className="font-bold text-[#0f172a]">{displayMrp}</span>
+            ) : (
+              <div className="relative w-full max-w-md bg-white/90 backdrop-blur-xs text-[#0f172a] rounded-xl p-5 shadow-xs border border-[#ccfbf1] text-center z-10 space-y-2.5">
+                <div className="w-10 h-10 rounded-lg bg-[#e0fbf9] border border-[#99f6e4] text-[#0d9488] flex items-center justify-center mx-auto shadow-xs">
+                  <Focus className="w-5 h-5" />
                 </div>
-
-                <div className="p-2 bg-[#f0fdfc] border border-[#ccfbf1] rounded flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#0d9488] shrink-0" />
-                    <span className="text-[#475569] font-medium">Net Quantity &amp; Weight</span>
+                <div>
+                  <div className="font-['Space_Grotesk'] text-sm font-bold text-[#0f172a]">
+                    Packaging Viewfinder Ready
                   </div>
-                  <span className="font-bold text-[#0f172a]">{displayWeight}</span>
+                  <p className="text-xs text-[#64748b] mt-1 max-w-xs mx-auto">
+                    Point camera at retail commodity or use <strong>Direct 2-Shot Audit</strong> to inspect MRP, Net Quantity &amp; Legal Metrology declarations.
+                  </p>
                 </div>
-
-                <div className="p-2 bg-[#f0fdfc] border border-[#ccfbf1] rounded flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#0d9488] shrink-0" />
-                    <span className="text-[#475569] font-medium">Month &amp; Year of Mfg</span>
-                  </div>
-                  <span className="font-bold text-[#0f172a]">{displayMfg}</span>
-                </div>
-
-                <div className="p-2 bg-[#f0fdfc] border border-[#ccfbf1] rounded flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#0d9488] shrink-0" />
-                    <span className="text-[#475569] font-medium">Consumer Helpline</span>
-                  </div>
-                  <span className="font-bold text-[#0f172a]">{displayHelpline}</span>
+                <div className="flex items-center justify-center gap-2 pt-1">
+                  <span className="px-2 py-0.5 bg-[#f0fdfc] border border-[#ccfbf1] text-[#0f766e] font-['JetBrains_Mono'] text-[10px] font-semibold rounded">
+                    Rule 6 Audit Active
+                  </span>
+                  <span className="px-2 py-0.5 bg-[#f0fdfc] border border-[#ccfbf1] text-[#0f766e] font-['JetBrains_Mono'] text-[10px] font-semibold rounded">
+                    Gemini Multimodal AI
+                  </span>
                 </div>
               </div>
-            </div>
+            )
           )}
         </div>
 
