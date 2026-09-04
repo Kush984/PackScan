@@ -20,6 +20,11 @@ Thumbs.db
 # Chrome / Test profiles
 chrome_profile/
 
+# Environment Variables & Secrets
+.env
+*.env
+backend/.env
+
 # Uploads
 backend/uploads/*
 !backend/uploads/.gitkeep

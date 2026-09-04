@@ -29,6 +29,7 @@ const {
   updateProductInLocalDB,
 } = require('./services/openFoodFactsService');
 const { extractTextFromImage, cleanOCRText } = require('./services/ocrService');
+const { isGeminiAvailable, analyzePackagingWithGemini } = require('./services/geminiVisionService');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -251,42 +252,94 @@ app.post(
         productData = await lookupProductByBarcode(barcode);
       }
 
-      // 2. Run real OCR (Tesseract.js + Sharp) concurrently on all captured photos
-      console.log('[OCR] Processing all captured photos concurrently...');
-      const ocrTasks = [
-        req.files?.frontPhoto?.[0]
-          ? extractTextFromImage(req.files.frontPhoto[0].path)
-              .then((r) => ({ key: 'front', angle: 'Front of Pack', r }))
-              .catch((err) => ({ key: 'front', angle: 'Front of Pack', r: { cleanedText: '', confidence: 0, error: err.message } }))
-          : null,
-        req.files?.backPhoto?.[0]
-          ? extractTextFromImage(req.files.backPhoto[0].path)
-              .then((r) => ({ key: 'back', angle: 'Back of Pack', r }))
-              .catch((err) => ({ key: 'back', angle: 'Back of Pack', r: { cleanedText: '', confidence: 0, error: err.message } }))
-          : null,
-        req.files?.sidePhoto?.[0]
-          ? extractTextFromImage(req.files.sidePhoto[0].path)
-              .then((r) => ({ key: 'side', angle: 'Side / Edge of Pack', r }))
-              .catch((err) => ({ key: 'side', angle: 'Side / Edge of Pack', r: { cleanedText: '', confidence: 0, error: err.message } }))
-          : null,
-        req.files?.additionalPhoto?.[0]
-          ? extractTextFromImage(req.files.additionalPhoto[0].path)
-              .then((r) => ({ key: 'additional', angle: 'Additional Photo Angle', r }))
-              .catch((err) => ({ key: 'additional', angle: 'Additional Photo Angle', r: { cleanedText: '', confidence: 0, error: err.message } }))
-          : null,
+      // 2. High-Accuracy Extraction: Try Gemini Vision AI first, fallback to Tesseract OCR
+      let combinedOCR = '';
+      const ocrResults = [];
+      const evidenceSources = {};
+
+      const uploadedImagePaths = [
+        req.files?.frontPhoto?.[0]?.path,
+        req.files?.backPhoto?.[0]?.path,
+        req.files?.sidePhoto?.[0]?.path,
+        req.files?.additionalPhoto?.[0]?.path,
       ].filter(Boolean);
 
-      const ocrOutputs = await Promise.all(ocrTasks);
-      const evidenceSources = {};
-      const ocrResults = [];
-
-      for (const item of ocrOutputs) {
-        evidenceSources[item.key] = item.r.cleanedText;
-        ocrResults.push({ angle: item.angle, text: item.r.cleanedText, confidence: item.r.confidence });
+      let geminiResult = null;
+      if (isGeminiAvailable() && uploadedImagePaths.length > 0) {
+        console.log(`[Multi-Evidence Scan] Attempting High-Accuracy Gemini Vision extraction on ${uploadedImagePaths.length} photo(s)...`);
+        geminiResult = await analyzePackagingWithGemini(uploadedImagePaths, barcode);
       }
 
-      // 3. Combine ALL extracted OCR text from all photos into one text pool
-      const combinedOCR = Object.values(evidenceSources).filter(Boolean).join('\n\n');
+      if (geminiResult) {
+        console.log('[Multi-Evidence Scan] Utilizing Gemini Vision structured extraction.');
+        combinedOCR = [
+          geminiResult.raw_transcribed_text || '',
+          geminiResult.mrp_declaration ? `MRP: ${geminiResult.mrp_declaration}` : '',
+          geminiResult.net_quantity ? `Net Qty: ${geminiResult.net_quantity}` : '',
+          geminiResult.manufacturer_address ? `Manufactured by: ${geminiResult.manufacturer_address}` : '',
+          geminiResult.mfg_date ? `Manufacturing Date: ${geminiResult.mfg_date}` : '',
+          geminiResult.consumer_care ? `Consumer Care: ${geminiResult.consumer_care}` : '',
+          geminiResult.generic_name ? `Generic Name: ${geminiResult.generic_name}` : '',
+          geminiResult.unit_sale_price ? `Unit Sale Price: ${geminiResult.unit_sale_price}` : '',
+          geminiResult.country_of_origin ? `Country of Origin: ${geminiResult.country_of_origin}` : '',
+          geminiResult.ingredients_text ? `INGREDIENTS: ${geminiResult.ingredients_text}` : '',
+        ].filter(Boolean).join('\n');
+
+        ocrResults.push({
+          angle: 'Multi-Angle Packaging Photos (Gemini Vision AI)',
+          text: geminiResult.raw_transcribed_text || combinedOCR,
+          confidence: 98,
+        });
+
+        productData = {
+          product_name: geminiResult.product_name || productData?.product_name || 'Scanned Packaged Commodity',
+          brand: geminiResult.brand || productData?.brand || 'Verified Brand',
+          barcode: barcode || productData?.barcode,
+          categories: productData?.categories || 'Packaged Commodity',
+          image_url: productData?.image_url || `/uploads/${path.basename(uploadedImagePaths[0])}`,
+          ingredients_text: geminiResult.ingredients_text || productData?.ingredients_text || '',
+          nutriments: {
+            ...(productData?.nutriments || {}),
+            ...(geminiResult.nutriments || {}),
+          },
+          dataSource: 'GEMINI_VISION_AI',
+          confidence: 'high',
+          source: 'GEMINI_VISION_AI',
+        };
+      } else {
+        // Fallback to local offline Tesseract.js OCR
+        console.log('[OCR] Processing all captured photos with local Tesseract.js engine...');
+        const ocrTasks = [
+          req.files?.frontPhoto?.[0]
+            ? extractTextFromImage(req.files.frontPhoto[0].path)
+                .then((r) => ({ key: 'front', angle: 'Front of Pack', r }))
+                .catch((err) => ({ key: 'front', angle: 'Front of Pack', r: { cleanedText: '', confidence: 0, error: err.message } }))
+            : null,
+          req.files?.backPhoto?.[0]
+            ? extractTextFromImage(req.files.backPhoto[0].path)
+                .then((r) => ({ key: 'back', angle: 'Back of Pack', r }))
+                .catch((err) => ({ key: 'back', angle: 'Back of Pack', r: { cleanedText: '', confidence: 0, error: err.message } }))
+            : null,
+          req.files?.sidePhoto?.[0]
+            ? extractTextFromImage(req.files.sidePhoto[0].path)
+                .then((r) => ({ key: 'side', angle: 'Side / Edge of Pack', r }))
+                .catch((err) => ({ key: 'side', angle: 'Side / Edge of Pack', r: { cleanedText: '', confidence: 0, error: err.message } }))
+            : null,
+          req.files?.additionalPhoto?.[0]
+            ? extractTextFromImage(req.files.additionalPhoto[0].path)
+                .then((r) => ({ key: 'additional', angle: 'Additional Photo Angle', r }))
+                .catch((err) => ({ key: 'additional', angle: 'Additional Photo Angle', r: { cleanedText: '', confidence: 0, error: err.message } }))
+            : null,
+        ].filter(Boolean);
+
+        const ocrOutputs = await Promise.all(ocrTasks);
+        for (const item of ocrOutputs) {
+          evidenceSources[item.key] = item.r.cleanedText;
+          ocrResults.push({ angle: item.angle, text: item.r.cleanedText, confidence: item.r.confidence });
+        }
+
+        combinedOCR = Object.values(evidenceSources).filter(Boolean).join('\n\n');
+      }
 
       // 4. Run Unified Legal Metrology and Safety Analysis
       const analysis = await runUnifiedAnalysis({
@@ -341,7 +394,32 @@ app.post('/api/scan/image', upload.single('labelImage'), async (req, res) => {
     }
 
     console.log(`[Scan/OCR] ${imagePath}`);
-    const ocrResult = await extractTextFromImage(imagePath);
+    let geminiResult = null;
+    if (isGeminiAvailable()) {
+      console.log('[Scan/Image] Attempting Gemini Vision extraction...');
+      geminiResult = await analyzePackagingWithGemini([imagePath], barcode);
+    }
+
+    let ocrResult = null;
+    let labelTextForAnalysis = '';
+    if (geminiResult) {
+      labelTextForAnalysis = [
+        geminiResult.raw_transcribed_text || '',
+        geminiResult.mrp_declaration ? `MRP: ${geminiResult.mrp_declaration}` : '',
+        geminiResult.net_quantity ? `Net Qty: ${geminiResult.net_quantity}` : '',
+        geminiResult.manufacturer_address ? `Manufactured by: ${geminiResult.manufacturer_address}` : '',
+        geminiResult.mfg_date ? `Manufacturing Date: ${geminiResult.mfg_date}` : '',
+        geminiResult.consumer_care ? `Consumer Care: ${geminiResult.consumer_care}` : '',
+        geminiResult.generic_name ? `Generic Name: ${geminiResult.generic_name}` : '',
+        geminiResult.unit_sale_price ? `Unit Sale Price: ${geminiResult.unit_sale_price}` : '',
+        geminiResult.country_of_origin ? `Country of Origin: ${geminiResult.country_of_origin}` : '',
+        geminiResult.ingredients_text ? `INGREDIENTS: ${geminiResult.ingredients_text}` : '',
+      ].filter(Boolean).join('\n');
+      ocrResult = { cleanedText: labelTextForAnalysis, confidence: 98 };
+    } else {
+      ocrResult = await extractTextFromImage(imagePath);
+      labelTextForAnalysis = ocrResult.cleanedText;
+    }
 
     // Try to match OCR text against catalog to get a better product name
     let productData = null;
@@ -384,20 +462,20 @@ app.post('/api/scan/image', upload.single('labelImage'), async (req, res) => {
         nutriments: {},
         categories: 'Packaged Commodity',
         image_url: `/uploads/${path.basename(imagePath)}`,
-        dataSource: 'ocr',
-        confidence: ocrResult.confidence >= 70 ? 'high' : 'needs_verification',
-        source: 'TESSERACT_OCR',
+        dataSource: geminiResult ? 'GEMINI_VISION_AI' : 'ocr',
+        confidence: geminiResult ? 'high' : (ocrResult.confidence >= 70 ? 'high' : 'needs_verification'),
+        source: geminiResult ? 'GEMINI_VISION_AI' : 'TESSERACT_OCR',
         barcode: barcode,
       };
 
-      // Save verified OCR result to scanned_products if barcode provided
+      // Save verified result to scanned_products if barcode provided
       if (barcode) {
         await saveToLocalDB({ ...productData, barcode });
       }
     }
 
     const analysis = await runUnifiedAnalysis({
-      labelText: ocrResult.cleanedText,
+      labelText: labelTextForAnalysis,
       productData,
       userProfile,
       scanType: 'label_ocr',
