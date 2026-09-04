@@ -121,8 +121,11 @@ export default function Scanner({
   const fileInputRef = useRef(null);
   const barcodeFileInputRef = useRef(null);
 
-  // Keep stepRef in sync
+  const isExtractingBarcodeRef = useRef(false);
+
+  // Keep refs in sync
   useEffect(() => { stepRef.current = step; }, [step]);
+  useEffect(() => { isExtractingBarcodeRef.current = isExtractingBarcode; }, [isExtractingBarcode]);
 
   // Reset step if loading finishes or fails
   useEffect(() => {
@@ -211,15 +214,24 @@ export default function Scanner({
         }
       }
 
-      // Step 1: Barcode scan interval
+      // Step 1: Barcode scan interval (Fast local ZXing + periodic AI auto-read)
       if (stepRef.current === 1) {
         if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
+        let scanTicks = 0;
         scanIntervalRef.current = setInterval(async () => {
-          if (isScanningRef.current || !videoRef.current) return;
+          if (isScanningRef.current || !videoRef.current || isLockedRef.current) return;
           isScanningRef.current = true;
+          scanTicks++;
           try {
             const code = await decodeFrameAsync(videoRef.current);
-            if (code) handleBarcodeFound(code);
+            if (code) {
+              handleBarcodeFound(code);
+              return;
+            }
+            // If local ZXing couldn't read after ~12 frames (~3s) on curved/blurry/shiny packs, auto-trigger AI
+            if (scanTicks % 12 === 0 && !isExtractingBarcodeRef.current && !isLockedRef.current) {
+              extractBarcodeFromVideoViaAI(videoRef.current);
+            }
           } catch (e) {
             console.warn('Frame scan error:', e);
           } finally {
@@ -373,61 +385,83 @@ export default function Scanner({
     }
   };
 
+  const extractBarcodeFromVideoViaAI = async (videoEl) => {
+    if (!videoEl || videoEl.readyState < 2 || isExtractingBarcodeRef.current || isLockedRef.current) return;
+    isExtractingBarcodeRef.current = true;
+    setIsExtractingBarcode(true);
+
+    try {
+      if (!offscreenCanvasRef.current) offscreenCanvasRef.current = document.createElement('canvas');
+      const canvas = offscreenCanvasRef.current;
+      const ctx = canvas.getContext('2d');
+      const vw = videoEl.videoWidth || 1280;
+      const vh = videoEl.videoHeight || 720;
+
+      // Center reticle crop (75% width, 65% height) for maximum barcode resolution & sharpness
+      const cropW = Math.round(vw * 0.75);
+      const cropH = Math.round(vh * 0.65);
+      const cropX = Math.round((vw - cropW) / 2);
+      const cropY = Math.round((vh - cropH) / 2);
+
+      canvas.width = cropW;
+      canvas.height = cropH;
+      ctx.drawImage(videoEl, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+      if (!blob) return;
+
+      const formData = new FormData();
+      formData.append('frame', blob, 'frame.jpg');
+
+      const res = await fetch('/api/scan/extract-barcode', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success && data.barcode && !isLockedRef.current) {
+        handleBarcodeFound(data.barcode);
+      } else if (!data.success) {
+        setCameraError(
+          'Could not read barcode from this angle. Tip: Click "🍬 Happydent Wave" in the 1-Click Demo Bar or enter 8901393019469 manually.'
+        );
+      }
+    } catch (err) {
+      console.warn('AI Barcode extraction error:', err);
+      setCameraError('AI Barcode extraction encountered network latency. Use the 1-Click Demo Bar below.');
+    } finally {
+      setIsExtractingBarcode(false);
+      isExtractingBarcodeRef.current = false;
+    }
+  };
+
   const handleCapturePhoto = async () => {
     if (!videoRef.current) return;
     const videoEl = videoRef.current;
-    if (!offscreenCanvasRef.current) offscreenCanvasRef.current = document.createElement('canvas');
-    const canvas = offscreenCanvasRef.current;
-    const ctx = canvas.getContext('2d');
-    canvas.width = videoEl.videoWidth || 1920;
-    canvas.height = videoEl.videoHeight || 1080;
-    ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
 
     // STEP 1: Barcode Capture Mode (Client decode + AI fallback)
     if (step === 1) {
-      setIsExtractingBarcode(true);
       setCameraError(null);
 
-      // 1. Try immediate client-side decode on the high-res canvas
+      // 1. Try immediate client-side decode on the video element
       try {
         const localCode = await decodeFrameAsync(videoEl);
         if (localCode) {
-          setIsExtractingBarcode(false);
           handleBarcodeFound(localCode);
           return;
         }
       } catch (_) {}
 
       // 2. Invoke AI Barcode Extractor for curved/blurry/colored barcodes
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
-          setIsExtractingBarcode(false);
-          return;
-        }
-        try {
-          const formData = new FormData();
-          formData.append('frame', blob, 'frame.jpg');
-          const res = await fetch('/api/scan/extract-barcode', {
-            method: 'POST',
-            body: formData,
-          });
-          const data = await res.json();
-          if (data.success && data.barcode) {
-            handleBarcodeFound(data.barcode);
-          } else {
-            setCameraError(
-              'Could not auto-read barcode from this angle. Tip: Type "8901393019469" in the Manual EAN box below, or click "Skip to 2-Shot Photos".'
-            );
-          }
-        } catch (err) {
-          console.warn('AI Barcode extraction error:', err);
-          setCameraError('Barcode recognition timeout. Please enter digits manually below or skip to 2-shot photos.');
-        } finally {
-          setIsExtractingBarcode(false);
-        }
-      }, 'image/jpeg', 0.85);
+      await extractBarcodeFromVideoViaAI(videoEl);
       return;
     }
+
+    if (!offscreenCanvasRef.current) offscreenCanvasRef.current = document.createElement('canvas');
+    const canvas = offscreenCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    canvas.width = videoEl.videoWidth || 1920;
+    canvas.height = videoEl.videoHeight || 1080;
+    ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
 
     // STEPS 2-4: Standard Packaging Angle Photo Capture
     canvas.toBlob((blob) => {
@@ -759,6 +793,41 @@ export default function Scanner({
           </div>
         </div>
 
+        {/* 1-Click Quick Demo Bar for Fast Barcode Selection */}
+        {step === 1 && !capturedData.barcode && (
+          <div className="flex items-center justify-between gap-2 px-3 py-1.5 bg-[#f0fdfc] border border-[#ccfbf1] rounded-lg my-1.5 text-xs">
+            <span className="font-['JetBrains_Mono'] text-[10px] font-bold text-[#0d9488] uppercase tracking-wider flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-[#0d9488]" /> 1-Click Demo Barcode:
+            </span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <button
+                type="button"
+                onClick={() => handleBarcodeFound('8901393019469')}
+                className="px-2.5 py-1 bg-white hover:bg-[#e0fbf9] text-[#0f766e] font-semibold rounded border border-[#99f6e4] transition shadow-2xs hover:scale-105 cursor-pointer text-[11px] flex items-center gap-1"
+                title="Happydent Wave (8901393019469)"
+              >
+                🍬 Happydent Wave
+              </button>
+              <button
+                type="button"
+                onClick={() => handleBarcodeFound('8901058852371')}
+                className="px-2.5 py-1 bg-white hover:bg-[#e0fbf9] text-[#0f766e] font-semibold rounded border border-[#99f6e4] transition shadow-2xs hover:scale-105 cursor-pointer text-[11px] flex items-center gap-1"
+                title="Maggi 2-Min (8901058852371)"
+              >
+                🍜 Maggi
+              </button>
+              <button
+                type="button"
+                onClick={() => handleBarcodeFound('8901764012297')}
+                className="px-2.5 py-1 bg-white hover:bg-[#e0fbf9] text-[#0f766e] font-semibold rounded border border-[#99f6e4] transition shadow-2xs hover:scale-105 cursor-pointer text-[11px] flex items-center gap-1"
+                title="Coca-Cola (8901764012297)"
+              >
+                🥤 Coca-Cola
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Viewfinder Stage (Soft Turquoise Tinted Stage) */}
         <div className="relative w-full flex-1 bg-[#f4fcfb] rounded-lg flex items-center justify-center p-6 my-4 overflow-hidden select-none border border-[#ccfbf1] min-h-[290px]">
           {/* Subtle Grid Background */}
@@ -828,18 +897,36 @@ export default function Scanner({
               className="w-full h-full object-cover"
             />
 
+            {/* AI Barcode Extraction Active Overlay */}
+            {isExtractingBarcode && (
+              <div className="absolute inset-0 z-30 bg-black/60 backdrop-blur-xs flex flex-col items-center justify-center text-white pointer-events-none animate-fadeIn">
+                <div className="flex items-center gap-3 bg-[#042f2e]/95 border border-[#47d1cc] px-5 py-3 rounded-xl shadow-[0_0_35px_rgba(71,209,204,0.5)]">
+                  <Loader2 className="w-5 h-5 text-[#47d1cc] animate-spin" />
+                  <div className="text-left">
+                    <div className="font-['Space_Grotesk'] text-sm font-bold text-[#e0fbf9]">
+                      AI Reading Barcode...
+                    </div>
+                    <div className="font-['JetBrains_Mono'] text-[10.5px] text-[#99f6e4]">
+                      Multimodal vision decoding EAN digits
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Barcode Reticle & Laser Sweep (Step 1) */}
             {step === 1 && !capturedData.barcode && (
               <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
-                <div className="w-64 h-36 border-2 border-[#47d1cc]/70 rounded-xl relative shadow-[0_0_20px_rgba(71,209,204,0.3)]">
+                <div className="w-72 h-40 border-2 border-[#47d1cc]/70 rounded-xl relative shadow-[0_0_20px_rgba(71,209,204,0.3)]">
                   <div className="camera-reticle-corner -top-1 -left-1 border-t-2 border-l-2 border-[#47d1cc] rounded-tl" />
                   <div className="camera-reticle-corner -top-1 -right-1 border-t-2 border-r-2 border-[#47d1cc] rounded-tr" />
                   <div className="camera-reticle-corner -bottom-1 -left-1 border-b-2 border-l-2 border-[#47d1cc] rounded-bl" />
                   <div className="camera-reticle-corner -bottom-1 -right-1 border-b-2 border-r-2 border-[#47d1cc] rounded-br" />
                   <div className="absolute inset-x-2 h-0.5 bg-[#47d1cc] shadow-[0_0_12px_#47d1cc] scanner-laser" />
                 </div>
-                <div className="mt-3 text-[11px] font-mono text-[#47d1cc] font-bold bg-black/70 px-3 py-1 rounded-full border border-[#47d1cc]/40">
-                  Align product barcode inside frame
+                <div className="mt-3 text-[11px] font-mono text-[#47d1cc] font-bold bg-black/75 px-3.5 py-1 rounded-full border border-[#47d1cc]/40 flex items-center gap-1.5 shadow-md">
+                  <Sparkles className="w-3 h-3 text-[#47d1cc]" />
+                  <span>Auto-reading... Hold steady or click AI Auto-Read below</span>
                 </div>
               </div>
             )}
@@ -1296,19 +1383,33 @@ export default function Scanner({
                 )}
                 <button
                   type="button"
+                  disabled={isExtractingBarcode}
                   onClick={handleCapturePhoto}
-                  className="px-4 py-2 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#2bc4be]"
+                  className={`px-4 py-2 font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border ${
+                    isExtractingBarcode
+                      ? 'bg-[#ccfbf1] text-[#0f766e] border-[#99f6e4] animate-pulse cursor-wait'
+                      : 'bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] border-[#2bc4be]'
+                  }`}
                 >
-                  <Camera className="w-4 h-4" />
-                  <span>
-                    {step === 1
-                      ? 'Capture Barcode Frame'
-                      : step === 2
-                      ? 'Capture Front Photo (1/2)'
-                      : step === 3
-                      ? 'Capture Back Photo (2/2)'
-                      : 'Capture Side Photo (3/3)'}
-                  </span>
+                  {isExtractingBarcode ? (
+                    <>
+                      <Loader2 className="w-4 h-4 text-[#0f766e] animate-spin" />
+                      <span>Reading Barcode with AI...</span>
+                    </>
+                  ) : (
+                    <>
+                      {step === 1 ? <Sparkles className="w-4 h-4" /> : <Camera className="w-4 h-4" />}
+                      <span>
+                        {step === 1
+                          ? '⚡ AI Auto-Read Barcode'
+                          : step === 2
+                          ? 'Capture Front Photo (1/2)'
+                          : step === 3
+                          ? 'Capture Back Photo (2/2)'
+                          : 'Capture Side Photo (3/3)'}
+                      </span>
+                    </>
+                  )}
                 </button>
                 <button
                   type="button"

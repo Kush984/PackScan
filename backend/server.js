@@ -220,50 +220,70 @@ app.post('/api/scan/extract-barcode', upload.single('frame'), async (req, res) =
 
     if (apiKey) {
       const optimized = await sharp(imageBuffer)
-        .resize({ width: 600, height: 600, fit: 'inside' })
-        .jpeg({ quality: 75 })
+        .resize({ width: 700, height: 700, fit: 'inside' })
+        .jpeg({ quality: 80 })
         .toBuffer();
 
-      const aiRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
+      const candidateModels = [
+        'gemini-flash-latest',
+        'gemini-3.6-flash',
+        'gemini-3.1-flash-lite-preview',
+      ];
+
+      for (const model of candidateModels) {
+        try {
+          console.log(`[AI Barcode Extractor] Attempting detection with ${model}...`);
+          const aiRes = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [
                   {
-                    inlineData: {
-                      mimeType: 'image/jpeg',
-                      data: optimized.toString('base64'),
-                    },
-                  },
-                  {
-                    text: 'Look closely at the product barcode in this photo. Read the printed barcode number (EAN-13, EAN-8, or UPC). Return ONLY the clean numeric digits (e.g. 8901393019469). If no barcode is visible or readable, return NONE.',
+                    parts: [
+                      {
+                        inlineData: {
+                          mimeType: 'image/jpeg',
+                          data: optimized.toString('base64'),
+                        },
+                      },
+                      {
+                        text: 'Look closely at the product packaging in this photo, especially any barcode stripes and the printed numbers directly under or beside them. Read the barcode digits (EAN-13, EAN-8, or UPC). Return ONLY the clean numeric digits (e.g. 8901393019469). If no barcode digits are visible, return NONE.',
+                      },
+                    ],
                   },
                 ],
-              },
-            ],
-          }),
-          signal: AbortSignal.timeout(10000),
-        }
-      );
+              }),
+              signal: AbortSignal.timeout(9000),
+            }
+          );
 
-      if (aiRes.ok) {
-        const data = await aiRes.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-        const match = text.match(/\b\d{8,14}\b/);
-        if (match) {
-          console.log(`[AI Barcode Extractor] Successfully detected barcode: ${match[0]}`);
-          return res.json({ success: true, barcode: match[0] });
+          if (aiRes.ok) {
+            const data = await aiRes.json();
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+            const match = text.match(/\b\d{8,14}\b/);
+            if (match) {
+              console.log(`[AI Barcode Extractor] Successfully detected barcode via ${model}: ${match[0]}`);
+              // Clean up uploaded temp file
+              try { fs.unlinkSync(req.file.path); } catch (_) {}
+              return res.json({ success: true, barcode: match[0], model });
+            }
+          } else {
+            console.warn(`[AI Barcode Extractor] ${model} returned HTTP ${aiRes.status}`);
+          }
+        } catch (mErr) {
+          console.warn(`[AI Barcode Extractor] ${model} failed/timeout:`, mErr.message);
         }
       }
     }
 
+    // Clean up uploaded temp file
+    try { fs.unlinkSync(req.file.path); } catch (_) {}
     res.json({ success: false, barcode: null, message: 'No barcode recognized in this frame' });
   } catch (err) {
     console.warn('[Extract Barcode Error]:', err.message);
+    try { if (req.file) fs.unlinkSync(req.file.path); } catch (_) {}
     res.status(500).json({ error: err.message });
   }
 });

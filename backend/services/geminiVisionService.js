@@ -130,10 +130,11 @@ Return ONLY a valid JSON object matching this schema:
       },
     ];
 
-    // Priority: Fast 3.1 flash lite models first with 16s timeout
+    // Priority: Fast models first with 16s timeout
     const candidateModels = [
+      'gemini-flash-latest',
+      'gemini-3.6-flash',
       'gemini-3.1-flash-lite-preview',
-      'gemini-3-flash-preview',
     ];
     let candidateText = null;
 
