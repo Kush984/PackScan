@@ -2,6 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-app: #0b1120;
+  --bg-card: #111c33;
+  --bg-card-hover: #152340;
+  --bg-card-subtle: #0e172a;
+  --border-card: #1e2f52;
+  --border-card-subtle: #17243e;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-teal: #0ea5e9;
+  --accent-cyan: #06b6d4;
+}
+
+body.theme-steel-ice {
+  --bg-app: #dce7f3;
+  --bg-card: #e8f1fa;
+  --bg-card-hover: #dfeaf5;
+  --bg-card-subtle: #d6e3f2;
+  --border-card: #b4c9e0;
+  --border-card-subtle: #c2d4e7;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --accent-teal: #0e7490;
+  --accent-cyan: #0284c7;
+}
+
 @layer base {
   html, body {
     margin: 0;
@@ -9,14 +37,37 @@
   }
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: #f1f5f9;
-    color: #1e293b;
+    background-color: var(--bg-app);
+    color: var(--text-secondary);
     overflow-x: hidden;
     overscroll-behavior: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
   code, pre {
     font-family: 'JetBrains Mono', ui-monospace, monospace;
   }
+}
+
+/* Material Symbols Safety Fallback */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'liga';
+  user-select: none;
+  vertical-align: middle;
 }
 
 /* Glassmorphism Surface Utilities */

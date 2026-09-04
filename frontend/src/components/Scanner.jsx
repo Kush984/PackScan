@@ -17,7 +17,9 @@ import {
   Database,
   ShieldCheck,
   Check,
-  Printer
+  Printer,
+  QrCode,
+  Focus
 } from 'lucide-react';
 import {
   MultiFormatReader,
@@ -495,44 +497,44 @@ export default function Scanner({
       {/* ========================================================================= */}
       {/* Left: Precision Metrology Viewfinder (col-span-8) */}
       {/* ========================================================================= */}
-      <div className="lg:col-span-8 bg-white rounded-xl p-5 sm:p-6 border border-[#cbd5e1] shadow-xs flex flex-col justify-between relative overflow-hidden min-h-[440px]">
+      <div className="lg:col-span-8 bg-[#111c33] rounded-xl p-5 sm:p-6 border border-[#1e2f52] shadow-sm flex flex-col justify-between relative overflow-hidden min-h-[440px]">
         {/* Header inside panel */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#e2e8f0]">
+        <div className="flex items-center justify-between pb-3 border-b border-[#1e2f52]">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#0e7490]"></span>
-            <span className="font-['Space_Grotesk'] text-[13px] text-[#0f172a] font-bold tracking-wider uppercase">
+            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+            <span className="font-['Space_Grotesk'] text-[13px] text-slate-100 font-bold tracking-wider uppercase">
               Metrology Viewfinder // Rule 9 Optical Micrometer
             </span>
           </div>
-          <div className="flex items-center gap-2 text-[#64748b] font-['JetBrains_Mono'] text-[11px]">
+          <div className="flex items-center gap-2 text-slate-400 font-['JetBrains_Mono'] text-[11px]">
             <span>CALIBRATION: 0.05MM / PX</span>
             <span>•</span>
-            <span className="text-[#0e7490] font-semibold">
+            <span className="text-cyan-400 font-semibold">
               {isCameraActive ? 'LIVE MICROMETER' : 'AUTO-FOCUS LOCK'}
             </span>
           </div>
         </div>
 
-        {/* Viewfinder Stage (Light calm steel stage) */}
-        <div className="relative w-full flex-1 bg-[#f8fafc] rounded-lg flex items-center justify-center p-6 my-4 overflow-hidden select-none border border-[#cbd5e1] min-h-[290px]">
+        {/* Viewfinder Stage (Dark steel stage) */}
+        <div className="relative w-full flex-1 bg-[#0a0f1d] rounded-lg flex items-center justify-center p-6 my-4 overflow-hidden select-none border border-[#1e2f52] min-h-[290px]">
           {/* Steel Grid Background */}
           <svg className="absolute inset-0 w-full h-full opacity-30 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern height="36" id="grid-light" patternUnits="userSpaceOnUse" width="36">
-                <path className="text-[#94a3b8]" d="M 36 0 L 0 0 0 36" fill="none" stroke="currentColor" strokeWidth="0.5"></path>
+                <path className="text-[#1e2f52]" d="M 36 0 L 0 0 0 36" fill="none" stroke="currentColor" strokeWidth="0.5"></path>
               </pattern>
             </defs>
             <rect fill="url(#grid-light)" height="100%" width="100%"></rect>
           </svg>
 
           {/* Optical Reticle Center Line */}
-          <div className="absolute inset-x-0 h-0.5 bg-[#0e7490]/40 top-1/3 pointer-events-none"></div>
+          <div className="absolute inset-x-0 h-0.5 bg-cyan-500/40 top-1/3 pointer-events-none"></div>
 
           {/* Target Corner Markers */}
-          <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-[#0e7490] z-20"></div>
-          <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-[#0e7490] z-20"></div>
-          <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-[#0e7490] z-20"></div>
-          <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-[#0e7490] z-20"></div>
+          <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-cyan-400 z-20"></div>
+          <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-cyan-400 z-20"></div>
+          <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-cyan-400 z-20"></div>
+          <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-cyan-400 z-20"></div>
 
           {/* A. Camera Active Live Feed */}
           {isCameraActive && (
@@ -626,13 +628,13 @@ export default function Scanner({
               </div>
 
               {/* Quality verification bottom bar */}
-              <div className="p-3 bg-white border-t border-[#cbd5e1] flex items-center justify-between">
+              <div className="p-3 bg-[#0e172a] border-t border-[#1e2f52] flex items-center justify-between">
                 <div className="text-left">
-                  <div className="text-xs font-bold text-[#0f172a] flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[16px] text-[#0e7490]">verified</span>
+                  <div className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-cyan-400" />
                     <span>Quality Check: Is printed text sharp and legible?</span>
                   </div>
-                  <div className="text-[11px] text-[#64748b]">
+                  <div className="text-[11px] text-slate-400">
                     Tap Retake if blurry or dark.
                   </div>
                 </div>
@@ -640,14 +642,14 @@ export default function Scanner({
                   <button
                     type="button"
                     onClick={handleRetake}
-                    className="px-3 py-1.5 bg-[#f8fafc] hover:bg-[#f1f5f9] text-[#1e293b] font-bold rounded-lg text-xs border border-[#cbd5e1] transition cursor-pointer"
+                    className="px-3 py-1.5 bg-[#1e293b] hover:bg-[#334155] text-slate-200 font-bold rounded-lg text-xs border border-[#334155] transition cursor-pointer"
                   >
                     Retake
                   </button>
                   <button
                     type="button"
                     onClick={handleConfirmPhoto}
-                    className="px-4 py-1.5 bg-[#0e7490] hover:bg-[#155e75] text-white font-bold rounded-lg text-xs transition flex items-center gap-1 shadow-xs cursor-pointer"
+                    className="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-lg text-xs transition flex items-center gap-1 shadow-xs cursor-pointer"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Confirm &amp; Proceed</span>
@@ -659,19 +661,19 @@ export default function Scanner({
 
           {/* C. Barcode Decision Modal Prompt */}
           {lockedPromptOpen && (
-            <div className="absolute inset-0 z-30 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-              <div className="bg-white rounded-xl p-5 border border-[#cbd5e1] max-w-sm w-full shadow-lg text-center space-y-3">
-                <div className="w-11 h-11 rounded-lg bg-[#f0fdfa] border border-[#ccfbf1] text-[#0e7490] flex items-center justify-center mx-auto">
-                  <span className="material-symbols-outlined text-[24px]">qr_code_scanner</span>
+            <div className="absolute inset-0 z-30 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
+              <div className="bg-[#111c33] rounded-xl p-5 border border-[#1e2f52] max-w-sm w-full shadow-2xl text-center space-y-3">
+                <div className="w-11 h-11 rounded-lg bg-cyan-950/60 border border-cyan-800/60 text-cyan-400 flex items-center justify-center mx-auto">
+                  <QrCode className="w-6 h-6" />
                 </div>
                 <div>
-                  <div className="font-['JetBrains_Mono'] text-[10px] font-bold text-[#0e7490] uppercase tracking-wider">
+                  <div className="font-['JetBrains_Mono'] text-[10px] font-bold text-cyan-400 uppercase tracking-wider">
                     Barcode Recognized
                   </div>
-                  <h3 className="font-['Space_Grotesk'] text-lg font-bold text-[#0f172a] mt-0.5">
+                  <h3 className="font-['Space_Grotesk'] text-lg font-bold text-slate-100 mt-0.5">
                     {capturedData.barcode}
                   </h3>
-                  <p className="text-xs text-[#64748b] mt-1">
+                  <p className="text-xs text-slate-400 mt-1">
                     Select audit mode for this packaged commodity:
                   </p>
                 </div>
@@ -680,7 +682,7 @@ export default function Scanner({
                   <button
                     type="button"
                     onClick={handleDirectDatabaseAudit}
-                    className="w-full py-2.5 px-3 bg-[#0e7490] hover:bg-[#155e75] text-white font-['Space_Grotesk'] font-bold rounded-lg text-xs transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                    className="w-full py-2.5 px-3 bg-cyan-600 hover:bg-cyan-700 text-white font-['Space_Grotesk'] font-bold rounded-lg text-xs transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                   >
                     <Database className="w-3.5 h-3.5" />
                     <span>Instant Database Audit (&lt;10ms)</span>
@@ -688,9 +690,9 @@ export default function Scanner({
                   <button
                     type="button"
                     onClick={handleProceedToPhotos}
-                    className="w-full py-2 px-3 bg-[#f8fafc] hover:bg-[#f1f5f9] text-[#1e293b] font-['Space_Grotesk'] font-semibold rounded-lg text-xs border border-[#cbd5e1] transition flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2 px-3 bg-[#0e172a] hover:bg-[#1a2744] text-slate-200 font-['Space_Grotesk'] font-semibold rounded-lg text-xs border border-[#1e2f52] transition flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <Camera className="w-3.5 h-3.5 text-[#0e7490]" />
+                    <Camera className="w-3.5 h-3.5 text-cyan-400" />
                     <span>Continue to Packaging Photos</span>
                   </button>
                 </div>
@@ -700,16 +702,16 @@ export default function Scanner({
 
           {/* D. Processing State */}
           {(step === 5 || isLoading) && (
-            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 bg-white/95 backdrop-blur-xs text-center space-y-3">
+            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 bg-[#0e172a]/95 backdrop-blur-xs text-center space-y-3">
               <div className="relative w-14 h-14 flex items-center justify-center">
-                <Loader2 className="w-12 h-12 text-[#0e7490] animate-spin absolute" />
-                <ShieldCheck className="w-5 h-5 text-[#0e7490]" />
+                <Loader2 className="w-12 h-12 text-cyan-400 animate-spin absolute" />
+                <ShieldCheck className="w-5 h-5 text-cyan-400" />
               </div>
               <div>
-                <div className="font-['Space_Grotesk'] font-bold text-[15px] text-[#0f172a]">
+                <div className="font-['Space_Grotesk'] font-bold text-[15px] text-slate-100">
                   Cross-Confirming Evidence with Database
                 </div>
-                <p className="font-['JetBrains_Mono'] text-[11.5px] text-[#64748b] mt-1 max-w-md mx-auto">
+                <p className="font-['JetBrains_Mono'] text-[11.5px] text-slate-400 mt-1 max-w-md mx-auto">
                   Running Rule 6 statutory checks, optical font measurement &amp; allergen cross-match...
                 </p>
               </div>
@@ -718,61 +720,53 @@ export default function Scanner({
 
           {/* E. Scanned Label Card (Idle State / Scanned Result Preview) */}
           {!isCameraActive && !currentPreviewUrl && !lockedPromptOpen && !isLoading && step !== 5 && (
-            <div className="relative w-full max-w-lg bg-white text-[#0f172a] rounded-lg p-4 shadow-sm border border-[#cbd5e1] z-10">
-              <div className="flex items-start justify-between border-b border-[#e2e8f0] pb-2 mb-2">
+            <div className="relative w-full max-w-lg bg-[#0e172a] text-slate-100 rounded-lg p-4 shadow-sm border border-[#1e2f52] z-10">
+              <div className="flex items-start justify-between border-b border-[#1e2f52] pb-2 mb-2">
                 <div>
-                  <span className="px-2 py-0.5 bg-[#f0fdfa] border border-[#ccfbf1] text-[#0e7490] font-['JetBrains_Mono'] text-[10px] font-bold rounded uppercase">
+                  <span className="px-2 py-0.5 bg-cyan-950/60 border border-cyan-800/60 text-cyan-400 font-['JetBrains_Mono'] text-[10px] font-bold rounded uppercase">
                     PREPACKAGED RETAIL UNIT
                   </span>
-                  <div className="font-['Space_Grotesk'] text-[15px] font-bold text-[#0f172a] mt-1">
+                  <div className="font-['Space_Grotesk'] text-[15px] font-bold text-slate-100 mt-1">
                     {displayName}
                   </div>
                 </div>
-                <span className="px-2 py-0.5 bg-[#f8fafc] text-[#475569] border border-[#e2e8f0] font-['JetBrains_Mono'] text-[11px] font-semibold rounded">
+                <span className="px-2 py-0.5 bg-[#152340] text-slate-300 border border-[#1e2f52] font-['JetBrains_Mono'] text-[11px] font-semibold rounded">
                   EAN: {displayEan}
                 </span>
               </div>
 
               {/* Bounding Boxes mapped to Rule 6 Plain Language */}
               <div className="grid grid-cols-2 gap-2 font-['JetBrains_Mono'] text-[11px]">
-                <div className="p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded flex items-center justify-between">
+                <div className="p-2 bg-[#152340] border border-[#1e2f52] rounded flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[15px] text-[#0e7490]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                      check_circle
-                    </span>
-                    <span className="text-[#334155] font-medium">Price (MRP)</span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span className="text-slate-300 font-medium">Price (MRP)</span>
                   </div>
-                  <span className="font-bold text-[#0f172a]">{displayMrp}</span>
+                  <span className="font-bold text-slate-100">{displayMrp}</span>
                 </div>
 
-                <div className="p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded flex items-center justify-between">
+                <div className="p-2 bg-[#152340] border border-[#1e2f52] rounded flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[15px] text-[#0e7490]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                      check_circle
-                    </span>
-                    <span className="text-[#334155] font-medium">Net Quantity &amp; Weight</span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span className="text-slate-300 font-medium">Net Quantity &amp; Weight</span>
                   </div>
-                  <span className="font-bold text-[#0f172a]">{displayWeight}</span>
+                  <span className="font-bold text-slate-100">{displayWeight}</span>
                 </div>
 
-                <div className="p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded flex items-center justify-between">
+                <div className="p-2 bg-[#152340] border border-[#1e2f52] rounded flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[15px] text-[#0e7490]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                      check_circle
-                    </span>
-                    <span className="text-[#334155] font-medium">Month &amp; Year of Mfg</span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span className="text-slate-300 font-medium">Month &amp; Year of Mfg</span>
                   </div>
-                  <span className="font-bold text-[#0f172a]">{displayMfg}</span>
+                  <span className="font-bold text-slate-100">{displayMfg}</span>
                 </div>
 
-                <div className="p-2 bg-[#f8fafc] border border-[#e2e8f0] rounded flex items-center justify-between">
+                <div className="p-2 bg-[#152340] border border-[#1e2f52] rounded flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[15px] text-[#0e7490]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                      check_circle
-                    </span>
-                    <span className="text-[#334155] font-medium">Consumer Helpline</span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span className="text-slate-300 font-medium">Consumer Helpline</span>
                   </div>
-                  <span className="font-bold text-[#0f172a]">{displayHelpline}</span>
+                  <span className="font-bold text-slate-100">{displayHelpline}</span>
                 </div>
               </div>
             </div>
@@ -781,8 +775,8 @@ export default function Scanner({
 
         {/* Plain language guidance & Action Footer */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <div className="flex items-center gap-1.5 text-[#475569] font-['JetBrains_Mono'] text-[11.5px] font-medium">
-            <span className="material-symbols-outlined text-[17px] text-[#0e7490]">center_focus_strong</span>
+          <div className="flex items-center gap-1.5 text-slate-400 font-['JetBrains_Mono'] text-[11.5px] font-medium">
+            <Focus className="w-4 h-4 text-cyan-400" />
             <span>Point your camera at the barcode • Hold steady</span>
           </div>
 
@@ -792,15 +786,15 @@ export default function Scanner({
                 <button
                   type="button"
                   onClick={handleCapturePhoto}
-                  className="px-4 py-2 bg-[#0e7490] hover:bg-[#155e75] text-white font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
-                  <span className="material-symbols-outlined text-[18px]">photo_camera</span>
+                  <Camera className="w-4 h-4" />
                   <span>{step === 1 ? 'Capture Frame' : 'Capture Photo & Check Rules'}</span>
                 </button>
                 <button
                   type="button"
                   onClick={stopCamera}
-                  className="px-4 py-2 bg-[#f8fafc] hover:bg-rose-50 text-rose-600 border border-rose-200 font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="px-4 py-2 bg-[#1e293b] hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   <CameraOff className="w-4 h-4" />
                   <span>Stop Scanner</span>
@@ -811,17 +805,17 @@ export default function Scanner({
                 <button
                   type="button"
                   onClick={() => barcodeFileInputRef.current?.click()}
-                  className="px-4 py-2 bg-[#f8fafc] hover:bg-[#f1f5f9] text-[#1e293b] border border-[#cbd5e1] font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="px-4 py-2 bg-[#0e172a] hover:bg-[#1a2744] text-slate-200 border border-[#1e2f52] font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
-                  <span className="material-symbols-outlined text-[18px] text-[#64748b]">upload_file</span>
+                  <Upload className="w-4 h-4 text-slate-400" />
                   <span>Upload Label File</span>
                 </button>
                 <button
                   type="button"
                   onClick={startCamera}
-                  className="px-4 py-2 bg-[#0e7490] hover:bg-[#155e75] text-white font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
-                  <span className="material-symbols-outlined text-[18px]">photo_camera_back</span>
+                  <Camera className="w-4 h-4" />
                   <span>Start Live Scanner</span>
                 </button>
               </>
@@ -831,8 +825,8 @@ export default function Scanner({
 
         {/* Optional Manual Barcode Input bar at bottom */}
         {!isCameraActive && (
-          <form onSubmit={handleManualBarcodeSubmit} className="mt-3 pt-3 border-t border-[#e2e8f0] flex items-center gap-2">
-            <span className="font-['JetBrains_Mono'] text-[10.5px] font-bold text-[#64748b] uppercase tracking-wider shrink-0">
+          <form onSubmit={handleManualBarcodeSubmit} className="mt-3 pt-3 border-t border-[#1e2f52] flex items-center gap-2">
+            <span className="font-['JetBrains_Mono'] text-[10.5px] font-bold text-slate-400 uppercase tracking-wider shrink-0">
               Manual EAN:
             </span>
             <input
@@ -840,12 +834,12 @@ export default function Scanner({
               value={manualBarcode}
               onChange={(e) => setManualBarcode(e.target.value)}
               placeholder="Or enter barcode (e.g. 8901058852371)"
-              className="bg-[#f8fafc] border border-[#cbd5e1] rounded-md px-3 py-1.5 text-xs text-[#0f172a] font-['JetBrains_Mono'] flex-1 focus:outline-none focus:border-[#0e7490]"
+              className="bg-[#0e172a] border border-[#1e2f52] rounded-md px-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 font-['JetBrains_Mono'] flex-1 focus:outline-none focus:border-cyan-500"
             />
             <button
               type="submit"
               disabled={!manualBarcode.trim()}
-              className="px-3 py-1.5 bg-[#0e7490] hover:bg-[#155e75] text-white font-['Space_Grotesk'] font-bold rounded-md text-xs disabled:opacity-40 cursor-pointer transition shadow-xs"
+              className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white font-['Space_Grotesk'] font-bold rounded-md text-xs disabled:opacity-40 cursor-pointer transition shadow-xs"
             >
               Verify
             </button>
@@ -856,10 +850,10 @@ export default function Scanner({
       {/* ========================================================================= */}
       {/* Right: Rule 6 Checklist (8 Plain-Language Declarations) (col-span-4) */}
       {/* ========================================================================= */}
-      <div className="lg:col-span-4 bg-white rounded-xl p-5 sm:p-6 border border-[#cbd5e1] shadow-xs flex flex-col justify-between space-y-4">
+      <div className="lg:col-span-4 bg-[#111c33] rounded-xl p-5 sm:p-6 border border-[#1e2f52] shadow-sm flex flex-col justify-between space-y-4">
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="font-['Space_Grotesk'] text-[16px] text-[#0f172a] font-bold">
+            <span className="font-['Space_Grotesk'] text-[16px] text-slate-100 font-bold">
               Rule 6 Checklist (8 Declarations)
             </span>
             <motion.span
@@ -868,21 +862,19 @@ export default function Scanner({
               animate={{ scale: 1, opacity: 1 }}
               className={`px-2.5 py-0.5 font-['JetBrains_Mono'] text-[11px] font-bold rounded flex items-center gap-1 border ${
                 isViolationState
-                  ? 'bg-[#fff7ed] text-[#c2410c] border-[#fed7aa]'
-                  : 'bg-[#f0fdfa] text-[#0f766e] border-[#99f6e4]'
+                  ? 'bg-orange-950/60 text-orange-300 border-orange-800/60'
+                  : 'bg-cyan-950/60 text-cyan-300 border-cyan-800/60'
               }`}
             >
-              <span
-                className={`material-symbols-outlined text-[14px] ${
-                  isViolationState ? 'text-[#ea580c]' : 'text-[#0e7490]'
-                }`}
-              >
-                {isViolationState ? 'warning' : 'check_circle'}
-              </span>
+              {isViolationState ? (
+                <AlertTriangle className="w-3.5 h-3.5 text-orange-400" />
+              ) : (
+                <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
+              )}
               <span>{score}/8 {isViolationState && score < 8 ? 'VERIFIED' : 'PASSED'}</span>
             </motion.span>
           </div>
-          <p className="text-[13px] text-[#64748b] font-normal">
+          <p className="text-[13px] text-slate-400 font-normal">
             Mandatory label standards verification under Legal Metrology Rules, 2011.
           </p>
 
@@ -901,18 +893,18 @@ export default function Scanner({
                   transition={{ delay: index * 0.04, duration: 0.2 }}
                   className={`flex items-center justify-between p-2 rounded border ${
                     isMissing
-                      ? 'bg-[#fff7ed] border-[#fed7aa]'
-                      : 'bg-[#f8fafc] border-[#e2e8f0]'
+                      ? 'bg-orange-950/30 border-orange-800/50'
+                      : 'bg-[#0e172a] border-[#1e2f52]'
                   }`}
                 >
-                  <span className="font-['JetBrains_Mono'] text-[11.5px] text-[#1e293b] font-medium">
+                  <span className={`font-['JetBrains_Mono'] text-[11.5px] font-medium ${isMissing ? 'text-orange-200' : 'text-slate-300'}`}>
                     {item.num}. {item.title}
                   </span>
                   <span
                     className={`px-1.5 py-0.5 font-['JetBrains_Mono'] text-[10px] font-bold rounded border ${
                       isMissing
-                        ? 'bg-[#fee2e2] text-[#b91c1c] border-[#fca5a5]'
-                        : 'bg-[#f0fdfa] text-[#0f766e] border-[#ccfbf1]'
+                        ? 'bg-red-950/60 text-red-300 border-red-800/60'
+                        : 'bg-cyan-950/60 text-cyan-300 border-cyan-800/60'
                     }`}
                   >
                     {item.rule} {isMissing ? '✗' : '✓'}
@@ -924,22 +916,22 @@ export default function Scanner({
         </div>
 
         {/* Section 36 Action Notice Panel */}
-        <div className="p-3.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-lg space-y-2">
+        <div className="p-3.5 bg-[#0e172a] border border-[#1e2f52] rounded-lg space-y-2">
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[#0e7490] text-[18px]">verified_user</span>
-            <span className="font-['Space_Grotesk'] text-[12px] font-bold text-[#0f172a] uppercase">
+            <ShieldCheck className="w-4 h-4 text-cyan-400" />
+            <span className="font-['Space_Grotesk'] text-[12px] font-bold text-slate-100 uppercase">
               Instant Audit Dossier
             </span>
           </div>
-          <p className="text-[12px] text-[#64748b] leading-relaxed">
+          <p className="text-[12px] text-slate-400 leading-relaxed">
             Section 36 penalty exporter auto-generates statutory notices for state enforcement when discrepancies exceed legal limits.
           </p>
           <button
             type="button"
             onClick={onOpenNoticeModal}
-            className="w-full mt-2 py-2 px-3 bg-[#0e7490] hover:bg-[#155e75] text-white font-['Space_Grotesk'] text-[12px] font-bold rounded transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+            className="w-full mt-2 py-2 px-3 bg-cyan-600 hover:bg-cyan-700 text-white font-['Space_Grotesk'] text-[12px] font-bold rounded transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[16px]">print</span>
+            <Printer className="w-4 h-4" />
             <span>GENERATE SEC 36 AUDIT REPORT</span>
           </button>
         </div>
