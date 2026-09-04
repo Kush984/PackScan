@@ -19,3 +19,7 @@ Thumbs.db
 
 # Chrome / Test profiles
 chrome_profile/
+
+# Uploads
+backend/uploads/*
+!backend/uploads/.gitkeep

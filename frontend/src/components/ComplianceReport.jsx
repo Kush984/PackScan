@@ -54,6 +54,14 @@ export default function ComplianceReport({
     fontCompliance = null,
   } = report || {};
 
+  const detectedCount = fields.filter((f, idx) => localOverrides[idx] !== undefined || f.status === 'DETECTED').length;
+  const unclearCount = fields.filter((f, idx) => localOverrides[idx] === undefined && f.status === 'UNCLEAR').length;
+  const missingCount = fields.filter((f, idx) => localOverrides[idx] === undefined && f.status === 'MISSING').length;
+
+  const displayScore = detectedCount;
+  const displayPercentage = Math.round((displayScore / totalFields) * 100);
+  const isFullyCompliant = displayScore === totalFields;
+
   const getStatusBadge = () => {
     switch (overallStatus) {
       case 'COMPLIANT':
@@ -170,14 +178,6 @@ export default function ComplianceReport({
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   }, [productName, product, barcode, isFullyCompliant, overallStatus, displayScore, totalFields, displayPercentage, fields, localOverrides, violations, fontCompliance]);
-
-  const detectedCount = fields.filter((f, idx) => localOverrides[idx] !== undefined || f.status === 'DETECTED').length;
-  const unclearCount = fields.filter((f, idx) => localOverrides[idx] === undefined && f.status === 'UNCLEAR').length;
-  const missingCount = fields.filter((f, idx) => localOverrides[idx] === undefined && f.status === 'MISSING').length;
-
-  const displayScore = detectedCount;
-  const displayPercentage = Math.round((displayScore / totalFields) * 100);
-  const isFullyCompliant = displayScore === totalFields;
 
   return (
     <div className="bg-slate-900/90 border-2 border-emerald-500/30 rounded-2xl p-4 sm:p-6 shadow-2xl relative overflow-hidden backdrop-blur-md">
