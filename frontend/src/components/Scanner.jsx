@@ -70,6 +70,7 @@ function createZXingReader() {
 export default function Scanner({
   onCompleteMultiStepScan,
   onScanDirectBarcode,
+  onScanImage,
   isLoading,
   scanResult,
   onOpenNoticeModal,
@@ -140,6 +141,16 @@ export default function Scanner({
     };
   }, []);
 
+  // Ensure video element receives stream and plays when camera becomes active
+  useEffect(() => {
+    if (isCameraActive && videoRef.current && streamRef.current) {
+      if (videoRef.current.srcObject !== streamRef.current) {
+        videoRef.current.srcObject = streamRef.current;
+      }
+      videoRef.current.play().catch((e) => console.warn('Video play caught in effect:', e));
+    }
+  }, [isCameraActive]);
+
   const stopCamera = () => {
     if (scanIntervalRef.current) {
       clearInterval(scanIntervalRef.current);
@@ -150,7 +161,9 @@ export default function Scanner({
       qualityIntervalRef.current = null;
     }
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
+      try {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      } catch (_) {}
       streamRef.current = null;
     }
     if (videoRef.current) {
@@ -161,44 +174,68 @@ export default function Scanner({
 
   const startCamera = async () => {
     stopCamera();
+    setCameraError(null);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'environment',
-          width: { ideal: 3840, min: 1280 },
-          height: { ideal: 2160, min: 720 },
-        }
-      });
-      setCameraError(null);
+      let stream = null;
+      // Resilient camera request: attempt high-res environment mode first, then fall back to standard video
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1920, min: 640 },
+            height: { ideal: 1080, min: 480 },
+          },
+        });
+      } catch (firstErr) {
+        console.warn('High-res camera constraints unsupported, falling back to basic video:', firstErr);
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      }
+
+      streamRef.current = stream;
+      setIsCameraActive(true);
+      isLockedRef.current = false;
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
-        streamRef.current = stream;
-        setIsCameraActive(true);
-        isLockedRef.current = false;
-
-        // Step 1: Barcode scan interval
-        if (stepRef.current === 1) {
-          scanIntervalRef.current = setInterval(async () => {
-            if (isScanningRef.current) return;
-            isScanningRef.current = true;
-            try {
-              const code = await decodeFrameAsync(videoRef.current);
-              if (code) handleBarcodeFound(code);
-            } finally {
-              isScanningRef.current = false;
-            }
-          }, 250);
-        } else {
-          // Steps 2, 3, 4: Real-time sharpness & lighting quality analyzer
-          qualityIntervalRef.current = setInterval(() => {
-            evaluateFrameQuality(videoRef.current);
-          }, 350);
+        try {
+          await videoRef.current.play();
+        } catch (playErr) {
+          console.warn('Direct play error (will retry via effect):', playErr);
         }
       }
+
+      // Step 1: Barcode scan interval
+      if (stepRef.current === 1) {
+        if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
+        scanIntervalRef.current = setInterval(async () => {
+          if (isScanningRef.current || !videoRef.current) return;
+          isScanningRef.current = true;
+          try {
+            const code = await decodeFrameAsync(videoRef.current);
+            if (code) handleBarcodeFound(code);
+          } catch (e) {
+            console.warn('Frame scan error:', e);
+          } finally {
+            isScanningRef.current = false;
+          }
+        }, 250);
+      } else {
+        // Steps 2, 3, 4: Real-time sharpness & lighting quality analyzer
+        if (qualityIntervalRef.current) clearInterval(qualityIntervalRef.current);
+        qualityIntervalRef.current = setInterval(() => {
+          if (videoRef.current) evaluateFrameQuality(videoRef.current);
+        }, 350);
+      }
     } catch (err) {
-      console.error('Camera error:', err);
-      setCameraError('Could not access camera. Please check permissions or upload photos directly.');
+      console.error('Camera access error:', err);
+      setIsCameraActive(false);
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setCameraError('Camera access denied. Please click the camera icon in your browser address bar to allow access, or upload packaging photos directly.');
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        setCameraError('No camera found on your device. You can test live scanning using "Upload Label File" or select a product from the demo catalog below.');
+      } else {
+        setCameraError(`Camera error (${err.message || err.name}). Please check permissions or upload photos directly.`);
+      }
     }
   };
 
@@ -380,15 +417,25 @@ export default function Scanner({
         } catch (_) {}
       }
 
+      URL.revokeObjectURL(url);
+
       if (foundBarcode) {
         playBeep();
         handleBarcodeFound(foundBarcode);
       } else {
-        alert('Could not detect a clear barcode in this uploaded photo. Please try entering the barcode number manually.');
+        // If no barcode was found in the image, user uploaded an ingredient/label photo.
+        // Send directly to backend OCR engine (/api/scan/image) for full optical analysis!
+        if (onScanImage) {
+          onScanImage(file);
+        } else {
+          setCameraError('Could not detect a barcode in this photo. Please enter barcode manually or upload another view.');
+        }
       }
-      URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Barcode file decode error:', err);
+      if (onScanImage) {
+        onScanImage(file);
+      }
     }
   };
 
@@ -536,76 +583,113 @@ export default function Scanner({
           <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-[#47d1cc] z-20"></div>
           <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-[#47d1cc] z-20"></div>
 
-          {/* A. Camera Active Live Feed */}
-          {isCameraActive && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-black">
-              <video
-                ref={videoRef}
-                playsInline
-                muted
-                className="w-full h-full object-cover"
-              />
-
-              {/* Barcode Reticle & Laser Sweep (Step 1) */}
-              {step === 1 && !capturedData.barcode && (
-                <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
-                  <div className="w-64 h-36 border-2 border-[#47d1cc]/70 rounded-xl relative shadow-[0_0_20px_rgba(71,209,204,0.3)]">
-                    <div className="camera-reticle-corner -top-1 -left-1 border-t-2 border-l-2 border-[#47d1cc] rounded-tl" />
-                    <div className="camera-reticle-corner -top-1 -right-1 border-t-2 border-r-2 border-[#47d1cc] rounded-tr" />
-                    <div className="camera-reticle-corner -bottom-1 -left-1 border-b-2 border-l-2 border-[#47d1cc] rounded-bl" />
-                    <div className="camera-reticle-corner -bottom-1 -right-1 border-b-2 border-r-2 border-[#47d1cc] rounded-br" />
-                    <div className="absolute inset-x-2 h-0.5 bg-[#47d1cc] shadow-[0_0_12px_#47d1cc] scanner-laser" />
-                  </div>
-                  <div className="mt-3 text-[11px] font-mono text-[#47d1cc] font-bold bg-black/70 px-3 py-1 rounded-full border border-[#47d1cc]/40">
-                    Align product barcode inside frame
-                  </div>
+          {/* Camera Error Alert Banner */}
+          {cameraError && !isCameraActive && (
+            <div className="absolute inset-x-4 top-4 z-30 p-3.5 bg-[#fff7ed] border border-[#fed7aa] rounded-xl flex items-start gap-3 text-left shadow-lg animate-fadeIn">
+              <AlertTriangle className="w-5 h-5 text-[#ea580c] shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-bold text-[#9a3412] uppercase tracking-wide">
+                  Camera Access Alert
                 </div>
-              )}
-
-              {/* Quality Guidance Overlay (Steps 2-4) */}
-              {step > 1 && (
-                <div className="absolute top-3 left-3 pointer-events-none">
-                  <div
-                    className={`px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md border shadow-lg ${
-                      qualityFeedback.status === 'good'
-                        ? 'bg-[#042f2e]/80 text-[#e0fbf9] border-[#47d1cc]/40'
-                        : 'bg-[#431407]/80 text-[#fdba74] border-[#ea580c]/40 animate-pulse'
-                    }`}
-                  >
-                    {qualityFeedback.message}
-                  </div>
-                </div>
-              )}
-
-              {/* Top Controls Overlay */}
-              <div className="absolute top-3 right-3 flex items-center space-x-2">
-                {step === 4 && (
+                <p className="text-xs text-[#c2410c] mt-0.5 leading-relaxed">
+                  {cameraError}
+                </p>
+                <div className="mt-2.5 flex items-center gap-2 flex-wrap">
                   <button
                     type="button"
-                    onClick={handleSkipStep4}
-                    className="px-3 py-1.5 bg-slate-900/90 hover:bg-slate-800 text-slate-200 font-bold rounded-lg backdrop-blur-md transition flex items-center space-x-1 text-xs border border-slate-700 shadow-md cursor-pointer"
+                    onClick={startCamera}
+                    className="px-3 py-1 bg-[#ea580c] hover:bg-[#c2410c] text-white text-xs font-bold rounded-md transition shadow-xs cursor-pointer"
                   >
-                    <span>Skip Side Photo</span>
-                    <SkipForward className="w-3.5 h-3.5" />
+                    Retry Camera
                   </button>
-                )}
-                <button
-                  type="button"
-                  onClick={stopCamera}
-                  className="px-3 py-1.5 bg-slate-900/90 hover:bg-rose-600 text-rose-300 hover:text-white font-bold rounded-lg text-xs border border-rose-500/40 hover:border-rose-600 backdrop-blur-md transition flex items-center space-x-1.5 shadow-lg active:scale-95 cursor-pointer"
-                  title="Stop camera feed and turn off webcam"
-                >
-                  <CameraOff className="w-3.5 h-3.5" />
-                  <span>Stop Scanner</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => barcodeFileInputRef.current?.click()}
+                    className="px-3 py-1 bg-white hover:bg-[#ffedd5] border border-[#fed7aa] text-[#c2410c] text-xs font-semibold rounded-md transition cursor-pointer"
+                  >
+                    Upload Label Image
+                  </button>
+                </div>
               </div>
-
-              {/* Step indicator pill */}
-              <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-md border border-white/20 text-white font-mono text-[11px] px-2.5 py-1 rounded-md">
-                {step === 1 ? 'STEP 1: Barcode Scan' : step === 2 ? 'STEP 2: Front Label' : step === 3 ? 'STEP 3: MRP & Date' : 'STEP 4: Side / Packer'}
-              </div>
+              <button
+                type="button"
+                onClick={() => setCameraError(null)}
+                className="text-[#ea580c] hover:text-[#9a3412] p-1 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           )}
+
+          {/* A. Camera Live Feed (Always mounted so videoRef.current is never null) */}
+          <div className={`absolute inset-0 z-10 flex items-center justify-center bg-black ${isCameraActive ? 'block' : 'hidden'}`}>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+            />
+
+            {/* Barcode Reticle & Laser Sweep (Step 1) */}
+            {step === 1 && !capturedData.barcode && (
+              <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
+                <div className="w-64 h-36 border-2 border-[#47d1cc]/70 rounded-xl relative shadow-[0_0_20px_rgba(71,209,204,0.3)]">
+                  <div className="camera-reticle-corner -top-1 -left-1 border-t-2 border-l-2 border-[#47d1cc] rounded-tl" />
+                  <div className="camera-reticle-corner -top-1 -right-1 border-t-2 border-r-2 border-[#47d1cc] rounded-tr" />
+                  <div className="camera-reticle-corner -bottom-1 -left-1 border-b-2 border-l-2 border-[#47d1cc] rounded-bl" />
+                  <div className="camera-reticle-corner -bottom-1 -right-1 border-b-2 border-r-2 border-[#47d1cc] rounded-br" />
+                  <div className="absolute inset-x-2 h-0.5 bg-[#47d1cc] shadow-[0_0_12px_#47d1cc] scanner-laser" />
+                </div>
+                <div className="mt-3 text-[11px] font-mono text-[#47d1cc] font-bold bg-black/70 px-3 py-1 rounded-full border border-[#47d1cc]/40">
+                  Align product barcode inside frame
+                </div>
+              </div>
+            )}
+
+            {/* Quality Guidance Overlay (Steps 2-4) */}
+            {step > 1 && (
+              <div className="absolute top-3 left-3 pointer-events-none">
+                <div
+                  className={`px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md border shadow-lg ${
+                    qualityFeedback.status === 'good'
+                      ? 'bg-[#042f2e]/80 text-[#e0fbf9] border-[#47d1cc]/40'
+                      : 'bg-[#431407]/80 text-[#fdba74] border-[#ea580c]/40 animate-pulse'
+                  }`}
+                >
+                  {qualityFeedback.message}
+                </div>
+              </div>
+            )}
+
+            {/* Top Controls Overlay */}
+            <div className="absolute top-3 right-3 flex items-center space-x-2">
+              {step === 4 && (
+                <button
+                  type="button"
+                  onClick={handleSkipStep4}
+                  className="px-3 py-1.5 bg-slate-900/90 hover:bg-slate-800 text-slate-200 font-bold rounded-lg backdrop-blur-md transition flex items-center space-x-1 text-xs border border-slate-700 shadow-md cursor-pointer"
+                >
+                  <span>Skip Side Photo</span>
+                  <SkipForward className="w-3.5 h-3.5" />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={stopCamera}
+                className="px-3 py-1.5 bg-slate-900/90 hover:bg-rose-600 text-rose-300 hover:text-white font-bold rounded-lg text-xs border border-rose-500/40 hover:border-rose-600 backdrop-blur-md transition flex items-center space-x-1.5 shadow-lg active:scale-95 cursor-pointer"
+                title="Stop camera feed and turn off webcam"
+              >
+                <CameraOff className="w-3.5 h-3.5" />
+                <span>Stop Scanner</span>
+              </button>
+            </div>
+
+            {/* Step indicator pill */}
+            <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-md border border-white/20 text-white font-mono text-[11px] px-2.5 py-1 rounded-md">
+              {step === 1 ? 'STEP 1: Barcode Scan' : step === 2 ? 'STEP 2: Front Label' : step === 3 ? 'STEP 3: MRP & Date' : 'STEP 4: Side / Packer'}
+            </div>
+          </div>
 
           {/* B. Zoomable Captured Photo Preview */}
           {currentPreviewUrl && !isCameraActive && (

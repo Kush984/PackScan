@@ -147,6 +147,22 @@ export default function App() {
       } catch (e) {}
     }
 
+    // Also sync saved profile from backend if available for this device
+    fetch(`/api/profile/${encodeURIComponent(id)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && (data.allergies?.length > 0 || data.conditions?.length > 0)) {
+          setUserProfile((prev) => ({
+            ...prev,
+            allergies: data.allergies || prev.allergies,
+            conditions: data.conditions || prev.conditions,
+            sugar_threshold: data.sugar_threshold !== undefined ? data.sugar_threshold : prev.sugar_threshold,
+            sodium_threshold: data.sodium_threshold !== undefined ? data.sodium_threshold : prev.sodium_threshold,
+          }));
+        }
+      })
+      .catch((err) => console.warn('Could not sync remote profile:', err.message));
+
     fetchPresets();
   }, []);
 
@@ -322,6 +338,40 @@ export default function App() {
     }
   };
 
+  // 3. Direct Image OCR Scan API (Upload Label Image)
+  const handleScanImage = async (imageFile, barcode = null) => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    setNotFoundInfo(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('labelImage', imageFile);
+      if (barcode) formData.append('barcode', barcode);
+      if (userProfile) formData.append('userProfile', JSON.stringify(userProfile));
+      formData.append('deviceId', deviceId);
+
+      const res = await fetch('/api/scan/image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || errData.error || 'Image OCR processing failed');
+      }
+
+      const data = await res.json();
+      setScanResult(data);
+      scrollToResult();
+    } catch (err) {
+      console.error('Image scan error:', err);
+      setErrorMessage(err.message || 'Image OCR processing failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSelectPreset = (preset) => {
     handleScanBarcode(preset.barcode);
   };
@@ -381,11 +431,6 @@ export default function App() {
     setActiveTab(tabId);
     if (typeof window !== 'undefined') {
       window.location.hash = tabId;
-    }
-    if (tabId === 'allergies') {
-      setIsProfileOpen(true);
-    } else if (tabId === 'forum') {
-      setIsFeedbackOpen(true);
     }
   };
 
@@ -525,6 +570,7 @@ export default function App() {
           <Scanner
             onCompleteMultiStepScan={handleMultiStepScan}
             onScanDirectBarcode={handleScanBarcode}
+            onScanImage={handleScanImage}
             isLoading={isLoading}
             scanResult={scanResult}
             onOpenNoticeModal={() => setIsNoticeModalOpen(true)}
