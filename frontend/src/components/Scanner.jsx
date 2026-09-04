@@ -19,7 +19,12 @@ import {
   Check,
   Printer,
   QrCode,
-  Focus
+  Focus,
+  Zap,
+  Plus,
+  Sparkles,
+  Layers,
+  X
 } from 'lucide-react';
 import {
   MultiFormatReader,
@@ -450,36 +455,68 @@ export default function Scanner({
     if (onResetScan) onResetScan();
   };
 
-  const handleConfirmPhoto = () => {
-    const updated = { ...capturedData };
-    const newThumbs = { ...thumbnails };
-
-    if (step === 2) {
-      updated.frontPhoto = currentFile;
-      newThumbs.front = currentPreviewUrl;
-    } else if (step === 3) {
-      updated.backPhoto = currentFile;
-      newThumbs.back = currentPreviewUrl;
-    } else if (step === 4) {
-      updated.sidePhoto = currentFile;
-      newThumbs.side = currentPreviewUrl;
+  const submitMultiStepScan = (dataToSubmit) => {
+    setStep(5);
+    stopCamera();
+    setCurrentFile(null);
+    setCurrentPreviewUrl(null);
+    setIsZoomed(false);
+    if (onCompleteMultiStepScan) {
+      onCompleteMultiStepScan(dataToSubmit);
     }
+  };
 
+  // Step 2 (Front): Confirm & Proceed to Shot 2 (Back)
+  const handleConfirmFront = () => {
+    const updated = { ...capturedData, frontPhoto: currentFile };
+    const newThumbs = { ...thumbnails, front: currentPreviewUrl };
     setCapturedData(updated);
     setThumbnails(newThumbs);
     setCurrentFile(null);
     setCurrentPreviewUrl(null);
     setIsZoomed(false);
+    setStep(3);
+    startCamera();
+  };
 
-    if (step < 4) {
-      setStep(step + 1);
-      startCamera();
-    } else {
-      setStep(5);
-      if (onCompleteMultiStepScan) {
-        onCompleteMultiStepScan(updated);
-      }
-    }
+  // Step 2 Optional: Quick single-shot analyze
+  const handleFinishSingleShot = () => {
+    const updated = { ...capturedData, frontPhoto: currentFile };
+    const newThumbs = { ...thumbnails, front: currentPreviewUrl };
+    setCapturedData(updated);
+    setThumbnails(newThumbs);
+    submitMultiStepScan(updated);
+  };
+
+  // Step 3 (Back): Immediate 2-Shot completion (~3.5s)
+  const handleFinishTwoShot = () => {
+    const updated = { ...capturedData, backPhoto: currentFile };
+    const newThumbs = { ...thumbnails, back: currentPreviewUrl };
+    setCapturedData(updated);
+    setThumbnails(newThumbs);
+    submitMultiStepScan(updated);
+  };
+
+  // Step 3 (Back): Proceed to optional side / flap photo (Shot 3)
+  const handleProceedToSidePhoto = () => {
+    const updated = { ...capturedData, backPhoto: currentFile };
+    const newThumbs = { ...thumbnails, back: currentPreviewUrl };
+    setCapturedData(updated);
+    setThumbnails(newThumbs);
+    setCurrentFile(null);
+    setCurrentPreviewUrl(null);
+    setIsZoomed(false);
+    setStep(4);
+    startCamera();
+  };
+
+  // Step 4 (Side): Confirm & Complete Full 3-Shot Audit
+  const handleConfirmSide = () => {
+    const updated = { ...capturedData, sidePhoto: currentFile };
+    const newThumbs = { ...thumbnails, side: currentPreviewUrl };
+    setCapturedData(updated);
+    setThumbnails(newThumbs);
+    submitMultiStepScan(updated);
   };
 
   const handleRetake = () => {
@@ -490,11 +527,7 @@ export default function Scanner({
   };
 
   const handleSkipStep4 = () => {
-    setStep(5);
-    stopCamera();
-    if (onCompleteMultiStepScan) {
-      onCompleteMultiStepScan(capturedData);
-    }
+    submitMultiStepScan(capturedData);
   };
 
   // Rule 6 statutory items list
@@ -559,6 +592,96 @@ export default function Scanner({
             <span className="text-[#0d9488] font-bold">
               {isCameraActive ? 'LIVE MICROMETER' : 'AUTO-FOCUS LOCK'}
             </span>
+          </div>
+        </div>
+
+        {/* Streamlined Stepper Progress Bar (Smart 2-Shot Architecture) */}
+        <div className="grid grid-cols-3 gap-2 pt-3 pb-1">
+          {/* Step 1 Pill */}
+          <div
+            onClick={() => {
+              if (step > 1 && !isLoading) {
+                stopCamera();
+                setStep(1);
+              }
+            }}
+            className={`p-2 rounded-lg border text-center transition-all ${
+              step > 1 && !isLoading ? 'cursor-pointer hover:border-[#47d1cc]' : ''
+            } ${
+              step === 1
+                ? 'bg-[#e0fbf9] border-[#47d1cc] text-[#042f2e] ring-1 ring-[#47d1cc]'
+                : capturedData.barcode
+                ? 'bg-[#f0fdfc] border-[#99f6e4] text-[#0f766e]'
+                : 'bg-[#f8fefe] border-[#e2e8f0] text-[#64748b]'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-1 font-['JetBrains_Mono'] text-[10px] font-bold uppercase tracking-wider">
+              {capturedData.barcode ? <Check className="w-3 h-3 text-[#0d9488]" /> : null}
+              <span>{capturedData.barcode ? 'Barcode Set' : '1. Barcode'}</span>
+            </div>
+            <div className="font-['Space_Grotesk'] text-[11px] font-semibold truncate mt-0.5">
+              {capturedData.barcode ? capturedData.barcode : 'Scan / Lookup'}
+            </div>
+          </div>
+
+          {/* Shot 1 Pill (Front) */}
+          <div
+            onClick={() => {
+              if (!isLoading) {
+                stopCamera();
+                setStep(2);
+                startCamera();
+              }
+            }}
+            className={`p-2 rounded-lg border text-center transition-all cursor-pointer hover:border-[#47d1cc] ${
+              step === 2
+                ? 'bg-[#e0fbf9] border-[#47d1cc] text-[#042f2e] ring-1 ring-[#47d1cc]'
+                : thumbnails.front
+                ? 'bg-[#f0fdfc] border-[#99f6e4] text-[#0f766e]'
+                : 'bg-[#f8fefe] border-[#e2e8f0] text-[#64748b]'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-1 font-['JetBrains_Mono'] text-[10px] font-bold uppercase tracking-wider">
+              {thumbnails.front ? <Check className="w-3 h-3 text-[#0d9488]" /> : null}
+              <span>{thumbnails.front ? 'Shot 1 Done' : '2. Front'}</span>
+            </div>
+            <div className="font-['Space_Grotesk'] text-[11px] font-semibold truncate mt-0.5 flex items-center justify-center gap-1">
+              {thumbnails.front && (
+                <img src={thumbnails.front} alt="Front" className="w-3.5 h-3.5 rounded object-cover" />
+              )}
+              <span>Brand &amp; Weight</span>
+            </div>
+          </div>
+
+          {/* Shot 2 Pill (Back + Optional Side) */}
+          <div
+            onClick={() => {
+              if (thumbnails.front && !isLoading) {
+                stopCamera();
+                setStep(3);
+                startCamera();
+              }
+            }}
+            className={`p-2 rounded-lg border text-center transition-all ${
+              thumbnails.front && !isLoading ? 'cursor-pointer hover:border-[#47d1cc]' : ''
+            } ${
+              step === 3 || step === 4
+                ? 'bg-[#e0fbf9] border-[#47d1cc] text-[#042f2e] ring-1 ring-[#47d1cc]'
+                : thumbnails.back
+                ? 'bg-[#f0fdfc] border-[#99f6e4] text-[#0f766e]'
+                : 'bg-[#f8fefe] border-[#e2e8f0] text-[#64748b]'
+            }`}
+          >
+            <div className="flex items-center justify-center gap-1 font-['JetBrains_Mono'] text-[10px] font-bold uppercase tracking-wider">
+              {thumbnails.back ? <Check className="w-3 h-3 text-[#0d9488]" /> : null}
+              <span>{thumbnails.back ? (step === 4 ? 'Shot 3 (Flap)' : 'Shot 2 Done') : '3. Back / Rules'}</span>
+            </div>
+            <div className="font-['Space_Grotesk'] text-[11px] font-semibold truncate mt-0.5 flex items-center justify-center gap-1">
+              {thumbnails.back && (
+                <img src={thumbnails.back} alt="Back" className="w-3.5 h-3.5 rounded object-cover" />
+              )}
+              <span>{step === 4 ? 'Side / Flap (Opt)' : 'MRP &amp; Nutrition'}</span>
+            </div>
           </div>
         </div>
 
@@ -664,14 +787,36 @@ export default function Scanner({
 
             {/* Top Controls Overlay */}
             <div className="absolute top-3 right-3 flex items-center space-x-2">
+              {step === 1 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep(2);
+                  }}
+                  className="px-3 py-1.5 bg-slate-900/90 hover:bg-slate-800 text-[#47d1cc] font-bold rounded-lg backdrop-blur-md transition flex items-center space-x-1 text-xs border border-slate-700 shadow-md cursor-pointer"
+                >
+                  <span>Skip Barcode → Photos</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {step === 3 && thumbnails.front && (
+                <button
+                  type="button"
+                  onClick={() => submitMultiStepScan(capturedData)}
+                  className="px-3 py-1.5 bg-slate-900/90 hover:bg-slate-800 text-[#47d1cc] font-bold rounded-lg backdrop-blur-md transition flex items-center space-x-1 text-xs border border-slate-700 shadow-md cursor-pointer"
+                >
+                  <Zap className="w-3.5 h-3.5 text-[#47d1cc]" />
+                  <span>Analyze Front Only</span>
+                </button>
+              )}
               {step === 4 && (
                 <button
                   type="button"
                   onClick={handleSkipStep4}
-                  className="px-3 py-1.5 bg-slate-900/90 hover:bg-slate-800 text-slate-200 font-bold rounded-lg backdrop-blur-md transition flex items-center space-x-1 text-xs border border-slate-700 shadow-md cursor-pointer"
+                  className="px-3 py-1.5 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-bold rounded-lg backdrop-blur-md transition flex items-center space-x-1 text-xs border border-[#2bc4be] shadow-md cursor-pointer"
                 >
-                  <span>Skip Side Photo</span>
-                  <SkipForward className="w-3.5 h-3.5" />
+                  <Zap className="w-3.5 h-3.5 fill-current" />
+                  <span>Analyze 2 Photos Now</span>
                 </button>
               )}
               <button
@@ -686,8 +831,31 @@ export default function Scanner({
             </div>
 
             {/* Step indicator pill */}
-            <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-md border border-white/20 text-white font-mono text-[11px] px-2.5 py-1 rounded-md">
-              {step === 1 ? 'STEP 1: Barcode Scan' : step === 2 ? 'STEP 2: Front Label' : step === 3 ? 'STEP 3: MRP & Date' : 'STEP 4: Side / Packer'}
+            <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-md border border-white/20 text-white font-mono text-[11px] px-2.5 py-1 rounded-md flex items-center gap-1.5">
+              {step === 1 && (
+                <>
+                  <Barcode className="w-3.5 h-3.5 text-[#47d1cc]" />
+                  <span>STEP 1: Barcode Scan</span>
+                </>
+              )}
+              {step === 2 && (
+                <>
+                  <Layers className="w-3.5 h-3.5 text-[#47d1cc]" />
+                  <span>SHOT 1 OF 2: Front Panel (Brand &amp; Net Wt)</span>
+                </>
+              )}
+              {step === 3 && (
+                <>
+                  <Layers className="w-3.5 h-3.5 text-[#47d1cc]" />
+                  <span>SHOT 2 OF 2: Back Panel (MRP, Date, Ingredients)</span>
+                </>
+              )}
+              {step === 4 && (
+                <>
+                  <Plus className="w-3.5 h-3.5 text-[#47d1cc]" />
+                  <span>OPTIONAL SHOT 3: Side Panel / Flap</span>
+                </>
+              )}
             </div>
           </div>
 
@@ -712,17 +880,24 @@ export default function Scanner({
               </div>
 
               {/* Quality verification bottom bar */}
-              <div className="p-3 bg-white border-t border-[#ccfbf1] flex items-center justify-between">
+              <div className="p-3 bg-white border-t border-[#ccfbf1] flex flex-wrap items-center justify-between gap-2">
                 <div className="text-left">
                   <div className="text-xs font-bold text-[#0f172a] flex items-center gap-1.5">
                     <CheckCircle2 className="w-4 h-4 text-[#0d9488]" />
-                    <span>Quality Check: Is printed text sharp and legible?</span>
+                    <span>
+                      {step === 2
+                        ? 'Front Panel: Brand, Name & Net Quantity clear?'
+                        : step === 3
+                        ? 'Back Panel: MRP, Date & Ingredients legible?'
+                        : 'Side / Flap: Batch info & Manufacturer address sharp?'}
+                    </span>
                   </div>
                   <div className="text-[11px] text-[#64748b]">
-                    Tap Retake if blurry or dark.
+                    Tap Retake if glare or motion blur obscures text.
                   </div>
                 </div>
-                <div className="flex gap-2">
+
+                <div className="flex items-center gap-2 flex-wrap">
                   <button
                     type="button"
                     onClick={handleRetake}
@@ -730,14 +905,53 @@ export default function Scanner({
                   >
                     Retake
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleConfirmPhoto}
-                    className="px-4 py-1.5 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-bold rounded-lg text-xs transition flex items-center gap-1 shadow-xs cursor-pointer border border-[#2bc4be]"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Confirm &amp; Proceed</span>
-                  </button>
+
+                  {/* Step 2 Actions */}
+                  {step === 2 && (
+                    <button
+                      type="button"
+                      onClick={handleConfirmFront}
+                      className="px-4 py-1.5 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-bold rounded-lg text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer border border-[#2bc4be]"
+                    >
+                      <span>Confirm &amp; Next: Back Panel (Shot 2)</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+
+                  {/* Step 3 Actions: 2-Shot Finish OR Add Side */}
+                  {step === 3 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleProceedToSidePhoto}
+                        className="px-3 py-1.5 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#0f766e] font-semibold rounded-lg text-xs border border-[#99f6e4] transition flex items-center gap-1 cursor-pointer"
+                        title="Add side or flap photo for packages with side printing"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>+ Add Side / Flap</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleFinishTwoShot}
+                        className="px-4 py-1.5 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-bold rounded-lg text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer border border-[#2bc4be]"
+                      >
+                        <Zap className="w-3.5 h-3.5 fill-current text-[#042f2e]" />
+                        <span>Analyze Now (Fast 2-Shot)</span>
+                      </button>
+                    </>
+                  )}
+
+                  {/* Step 4 Actions */}
+                  {step === 4 && (
+                    <button
+                      type="button"
+                      onClick={handleConfirmSide}
+                      className="px-4 py-1.5 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-bold rounded-lg text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer border border-[#2bc4be]"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Confirm &amp; Analyze Full Package</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -776,8 +990,8 @@ export default function Scanner({
                     onClick={handleProceedToPhotos}
                     className="w-full py-2 px-3 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#334155] font-['Space_Grotesk'] font-semibold rounded-lg text-xs border border-[#ccfbf1] transition flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <Camera className="w-3.5 h-3.5 text-[#0d9488]" />
-                    <span>Continue to Packaging Photos</span>
+                    <Layers className="w-3.5 h-3.5 text-[#0d9488]" />
+                    <span>Start Fast 2-Shot Packaging Audit</span>
                   </button>
                 </div>
               </div>
@@ -861,19 +1075,68 @@ export default function Scanner({
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
           <div className="flex items-center gap-1.5 text-[#64748b] font-['JetBrains_Mono'] text-[11.5px] font-medium">
             <Focus className="w-4 h-4 text-[#0d9488]" />
-            <span>Point your camera at the barcode • Hold steady</span>
+            <span>
+              {step === 1
+                ? 'Align barcode in frame or click "Direct 2-Shot Audit"'
+                : step === 2
+                ? 'Shot 1 of 2: Point camera at front panel (Brand, Net Wt)'
+                : step === 3
+                ? 'Shot 2 of 2: Point camera at back panel (MRP, Date, Ingredients)'
+                : 'Optional Shot 3: Side panel or seal flap (Packer, USP)'}
+            </span>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 flex-wrap">
             {isCameraActive ? (
               <>
+                {step === 1 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep(2);
+                    }}
+                    className="px-3 py-2 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#0f766e] border border-[#ccfbf1] font-['Space_Grotesk'] text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <span>Skip to 2-Shot Photos</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                {step === 3 && thumbnails.front && (
+                  <button
+                    type="button"
+                    onClick={() => submitMultiStepScan(capturedData)}
+                    className="px-3 py-2 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#0f766e] border border-[#ccfbf1] font-['Space_Grotesk'] text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    title="Analyze directly with front photo"
+                  >
+                    <Zap className="w-3.5 h-3.5 text-[#0d9488]" />
+                    <span>Analyze Front Only</span>
+                  </button>
+                )}
+                {step === 4 && (
+                  <button
+                    type="button"
+                    onClick={handleSkipStep4}
+                    className="px-3 py-2 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#0f766e] border border-[#ccfbf1] font-['Space_Grotesk'] text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <Zap className="w-3.5 h-3.5 text-[#0d9488]" />
+                    <span>Analyze 2 Photos Now</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={handleCapturePhoto}
                   className="px-4 py-2 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#2bc4be]"
                 >
                   <Camera className="w-4 h-4" />
-                  <span>{step === 1 ? 'Capture Frame' : 'Capture Photo & Check Rules'}</span>
+                  <span>
+                    {step === 1
+                      ? 'Capture Barcode Frame'
+                      : step === 2
+                      ? 'Capture Front Photo (1/2)'
+                      : step === 3
+                      ? 'Capture Back Photo (2/2)'
+                      : 'Capture Side Photo (3/3)'}
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -886,13 +1149,48 @@ export default function Scanner({
               </>
             ) : (
               <>
+                {step === 1 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep(2);
+                      startCamera();
+                    }}
+                    className="px-3.5 py-2 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#0f766e] border border-[#ccfbf1] font-['Space_Grotesk'] text-[13px] font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <Layers className="w-4 h-4 text-[#0d9488]" />
+                    <span>Direct 2-Shot Audit</span>
+                  </button>
+                )}
+                {thumbnails.front && (
+                  <button
+                    type="button"
+                    onClick={() => submitMultiStepScan(capturedData)}
+                    className="px-3.5 py-2 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#2bc4be]"
+                  >
+                    <Zap className="w-4 h-4 fill-current" />
+                    <span>
+                      Analyze Captured ({[thumbnails.front, thumbnails.back, thumbnails.side].filter(Boolean).length} Photos)
+                    </span>
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => barcodeFileInputRef.current?.click()}
+                  onClick={() => {
+                    if (step === 1) {
+                      barcodeFileInputRef.current?.click();
+                    } else {
+                      fileInputRef.current?.click();
+                    }
+                  }}
                   className="px-4 py-2 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#334155] border border-[#ccfbf1] font-['Space_Grotesk'] text-[13px] font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   <Upload className="w-4 h-4 text-[#64748b]" />
-                  <span>Upload Label File</span>
+                  <span>
+                    {step === 1
+                      ? 'Upload Label File'
+                      : `Upload Shot ${step === 2 ? '1 (Front)' : step === 3 ? '2 (Back)' : '3 (Side)'} Photo`}
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -900,7 +1198,7 @@ export default function Scanner({
                   className="px-4 py-2 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#2bc4be]"
                 >
                   <Camera className="w-4 h-4" />
-                  <span>Start Live Scanner</span>
+                  <span>{thumbnails.front ? 'Resume Camera' : 'Start Live Scanner'}</span>
                 </button>
               </>
             )}
