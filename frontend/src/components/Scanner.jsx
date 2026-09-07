@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { apiFetch } from '../utils/api';
 import {
   Camera,
   CameraOff,
@@ -214,7 +215,7 @@ export default function Scanner({
         }
       }
 
-      // Step 1: Barcode scan interval (Fast local ZXing + periodic AI auto-read)
+      // Step 1: Barcode scan interval (Fast local ZXing + seamless background AI vision assist)
       if (stepRef.current === 1) {
         if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
         let scanTicks = 0;
@@ -223,14 +224,16 @@ export default function Scanner({
           isScanningRef.current = true;
           scanTicks++;
           try {
+            // 1. Instant local client-side ZXing decode (checks every 250ms)
             const code = await decodeFrameAsync(videoRef.current);
             if (code) {
               handleBarcodeFound(code);
               return;
             }
-            // If local ZXing couldn't read after ~12 frames (~3s) on curved/blurry/shiny packs, auto-trigger AI
-            if (scanTicks % 12 === 0 && !isExtractingBarcodeRef.current && !isLockedRef.current) {
-              extractBarcodeFromVideoViaAI(videoRef.current);
+            // 2. Seamless background AI assist: runs silently every ~8 ticks (~2s)
+            //    Extracts curved, shiny, or distorted barcodes automatically without blocking UI or popping errors
+            if (scanTicks % 8 === 0 && !isExtractingBarcodeRef.current && !isLockedRef.current) {
+              extractBarcodeFromVideoViaAI(videoRef.current, true);
             }
           } catch (e) {
             console.warn('Frame scan error:', e);
@@ -385,10 +388,10 @@ export default function Scanner({
     }
   };
 
-  const extractBarcodeFromVideoViaAI = async (videoEl) => {
+  const extractBarcodeFromVideoViaAI = async (videoEl, isSilent = false) => {
     if (!videoEl || videoEl.readyState < 2 || isExtractingBarcodeRef.current || isLockedRef.current) return;
     isExtractingBarcodeRef.current = true;
-    setIsExtractingBarcode(true);
+    if (!isSilent) setIsExtractingBarcode(true);
 
     try {
       if (!offscreenCanvasRef.current) offscreenCanvasRef.current = document.createElement('canvas');
@@ -413,23 +416,25 @@ export default function Scanner({
       const formData = new FormData();
       formData.append('frame', blob, 'frame.jpg');
 
-      const res = await fetch('/api/scan/extract-barcode', {
+      const res = await apiFetch('/api/scan/extract-barcode', {
         method: 'POST',
         body: formData,
       });
       const data = await res.json();
       if (data.success && data.barcode && !isLockedRef.current) {
         handleBarcodeFound(data.barcode);
-      } else if (!data.success) {
+      } else if (!data.success && !isSilent) {
         setCameraError(
-          'Could not read barcode from this angle. Tip: Click "🍬 Happydent Wave" in the 1-Click Demo Bar or enter 8901393019469 manually.'
+          'No barcode detected in frame. Please align the barcode clearly inside the reticle, or click "Skip Barcode → Photos" for direct photo analysis.'
         );
       }
     } catch (err) {
-      console.warn('AI Barcode extraction error:', err);
-      setCameraError('AI Barcode extraction encountered network latency. Use the 1-Click Demo Bar below.');
+      if (!isSilent) {
+        console.warn('AI Barcode extraction error:', err);
+        setCameraError('AI Barcode extraction encountered network latency. Use the 1-Click Demo Bar below.');
+      }
     } finally {
-      setIsExtractingBarcode(false);
+      if (!isSilent) setIsExtractingBarcode(false);
       isExtractingBarcodeRef.current = false;
     }
   };
@@ -531,7 +536,7 @@ export default function Scanner({
       // If client-side ZXing failed, send to AI barcode extractor
       const formData = new FormData();
       formData.append('frame', file);
-      const res = await fetch('/api/scan/extract-barcode', {
+      const res = await apiFetch('/api/scan/extract-barcode', {
         method: 'POST',
         body: formData,
       });
@@ -685,19 +690,19 @@ export default function Scanner({
       {/* ========================================================================= */}
       {/* Left: Precision Metrology Viewfinder (col-span-8) */}
       {/* ========================================================================= */}
-      <div className="lg:col-span-8 bg-white rounded-xl p-5 sm:p-6 border border-[#ccfbf1] shadow-xs flex flex-col justify-between relative overflow-hidden min-h-[440px]">
+      <div className="lg:col-span-8 bg-white rounded-xl p-5 sm:p-6 border border-[#e7e0d6] shadow-xs flex flex-col justify-between relative overflow-hidden min-h-[440px]">
         {/* Header inside panel */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#ccfbf1]">
+        <div className="flex items-center justify-between pb-3 border-b border-[#e7e0d6]">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#47d1cc]"></span>
-            <span className="font-['Space_Grotesk'] text-[13px] text-[#0f172a] font-bold tracking-wider uppercase">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#b8532f]"></span>
+            <span className="font-['Space_Grotesk'] text-[13px] text-[#2a2622] font-bold tracking-wider uppercase">
               Metrology Viewfinder // Rule 9 Optical Micrometer
             </span>
           </div>
-          <div className="flex items-center gap-2 text-[#64748b] font-['JetBrains_Mono'] text-[11px]">
+          <div className="flex items-center gap-2 text-[#786e65] font-['Space_Grotesk'] text-[11px]">
             <span>CALIBRATION: 0.05MM / PX</span>
             <span>•</span>
-            <span className="text-[#0d9488] font-bold">
+            <span className="text-[#b8532f] font-bold">
               {isCameraActive ? 'LIVE MICROMETER' : 'AUTO-FOCUS LOCK'}
             </span>
           </div>
@@ -714,20 +719,20 @@ export default function Scanner({
               }
             }}
             className={`p-2 rounded-lg border text-center transition-all ${
-              step > 1 && !isLoading ? 'cursor-pointer hover:border-[#47d1cc]' : ''
+              step > 1 && !isLoading ? 'cursor-pointer hover:border-[#b8532f]' : ''
             } ${
               step === 1
-                ? 'bg-[#e0fbf9] border-[#47d1cc] text-[#042f2e] ring-1 ring-[#47d1cc]'
+                ? 'bg-[#fdf2ec] border-[#b8532f] text-[#b8532f] ring-1 ring-[#b8532f]'
                 : capturedData.barcode
-                ? 'bg-[#f0fdfc] border-[#99f6e4] text-[#0f766e]'
-                : 'bg-[#f8fefe] border-[#e2e8f0] text-[#64748b]'
+                ? 'bg-[#fdfbf7] border-[#c99a3e] text-[#8a651e]'
+                : 'bg-[#faf7f2] border-[#e7e0d6] text-[#786e65]'
             }`}
           >
-            <div className="flex items-center justify-center gap-1 font-['JetBrains_Mono'] text-[10px] font-bold uppercase tracking-wider">
-              {capturedData.barcode ? <Check className="w-3 h-3 text-[#0d9488]" /> : null}
+            <div className="flex items-center justify-center gap-1 font-['Space_Grotesk'] text-[10.5px] font-bold uppercase tracking-wider">
+              {capturedData.barcode ? <Check className="w-3 h-3 text-[#b8532f]" /> : null}
               <span>{capturedData.barcode ? 'Barcode Set' : '1. Barcode'}</span>
             </div>
-            <div className="font-['Space_Grotesk'] text-[11px] font-semibold truncate mt-0.5">
+            <div className="font-mono text-[11px] font-semibold truncate mt-0.5">
               {capturedData.barcode ? capturedData.barcode : 'Scan / Lookup'}
             </div>
           </div>
@@ -741,16 +746,16 @@ export default function Scanner({
                 startCamera();
               }
             }}
-            className={`p-2 rounded-lg border text-center transition-all cursor-pointer hover:border-[#47d1cc] ${
+            className={`p-2 rounded-lg border text-center transition-all cursor-pointer hover:border-[#b8532f] ${
               step === 2
-                ? 'bg-[#e0fbf9] border-[#47d1cc] text-[#042f2e] ring-1 ring-[#47d1cc]'
+                ? 'bg-[#fdf2ec] border-[#b8532f] text-[#b8532f] ring-1 ring-[#b8532f]'
                 : thumbnails.front
-                ? 'bg-[#f0fdfc] border-[#99f6e4] text-[#0f766e]'
-                : 'bg-[#f8fefe] border-[#e2e8f0] text-[#64748b]'
+                ? 'bg-[#fdfbf7] border-[#c99a3e] text-[#8a651e]'
+                : 'bg-[#faf7f2] border-[#e7e0d6] text-[#786e65]'
             }`}
           >
-            <div className="flex items-center justify-center gap-1 font-['JetBrains_Mono'] text-[10px] font-bold uppercase tracking-wider">
-              {thumbnails.front ? <Check className="w-3 h-3 text-[#0d9488]" /> : null}
+            <div className="flex items-center justify-center gap-1 font-['Space_Grotesk'] text-[10.5px] font-bold uppercase tracking-wider">
+              {thumbnails.front ? <Check className="w-3 h-3 text-[#b8532f]" /> : null}
               <span>{thumbnails.front ? 'Shot 1 Done' : '2. Front'}</span>
             </div>
             <div className="font-['Space_Grotesk'] text-[11px] font-semibold truncate mt-0.5 flex items-center justify-center gap-1">
@@ -771,17 +776,17 @@ export default function Scanner({
               }
             }}
             className={`p-2 rounded-lg border text-center transition-all ${
-              thumbnails.front && !isLoading ? 'cursor-pointer hover:border-[#47d1cc]' : ''
+              thumbnails.front && !isLoading ? 'cursor-pointer hover:border-[#b8532f]' : ''
             } ${
               step === 3 || step === 4
-                ? 'bg-[#e0fbf9] border-[#47d1cc] text-[#042f2e] ring-1 ring-[#47d1cc]'
+                ? 'bg-[#fdf2ec] border-[#b8532f] text-[#b8532f] ring-1 ring-[#b8532f]'
                 : thumbnails.back
-                ? 'bg-[#f0fdfc] border-[#99f6e4] text-[#0f766e]'
-                : 'bg-[#f8fefe] border-[#e2e8f0] text-[#64748b]'
+                ? 'bg-[#fdfbf7] border-[#c99a3e] text-[#8a651e]'
+                : 'bg-[#faf7f2] border-[#e7e0d6] text-[#786e65]'
             }`}
           >
-            <div className="flex items-center justify-center gap-1 font-['JetBrains_Mono'] text-[10px] font-bold uppercase tracking-wider">
-              {thumbnails.back ? <Check className="w-3 h-3 text-[#0d9488]" /> : null}
+            <div className="flex items-center justify-center gap-1 font-['Space_Grotesk'] text-[10.5px] font-bold uppercase tracking-wider">
+              {thumbnails.back ? <Check className="w-3 h-3 text-[#b8532f]" /> : null}
               <span>{thumbnails.back ? (step === 4 ? 'Shot 3 (Flap)' : 'Shot 2 Done') : '3. Back / Rules'}</span>
             </div>
             <div className="font-['Space_Grotesk'] text-[11px] font-semibold truncate mt-0.5 flex items-center justify-center gap-1">
@@ -795,15 +800,15 @@ export default function Scanner({
 
         {/* 1-Click Quick Demo Bar for Fast Barcode Selection */}
         {step === 1 && !capturedData.barcode && (
-          <div className="flex items-center justify-between gap-2 px-3 py-1.5 bg-[#f0fdfc] border border-[#ccfbf1] rounded-lg my-1.5 text-xs">
-            <span className="font-['JetBrains_Mono'] text-[10px] font-bold text-[#0d9488] uppercase tracking-wider flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-[#0d9488]" /> 1-Click Demo Barcode:
+          <div className="flex items-center justify-between gap-2 px-3 py-1.5 bg-[#fdf9ee] border border-[#f2e5be] rounded-lg my-1.5 text-xs">
+            <span className="font-['Space_Grotesk'] text-[10.5px] font-bold text-[#8a651e] uppercase tracking-wider flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-[#c99a3e]" /> 1-Click Demo Barcode:
             </span>
             <div className="flex items-center gap-1.5 flex-wrap">
               <button
                 type="button"
                 onClick={() => handleBarcodeFound('8901393019469')}
-                className="px-2.5 py-1 bg-white hover:bg-[#e0fbf9] text-[#0f766e] font-semibold rounded border border-[#99f6e4] transition shadow-2xs hover:scale-105 cursor-pointer text-[11px] flex items-center gap-1"
+                className="px-2.5 py-1 bg-white hover:bg-[#faf7f2] text-[#2a2622] font-semibold rounded border border-[#e7e0d6] transition shadow-2xs hover:scale-105 cursor-pointer text-[11px] flex items-center gap-1"
                 title="Happydent Wave (8901393019469)"
               >
                 🍬 Happydent Wave
@@ -811,7 +816,7 @@ export default function Scanner({
               <button
                 type="button"
                 onClick={() => handleBarcodeFound('8901058852371')}
-                className="px-2.5 py-1 bg-white hover:bg-[#e0fbf9] text-[#0f766e] font-semibold rounded border border-[#99f6e4] transition shadow-2xs hover:scale-105 cursor-pointer text-[11px] flex items-center gap-1"
+                className="px-2.5 py-1 bg-white hover:bg-[#faf7f2] text-[#2a2622] font-semibold rounded border border-[#e7e0d6] transition shadow-2xs hover:scale-105 cursor-pointer text-[11px] flex items-center gap-1"
                 title="Maggi 2-Min (8901058852371)"
               >
                 🍜 Maggi
@@ -819,7 +824,7 @@ export default function Scanner({
               <button
                 type="button"
                 onClick={() => handleBarcodeFound('8901764012297')}
-                className="px-2.5 py-1 bg-white hover:bg-[#e0fbf9] text-[#0f766e] font-semibold rounded border border-[#99f6e4] transition shadow-2xs hover:scale-105 cursor-pointer text-[11px] flex items-center gap-1"
+                className="px-2.5 py-1 bg-white hover:bg-[#faf7f2] text-[#2a2622] font-semibold rounded border border-[#e7e0d6] transition shadow-2xs hover:scale-105 cursor-pointer text-[11px] flex items-center gap-1"
                 title="Coca-Cola (8901764012297)"
               >
                 🥤 Coca-Cola
@@ -828,26 +833,26 @@ export default function Scanner({
           </div>
         )}
 
-        {/* Viewfinder Stage (Soft Turquoise Tinted Stage) */}
-        <div className="relative w-full flex-1 bg-[#f4fcfb] rounded-lg flex items-center justify-center p-6 my-4 overflow-hidden select-none border border-[#ccfbf1] min-h-[290px]">
+        {/* Viewfinder Stage */}
+        <div className="relative w-full flex-1 bg-[#fcfaf7] rounded-lg flex items-center justify-center p-6 my-4 overflow-hidden select-none border border-[#e7e0d6] min-h-[290px]">
           {/* Subtle Grid Background */}
           <svg className="absolute inset-0 w-full h-full opacity-40 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern height="36" id="grid-light" patternUnits="userSpaceOnUse" width="36">
-                <path className="text-[#ccfbf1]" d="M 36 0 L 0 0 0 36" fill="none" stroke="currentColor" strokeWidth="0.75"></path>
+                <path className="text-[#e7e0d6]" d="M 36 0 L 0 0 0 36" fill="none" stroke="currentColor" strokeWidth="0.75"></path>
               </pattern>
             </defs>
             <rect fill="url(#grid-light)" height="100%" width="100%"></rect>
           </svg>
 
           {/* Optical Reticle Center Line */}
-          <div className="absolute inset-x-0 h-0.5 bg-[#47d1cc]/40 top-1/3 pointer-events-none"></div>
+          <div className="absolute inset-x-0 h-0.5 bg-[#b8532f]/30 top-1/3 pointer-events-none"></div>
 
           {/* Target Corner Markers */}
-          <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-[#47d1cc] z-20"></div>
-          <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-[#47d1cc] z-20"></div>
-          <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-[#47d1cc] z-20"></div>
-          <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-[#47d1cc] z-20"></div>
+          <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-[#b8532f] z-20"></div>
+          <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-[#b8532f] z-20"></div>
+          <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-[#b8532f] z-20"></div>
+          <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-[#b8532f] z-20"></div>
 
           {/* Camera Error Alert Banner */}
           {cameraError && !isCameraActive && (
@@ -897,36 +902,19 @@ export default function Scanner({
               className="w-full h-full object-cover"
             />
 
-            {/* AI Barcode Extraction Active Overlay */}
-            {isExtractingBarcode && (
-              <div className="absolute inset-0 z-30 bg-black/60 backdrop-blur-xs flex flex-col items-center justify-center text-white pointer-events-none animate-fadeIn">
-                <div className="flex items-center gap-3 bg-[#042f2e]/95 border border-[#47d1cc] px-5 py-3 rounded-xl shadow-[0_0_35px_rgba(71,209,204,0.5)]">
-                  <Loader2 className="w-5 h-5 text-[#47d1cc] animate-spin" />
-                  <div className="text-left">
-                    <div className="font-['Space_Grotesk'] text-sm font-bold text-[#e0fbf9]">
-                      AI Reading Barcode...
-                    </div>
-                    <div className="font-['JetBrains_Mono'] text-[10.5px] text-[#99f6e4]">
-                      Multimodal vision decoding EAN digits
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Barcode Reticle & Laser Sweep (Step 1) */}
             {step === 1 && !capturedData.barcode && (
               <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
-                <div className="w-72 h-40 border-2 border-[#47d1cc]/70 rounded-xl relative shadow-[0_0_20px_rgba(71,209,204,0.3)]">
-                  <div className="camera-reticle-corner -top-1 -left-1 border-t-2 border-l-2 border-[#47d1cc] rounded-tl" />
-                  <div className="camera-reticle-corner -top-1 -right-1 border-t-2 border-r-2 border-[#47d1cc] rounded-tr" />
-                  <div className="camera-reticle-corner -bottom-1 -left-1 border-b-2 border-l-2 border-[#47d1cc] rounded-bl" />
-                  <div className="camera-reticle-corner -bottom-1 -right-1 border-b-2 border-r-2 border-[#47d1cc] rounded-br" />
-                  <div className="absolute inset-x-2 h-0.5 bg-[#47d1cc] shadow-[0_0_12px_#47d1cc] scanner-laser" />
+                <div className="w-72 h-40 border-2 border-[#b8532f]/80 rounded-xl relative shadow-[0_0_20px_rgba(184,83,47,0.3)]">
+                  <div className="camera-reticle-corner -top-1 -left-1 border-t-2 border-l-2 border-[#b8532f] rounded-tl" />
+                  <div className="camera-reticle-corner -top-1 -right-1 border-t-2 border-r-2 border-[#b8532f] rounded-tr" />
+                  <div className="camera-reticle-corner -bottom-1 -left-1 border-b-2 border-l-2 border-[#b8532f] rounded-bl" />
+                  <div className="camera-reticle-corner -bottom-1 -right-1 border-b-2 border-r-2 border-[#b8532f] rounded-br" />
+                  <div className="absolute inset-x-2 h-0.5 bg-[#b8532f] shadow-[0_0_12px_#b8532f] scanner-laser" />
                 </div>
-                <div className="mt-3 text-[11px] font-mono text-[#47d1cc] font-bold bg-black/75 px-3.5 py-1 rounded-full border border-[#47d1cc]/40 flex items-center gap-1.5 shadow-md">
-                  <Sparkles className="w-3 h-3 text-[#47d1cc]" />
-                  <span>Auto-reading... Hold steady or click AI Auto-Read below</span>
+                <div className="mt-3 text-[11px] font-['Space_Grotesk'] text-[#faf7f2] font-semibold bg-[#2a2622]/85 px-4 py-1.5 rounded-full border border-[#b8532f]/50 flex items-center gap-2 shadow-md">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Aim barcode at reticle • Auto-Scanning (Optical + AI Vision)</span>
                 </div>
               </div>
             )}
@@ -937,8 +925,8 @@ export default function Scanner({
                 <div
                   className={`px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md border shadow-lg ${
                     qualityFeedback.status === 'good'
-                      ? 'bg-[#042f2e]/80 text-[#e0fbf9] border-[#47d1cc]/40'
-                      : 'bg-[#431407]/80 text-[#fdba74] border-[#ea580c]/40 animate-pulse'
+                      ? 'bg-[#2a2622]/85 text-[#faf7f2] border-[#c99a3e]/50'
+                      : 'bg-[#431407]/90 text-[#fdba74] border-[#be123c]/50 animate-pulse'
                   }`}
                 >
                   {qualityFeedback.message}
@@ -946,74 +934,41 @@ export default function Scanner({
               </div>
             )}
 
-            {/* Top Controls Overlay */}
-            <div className="absolute top-3 right-3 flex items-center space-x-2">
-              {step === 1 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStep(2);
-                  }}
-                  className="px-3 py-1.5 bg-slate-900/90 hover:bg-slate-800 text-[#47d1cc] font-bold rounded-lg backdrop-blur-md transition flex items-center space-x-1 text-xs border border-slate-700 shadow-md cursor-pointer"
-                >
-                  <span>Skip Barcode → Photos</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              )}
-              {step === 3 && thumbnails.front && (
-                <button
-                  type="button"
-                  onClick={() => submitMultiStepScan(capturedData)}
-                  className="px-3 py-1.5 bg-slate-900/90 hover:bg-slate-800 text-[#47d1cc] font-bold rounded-lg backdrop-blur-md transition flex items-center space-x-1 text-xs border border-slate-700 shadow-md cursor-pointer"
-                >
-                  <Zap className="w-3.5 h-3.5 text-[#47d1cc]" />
-                  <span>Analyze Front Only</span>
-                </button>
-              )}
-              {step === 4 && (
-                <button
-                  type="button"
-                  onClick={handleSkipStep4}
-                  className="px-3 py-1.5 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-bold rounded-lg backdrop-blur-md transition flex items-center space-x-1 text-xs border border-[#2bc4be] shadow-md cursor-pointer"
-                >
-                  <Zap className="w-3.5 h-3.5 fill-current" />
-                  <span>Analyze 2 Photos Now</span>
-                </button>
-              )}
+            {/* Top Controls: Single Compact Camera Close Button */}
+            <div className="absolute top-3 right-3 z-20 flex items-center">
               <button
                 type="button"
                 onClick={stopCamera}
-                className="px-3 py-1.5 bg-slate-900/90 hover:bg-rose-600 text-rose-300 hover:text-white font-bold rounded-lg text-xs border border-rose-500/40 hover:border-rose-600 backdrop-blur-md transition flex items-center space-x-1.5 shadow-lg active:scale-95 cursor-pointer"
-                title="Stop camera feed and turn off webcam"
+                className="p-2 bg-[#2a2622]/80 hover:bg-[#be123c] text-[#faf7f2] rounded-full backdrop-blur-md transition shadow-lg active:scale-95 cursor-pointer"
+                title="Close Camera"
               >
-                <CameraOff className="w-3.5 h-3.5" />
-                <span>Stop Scanner</span>
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Step indicator pill */}
-            <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-md border border-white/20 text-white font-mono text-[11px] px-2.5 py-1 rounded-md flex items-center gap-1.5">
+            <div className="absolute bottom-3 left-3 bg-[#2a2622]/85 backdrop-blur-md border border-[#574f46] text-[#faf7f2] font-['Space_Grotesk'] text-[11px] px-2.5 py-1 rounded-md flex items-center gap-1.5">
               {step === 1 && (
                 <>
-                  <Barcode className="w-3.5 h-3.5 text-[#47d1cc]" />
+                  <Barcode className="w-3.5 h-3.5 text-[#c99a3e]" />
                   <span>STEP 1: Barcode Scan</span>
                 </>
               )}
               {step === 2 && (
                 <>
-                  <Layers className="w-3.5 h-3.5 text-[#47d1cc]" />
+                  <Layers className="w-3.5 h-3.5 text-[#c99a3e]" />
                   <span>SHOT 1 OF 2: Front Panel (Brand &amp; Net Wt)</span>
                 </>
               )}
               {step === 3 && (
                 <>
-                  <Layers className="w-3.5 h-3.5 text-[#47d1cc]" />
+                  <Layers className="w-3.5 h-3.5 text-[#c99a3e]" />
                   <span>SHOT 2 OF 2: Back Panel (MRP, Date, Ingredients)</span>
                 </>
               )}
               {step === 4 && (
                 <>
-                  <Plus className="w-3.5 h-3.5 text-[#47d1cc]" />
+                  <Plus className="w-3.5 h-3.5 text-[#c99a3e]" />
                   <span>OPTIONAL SHOT 3: Side Panel / Flap</span>
                 </>
               )}
@@ -1022,7 +977,7 @@ export default function Scanner({
 
           {/* B. Zoomable Captured Photo Preview */}
           {currentPreviewUrl && !isCameraActive && (
-            <div className="absolute inset-0 z-20 flex flex-col bg-slate-950">
+            <div className="absolute inset-0 z-20 flex flex-col bg-stone-950">
               <div
                 className="relative flex-1 overflow-hidden flex items-center justify-center bg-black/70 cursor-pointer select-none"
                 onClick={() => setIsZoomed(!isZoomed)}
@@ -1035,16 +990,16 @@ export default function Scanner({
                   }`}
                 />
                 <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md text-white text-[11px] font-semibold px-3 py-1 rounded-full border border-white/20 flex items-center space-x-1 shadow-md">
-                  <ZoomIn className="w-3.5 h-3.5 text-[#47d1cc]" />
+                  <ZoomIn className="w-3.5 h-3.5 text-[#c99a3e]" />
                   <span>{isZoomed ? 'Tap to Zoom Out' : 'Tap to Zoom & Inspect'}</span>
                 </div>
               </div>
 
               {/* Quality verification bottom bar */}
-              <div className="p-3 bg-white border-t border-[#ccfbf1] flex flex-wrap items-center justify-between gap-2">
+              <div className="p-3 bg-white border-t border-[#e7e0d6] flex flex-wrap items-center justify-between gap-2">
                 <div className="text-left">
-                  <div className="text-xs font-bold text-[#0f172a] flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-[#0d9488]" />
+                  <div className="text-xs font-bold text-[#2a2622] flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-[#b8532f]" />
                     <span>
                       {step === 2
                         ? 'Front Panel: Brand, Name & Net Quantity clear?'
@@ -1053,7 +1008,7 @@ export default function Scanner({
                         : 'Side / Flap: Batch info & Manufacturer address sharp?'}
                     </span>
                   </div>
-                  <div className="text-[11px] text-[#64748b]">
+                  <div className="text-[11px] text-[#786e65]">
                     Tap Retake if glare or motion blur obscures text.
                   </div>
                 </div>
@@ -1062,7 +1017,7 @@ export default function Scanner({
                   <button
                     type="button"
                     onClick={handleRetake}
-                    className="px-3 py-1.5 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#334155] font-semibold rounded-lg text-xs border border-[#ccfbf1] transition cursor-pointer"
+                    className="px-3 py-1.5 bg-[#faf7f2] hover:bg-[#f5ecdf] text-[#2a2622] font-semibold rounded-lg text-xs border border-[#e7e0d6] transition cursor-pointer"
                   >
                     Retake
                   </button>
@@ -1072,7 +1027,7 @@ export default function Scanner({
                     <button
                       type="button"
                       onClick={handleConfirmFront}
-                      className="px-4 py-1.5 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-bold rounded-lg text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer border border-[#2bc4be]"
+                      className="px-4 py-1.5 bg-[#b8532f] hover:bg-[#a34a2b] text-white font-bold rounded-lg text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer border border-[#a34a2b]"
                     >
                       <span>Confirm &amp; Next: Back Panel (Shot 2)</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -1085,7 +1040,7 @@ export default function Scanner({
                       <button
                         type="button"
                         onClick={handleProceedToSidePhoto}
-                        className="px-3 py-1.5 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#0f766e] font-semibold rounded-lg text-xs border border-[#99f6e4] transition flex items-center gap-1 cursor-pointer"
+                        className="px-3 py-1.5 bg-[#fdf9ee] hover:bg-[#f5ecdf] text-[#8a651e] font-semibold rounded-lg text-xs border border-[#f2e5be] transition flex items-center gap-1 cursor-pointer"
                         title="Add side or flap photo for packages with side printing"
                       >
                         <Plus className="w-3.5 h-3.5" />
@@ -1094,9 +1049,9 @@ export default function Scanner({
                       <button
                         type="button"
                         onClick={handleFinishTwoShot}
-                        className="px-4 py-1.5 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-bold rounded-lg text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer border border-[#2bc4be]"
+                        className="px-4 py-1.5 bg-[#b8532f] hover:bg-[#a34a2b] text-white font-bold rounded-lg text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer border border-[#a34a2b]"
                       >
-                        <Zap className="w-3.5 h-3.5 fill-current text-[#042f2e]" />
+                        <Zap className="w-3.5 h-3.5 fill-current text-white" />
                         <span>Analyze Now (Fast 2-Shot)</span>
                       </button>
                     </>
@@ -1107,7 +1062,7 @@ export default function Scanner({
                     <button
                       type="button"
                       onClick={handleConfirmSide}
-                      className="px-4 py-1.5 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-bold rounded-lg text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer border border-[#2bc4be]"
+                      className="px-4 py-1.5 bg-[#b8532f] hover:bg-[#a34a2b] text-white font-bold rounded-lg text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer border border-[#a34a2b]"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Confirm &amp; Analyze Full Package</span>
@@ -1121,18 +1076,18 @@ export default function Scanner({
           {/* C. Barcode Decision Modal Prompt */}
           {lockedPromptOpen && (
             <div className="absolute inset-0 z-30 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-              <div className="bg-white rounded-xl p-5 border border-[#ccfbf1] max-w-sm w-full shadow-2xl text-center space-y-3">
-                <div className="w-11 h-11 rounded-lg bg-[#e0fbf9] border border-[#99f6e4] text-[#0d9488] flex items-center justify-center mx-auto">
+              <div className="bg-white rounded-xl p-5 border border-[#e7e0d6] max-w-sm w-full shadow-2xl text-center space-y-3">
+                <div className="w-11 h-11 rounded-lg bg-[#fdf2ec] border border-[#f5d5c6] text-[#b8532f] flex items-center justify-center mx-auto">
                   <QrCode className="w-6 h-6" />
                 </div>
                 <div>
-                  <div className="font-['JetBrains_Mono'] text-[10px] font-bold text-[#0d9488] uppercase tracking-wider">
+                  <div className="font-['Space_Grotesk'] text-[10.5px] font-bold text-[#b8532f] uppercase tracking-wider">
                     Barcode Recognized
                   </div>
-                  <h3 className="font-['Space_Grotesk'] text-lg font-bold text-[#0f172a] mt-0.5">
+                  <h3 className="font-['Space_Grotesk'] text-lg font-bold text-[#2a2622] mt-0.5">
                     {capturedData.barcode}
                   </h3>
-                  <p className="text-xs text-[#64748b] mt-1">
+                  <p className="text-xs text-[#786e65] mt-1">
                     Select audit mode for this packaged commodity:
                   </p>
                 </div>
@@ -1141,7 +1096,7 @@ export default function Scanner({
                   <button
                     type="button"
                     onClick={handleDirectDatabaseAudit}
-                    className="w-full py-2.5 px-3 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-['Space_Grotesk'] font-bold rounded-lg text-xs transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer border border-[#2bc4be]"
+                    className="w-full py-2.5 px-3 bg-[#b8532f] hover:bg-[#a34a2b] text-white font-['Space_Grotesk'] font-bold rounded-lg text-xs transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer border border-[#a34a2b]"
                   >
                     <Database className="w-3.5 h-3.5" />
                     <span>Instant Database Audit (&lt;10ms)</span>
@@ -1149,9 +1104,9 @@ export default function Scanner({
                   <button
                     type="button"
                     onClick={handleProceedToPhotos}
-                    className="w-full py-2 px-3 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#334155] font-['Space_Grotesk'] font-semibold rounded-lg text-xs border border-[#ccfbf1] transition flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2 px-3 bg-[#faf7f2] hover:bg-[#f5ecdf] text-[#2a2622] font-['Space_Grotesk'] font-semibold rounded-lg text-xs border border-[#e7e0d6] transition flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <Layers className="w-3.5 h-3.5 text-[#0d9488]" />
+                    <Layers className="w-3.5 h-3.5 text-[#b8532f]" />
                     <span>Start Fast 2-Shot Packaging Audit</span>
                   </button>
                 </div>
@@ -1163,14 +1118,14 @@ export default function Scanner({
           {(step === 5 || isLoading) && (
             <div className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 bg-white/95 backdrop-blur-xs text-center space-y-3">
               <div className="relative w-14 h-14 flex items-center justify-center">
-                <Loader2 className="w-12 h-12 text-[#47d1cc] animate-spin absolute" />
-                <ShieldCheck className="w-5 h-5 text-[#0d9488]" />
+                <Loader2 className="w-12 h-12 text-[#b8532f] animate-spin absolute" />
+                <ShieldCheck className="w-5 h-5 text-[#c99a3e]" />
               </div>
               <div>
-                <div className="font-['Space_Grotesk'] font-bold text-[15px] text-[#0f172a]">
+                <div className="font-['Space_Grotesk'] font-bold text-[15px] text-[#2a2622]">
                   Cross-Confirming Evidence with Database
                 </div>
-                <p className="font-['JetBrains_Mono'] text-[11.5px] text-[#64748b] mt-1 max-w-md mx-auto">
+                <p className="font-['Space_Grotesk'] text-[11.5px] text-[#786e65] mt-1 max-w-md mx-auto">
                   Running Rule 6 statutory checks, optical font measurement &amp; allergen cross-match...
                 </p>
               </div>
@@ -1180,19 +1135,19 @@ export default function Scanner({
           {/* E. Scanned Label Card (Active Scanned Result Preview or Standby Prompt) */}
           {!isCameraActive && !currentPreviewUrl && !lockedPromptOpen && !isLoading && step !== 5 && (
             scanResult ? (
-              <div className="relative w-full max-w-lg bg-white text-[#0f172a] rounded-lg p-4 shadow-xs border border-[#ccfbf1] z-10">
-                <div className="flex items-start justify-between border-b border-[#ccfbf1] pb-2 mb-2">
+              <div className="relative w-full max-w-lg bg-white text-[#2a2622] rounded-lg p-4 shadow-xs border border-[#e7e0d6] z-10">
+                <div className="flex items-start justify-between border-b border-[#e7e0d6] pb-2 mb-2">
                   <div>
-                    <span className="px-2 py-0.5 bg-[#e6fbf9] border border-[#99f6e4] text-[#0f766e] font-['JetBrains_Mono'] text-[10px] font-bold rounded uppercase">
+                    <span className="px-2 py-0.5 bg-[#fdfbf7] border border-[#f2e5be] text-[#8a651e] font-['Space_Grotesk'] text-[10px] font-bold rounded uppercase">
                       PREPACKAGED RETAIL UNIT
                     </span>
-                    <div className="font-['Space_Grotesk'] text-[15px] font-bold text-[#0f172a] mt-1">
+                    <div className="font-['Space_Grotesk'] text-[15px] font-bold text-[#2a2622] mt-1">
                       {activeProduct?.name || 'Scanned Packaged Commodity'}
                     </div>
                   </div>
-                  <span className={`px-2 py-0.5 font-['JetBrains_Mono'] text-[11px] font-semibold rounded border ${
+                  <span className={`px-2 py-0.5 font-mono text-[11px] font-semibold rounded border ${
                     activeProduct?.barcode 
-                      ? 'bg-[#f0fdfc] text-[#334155] border-[#ccfbf1]' 
+                      ? 'bg-[#faf7f2] text-[#2a2622] border-[#e7e0d6]' 
                       : 'bg-[#fff7ed] text-[#c2410c] border-[#fed7aa]'
                   }`}>
                     {activeProduct?.barcode ? `EAN: ${activeProduct.barcode}` : 'NO BARCODE (VISUAL AUDIT)'}
@@ -1200,23 +1155,23 @@ export default function Scanner({
                 </div>
 
                 {/* Bounding Boxes mapped to Rule 6 Plain Language */}
-                <div className="grid grid-cols-2 gap-2 font-['JetBrains_Mono'] text-[11px]">
+                <div className="grid grid-cols-2 gap-2 text-[11px]">
                   {/* MRP */}
                   <div className={`p-2 border rounded flex items-center justify-between ${
                     mrpField?.status === 'DETECTED'
-                      ? 'bg-[#f0fdfc] border-[#ccfbf1]'
-                      : 'bg-[#fff7ed] border-[#fed7aa]'
+                      ? 'bg-[#fcfaf7] border-[#e7e0d6]'
+                      : 'bg-[#fff1f2] border-[#fecdd3]'
                   }`}>
                     <div className="flex items-center gap-1.5">
                       {mrpField?.status === 'DETECTED' ? (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#0d9488] shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#b8532f] shrink-0" />
                       ) : (
-                        <AlertTriangle className="w-3.5 h-3.5 text-[#ea580c] shrink-0" />
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#be123c] shrink-0" />
                       )}
-                      <span className="text-[#475569] font-medium">Price (MRP)</span>
+                      <span className="text-[#574f46] font-medium">Price (MRP)</span>
                     </div>
                     <span className={`font-bold ${
-                      mrpField?.status === 'DETECTED' ? 'text-[#0f172a]' : 'text-[#c2410c] text-[10px]'
+                      mrpField?.status === 'DETECTED' ? 'text-[#2a2622]' : 'text-[#be123c] text-[10px]'
                     }`}>
                       {mrpField?.status === 'DETECTED'
                         ? (mrpField.value?.startsWith('₹') ? mrpField.value : `₹${mrpField.value}`)
@@ -1227,19 +1182,19 @@ export default function Scanner({
                   {/* Net Quantity & Weight */}
                   <div className={`p-2 border rounded flex items-center justify-between ${
                     weightField?.status === 'DETECTED'
-                      ? 'bg-[#f0fdfc] border-[#ccfbf1]'
-                      : 'bg-[#fff7ed] border-[#fed7aa]'
+                      ? 'bg-[#fcfaf7] border-[#e7e0d6]'
+                      : 'bg-[#fff1f2] border-[#fecdd3]'
                   }`}>
                     <div className="flex items-center gap-1.5">
                       {weightField?.status === 'DETECTED' ? (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#0d9488] shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#b8532f] shrink-0" />
                       ) : (
-                        <AlertTriangle className="w-3.5 h-3.5 text-[#ea580c] shrink-0" />
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#be123c] shrink-0" />
                       )}
-                      <span className="text-[#475569] font-medium">Net Quantity</span>
+                      <span className="text-[#574f46] font-medium">Net Quantity</span>
                     </div>
                     <span className={`font-bold ${
-                      weightField?.status === 'DETECTED' ? 'text-[#0f172a]' : 'text-[#c2410c] text-[10px]'
+                      weightField?.status === 'DETECTED' ? 'text-[#2a2622]' : 'text-[#be123c] text-[10px]'
                     }`}>
                       {weightField?.status === 'DETECTED'
                         ? (weightField.value?.replace(/^NET\s*(?:WEIGHT|QTY|QUANTITY)?\s*:\s*/i, '') || 'Detected')
@@ -1250,27 +1205,27 @@ export default function Scanner({
                   {/* Month & Year of Mfg */}
                   <div className={`p-2 border rounded flex items-center justify-between ${
                     mfgField?.status === 'DETECTED'
-                      ? 'bg-[#f0fdfc] border-[#ccfbf1]'
+                      ? 'bg-[#fcfaf7] border-[#e7e0d6]'
                       : mfgField?.status === 'UNCLEAR'
-                      ? 'bg-[#fffbeb] border-[#fde68a]'
-                      : 'bg-[#fff7ed] border-[#fed7aa]'
+                      ? 'bg-[#fdf9ee] border-[#f2e5be]'
+                      : 'bg-[#fff1f2] border-[#fecdd3]'
                   }`}>
                     <div className="flex items-center gap-1.5">
                       {mfgField?.status === 'DETECTED' ? (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#0d9488] shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#b8532f] shrink-0" />
                       ) : mfgField?.status === 'UNCLEAR' ? (
-                        <HelpCircle className="w-3.5 h-3.5 text-[#d97706] shrink-0" />
+                        <HelpCircle className="w-3.5 h-3.5 text-[#c99a3e] shrink-0" />
                       ) : (
-                        <AlertTriangle className="w-3.5 h-3.5 text-[#ea580c] shrink-0" />
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#be123c] shrink-0" />
                       )}
-                      <span className="text-[#475569] font-medium">Mfg Date</span>
+                      <span className="text-[#574f46] font-medium">Mfg Date</span>
                     </div>
                     <span className={`font-bold ${
                       mfgField?.status === 'DETECTED' 
-                        ? 'text-[#0f172a]' 
+                        ? 'text-[#2a2622]' 
                         : mfgField?.status === 'UNCLEAR'
-                        ? 'text-[#b45309] text-[10px]'
-                        : 'text-[#c2410c] text-[10px]'
+                        ? 'text-[#8a651e] text-[10px]'
+                        : 'text-[#be123c] text-[10px]'
                     }`}>
                       {mfgField?.status === 'DETECTED'
                         ? mfgField.value
@@ -1283,19 +1238,19 @@ export default function Scanner({
                   {/* Consumer Helpline */}
                   <div className={`p-2 border rounded flex items-center justify-between ${
                     helplineField?.status === 'DETECTED'
-                      ? 'bg-[#f0fdfc] border-[#ccfbf1]'
-                      : 'bg-[#fff7ed] border-[#fed7aa]'
+                      ? 'bg-[#fcfaf7] border-[#e7e0d6]'
+                      : 'bg-[#fff1f2] border-[#fecdd3]'
                   }`}>
                     <div className="flex items-center gap-1.5">
                       {helplineField?.status === 'DETECTED' ? (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#0d9488] shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#b8532f] shrink-0" />
                       ) : (
-                        <AlertTriangle className="w-3.5 h-3.5 text-[#ea580c] shrink-0" />
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#be123c] shrink-0" />
                       )}
-                      <span className="text-[#475569] font-medium">Helpline</span>
+                      <span className="text-[#574f46] font-medium">Helpline</span>
                     </div>
                     <span className={`font-bold ${
-                      helplineField?.status === 'DETECTED' ? 'text-[#0f172a]' : 'text-[#c2410c] text-[10px]'
+                      helplineField?.status === 'DETECTED' ? 'text-[#2a2622]' : 'text-[#be123c] text-[10px]'
                     }`}>
                       {helplineField?.status === 'DETECTED'
                         ? helplineField.value
@@ -1305,23 +1260,23 @@ export default function Scanner({
                 </div>
               </div>
             ) : (
-              <div className="relative w-full max-w-md bg-white/90 backdrop-blur-xs text-[#0f172a] rounded-xl p-5 shadow-xs border border-[#ccfbf1] text-center z-10 space-y-2.5">
-                <div className="w-10 h-10 rounded-lg bg-[#e0fbf9] border border-[#99f6e4] text-[#0d9488] flex items-center justify-center mx-auto shadow-xs">
+              <div className="relative w-full max-w-md bg-white/95 backdrop-blur-xs text-[#2a2622] rounded-xl p-5 shadow-xs border border-[#e7e0d6] text-center z-10 space-y-2.5">
+                <div className="w-10 h-10 rounded-lg bg-[#fdf2ec] border border-[#f5d5c6] text-[#b8532f] flex items-center justify-center mx-auto shadow-xs">
                   <Focus className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="font-['Space_Grotesk'] text-sm font-bold text-[#0f172a]">
+                  <div className="font-['Space_Grotesk'] text-sm font-bold text-[#2a2622]">
                     Packaging Viewfinder Ready
                   </div>
-                  <p className="text-xs text-[#64748b] mt-1 max-w-xs mx-auto">
+                  <p className="text-xs text-[#786e65] mt-1 max-w-xs mx-auto">
                     Point camera at retail commodity or use <strong>Direct 2-Shot Audit</strong> to inspect MRP, Net Quantity &amp; Legal Metrology declarations.
                   </p>
                 </div>
                 <div className="flex items-center justify-center gap-2 pt-1">
-                  <span className="px-2 py-0.5 bg-[#f0fdfc] border border-[#ccfbf1] text-[#0f766e] font-['JetBrains_Mono'] text-[10px] font-semibold rounded">
+                  <span className="px-2 py-0.5 bg-[#faf7f2] border border-[#e7e0d6] text-[#574f46] font-['Space_Grotesk'] text-[10px] font-semibold rounded">
                     Rule 6 Audit Active
                   </span>
-                  <span className="px-2 py-0.5 bg-[#f0fdfc] border border-[#ccfbf1] text-[#0f766e] font-['JetBrains_Mono'] text-[10px] font-semibold rounded">
+                  <span className="px-2 py-0.5 bg-[#faf7f2] border border-[#e7e0d6] text-[#574f46] font-['Space_Grotesk'] text-[10px] font-semibold rounded">
                     Gemini Multimodal AI
                   </span>
                 </div>
@@ -1332,8 +1287,8 @@ export default function Scanner({
 
         {/* Plain language guidance & Action Footer */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <div className="flex items-center gap-1.5 text-[#64748b] font-['JetBrains_Mono'] text-[11.5px] font-medium">
-            <Focus className="w-4 h-4 text-[#0d9488]" />
+          <div className="flex items-center gap-1.5 text-[#786e65] font-['Space_Grotesk'] text-[11.5px] font-medium">
+            <Focus className="w-4 h-4 text-[#b8532f]" />
             <span>
               {step === 1
                 ? 'Align barcode in frame or click "Direct 2-Shot Audit"'
@@ -1348,77 +1303,83 @@ export default function Scanner({
           <div className="flex items-center gap-2 flex-wrap">
             {isCameraActive ? (
               <>
-                {step === 1 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStep(2);
-                    }}
-                    className="px-3 py-2 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#0f766e] border border-[#ccfbf1] font-['Space_Grotesk'] text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
-                  >
-                    <span>Skip to 2-Shot Photos</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                {step === 1 ? (
+                  /* Step 1: Automatic Optical + AI Barcode Scan - Clean uncluttered controls */
+                  <div className="flex items-center justify-between w-full flex-wrap gap-2">
+                    <div className="flex items-center gap-2 text-xs text-[#78716c]">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="font-['Space_Grotesk'] font-medium">Automatic Optical &amp; AI Barcode Detection Active</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setStep(2)}
+                        className="px-4 py-2 bg-[#faf7f2] hover:bg-[#f5ecdf] text-[#2a2622] border border-[#e7e0d6] font-['Space_Grotesk'] text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                      >
+                        <span>Skip Barcode → Photos</span>
+                        <ArrowRight className="w-3.5 h-3.5 text-[#b8532f]" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={stopCamera}
+                        className="px-3.5 py-2 bg-[#fff1f2] hover:bg-[#ffe4e6] text-[#be123c] border border-[#fecdd3] font-['Space_Grotesk'] text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                      >
+                        <CameraOff className="w-3.5 h-3.5" />
+                        <span>Stop</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* Steps 2-4: Multi-Angle Label Photos */
+                  <div className="flex items-center justify-between w-full flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      {step === 3 && thumbnails.front && (
+                        <button
+                          type="button"
+                          onClick={() => submitMultiStepScan(capturedData)}
+                          className="px-3 py-2 bg-[#faf7f2] hover:bg-[#f5ecdf] text-[#2a2622] border border-[#e7e0d6] font-['Space_Grotesk'] text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                        >
+                          <Zap className="w-3.5 h-3.5 text-[#b8532f]" />
+                          <span>Analyze Front Only</span>
+                        </button>
+                      )}
+                      {step === 4 && (
+                        <button
+                          type="button"
+                          onClick={handleSkipStep4}
+                          className="px-3 py-2 bg-[#faf7f2] hover:bg-[#f5ecdf] text-[#2a2622] border border-[#e7e0d6] font-['Space_Grotesk'] text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                        >
+                          <Zap className="w-3.5 h-3.5 text-[#b8532f]" />
+                          <span>Analyze 2 Photos Now</span>
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCapturePhoto}
+                        className="px-5 py-2.5 bg-[#b8532f] hover:bg-[#a34a2b] text-white font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-all flex items-center gap-2 cursor-pointer shadow-sm border border-[#a34a2b]"
+                      >
+                        <Camera className="w-4 h-4" />
+                        <span>
+                          {step === 2
+                            ? 'Capture Front Photo (1/2)'
+                            : step === 3
+                            ? 'Capture Back Photo (2/2)'
+                            : 'Capture Side Photo (3/3)'}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={stopCamera}
+                        className="px-3.5 py-2.5 bg-[#fff1f2] hover:bg-[#ffe4e6] text-[#be123c] border border-[#fecdd3] font-['Space_Grotesk'] text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                      >
+                        <CameraOff className="w-3.5 h-3.5" />
+                        <span>Stop</span>
+                      </button>
+                    </div>
+                  </div>
                 )}
-                {step === 3 && thumbnails.front && (
-                  <button
-                    type="button"
-                    onClick={() => submitMultiStepScan(capturedData)}
-                    className="px-3 py-2 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#0f766e] border border-[#ccfbf1] font-['Space_Grotesk'] text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
-                    title="Analyze directly with front photo"
-                  >
-                    <Zap className="w-3.5 h-3.5 text-[#0d9488]" />
-                    <span>Analyze Front Only</span>
-                  </button>
-                )}
-                {step === 4 && (
-                  <button
-                    type="button"
-                    onClick={handleSkipStep4}
-                    className="px-3 py-2 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#0f766e] border border-[#ccfbf1] font-['Space_Grotesk'] text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
-                  >
-                    <Zap className="w-3.5 h-3.5 text-[#0d9488]" />
-                    <span>Analyze 2 Photos Now</span>
-                  </button>
-                )}
-                <button
-                  type="button"
-                  disabled={isExtractingBarcode}
-                  onClick={handleCapturePhoto}
-                  className={`px-4 py-2 font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border ${
-                    isExtractingBarcode
-                      ? 'bg-[#ccfbf1] text-[#0f766e] border-[#99f6e4] animate-pulse cursor-wait'
-                      : 'bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] border-[#2bc4be]'
-                  }`}
-                >
-                  {isExtractingBarcode ? (
-                    <>
-                      <Loader2 className="w-4 h-4 text-[#0f766e] animate-spin" />
-                      <span>Reading Barcode with AI...</span>
-                    </>
-                  ) : (
-                    <>
-                      {step === 1 ? <Sparkles className="w-4 h-4" /> : <Camera className="w-4 h-4" />}
-                      <span>
-                        {step === 1
-                          ? '⚡ AI Auto-Read Barcode'
-                          : step === 2
-                          ? 'Capture Front Photo (1/2)'
-                          : step === 3
-                          ? 'Capture Back Photo (2/2)'
-                          : 'Capture Side Photo (3/3)'}
-                      </span>
-                    </>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={stopCamera}
-                  className="px-4 py-2 bg-[#fff1f2] hover:bg-[#ffe4e6] text-[#be123c] border border-[#fecdd3] font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
-                >
-                  <CameraOff className="w-4 h-4" />
-                  <span>Stop Scanner</span>
-                </button>
               </>
             ) : (
               <>
@@ -1429,9 +1390,9 @@ export default function Scanner({
                       setStep(2);
                       startCamera();
                     }}
-                    className="px-3.5 py-2 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#0f766e] border border-[#ccfbf1] font-['Space_Grotesk'] text-[13px] font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    className="px-3.5 py-2 bg-[#faf7f2] hover:bg-[#f5ecdf] text-[#2a2622] border border-[#e7e0d6] font-['Space_Grotesk'] text-[13px] font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
                   >
-                    <Layers className="w-4 h-4 text-[#0d9488]" />
+                    <Layers className="w-4 h-4 text-[#b8532f]" />
                     <span>Direct 2-Shot Audit</span>
                   </button>
                 )}
@@ -1439,7 +1400,7 @@ export default function Scanner({
                   <button
                     type="button"
                     onClick={() => submitMultiStepScan(capturedData)}
-                    className="px-3.5 py-2 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#2bc4be]"
+                    className="px-3.5 py-2 bg-[#b8532f] hover:bg-[#a34a2b] text-white font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#a34a2b]"
                   >
                     <Zap className="w-4 h-4 fill-current" />
                     <span>
@@ -1456,9 +1417,9 @@ export default function Scanner({
                       fileInputRef.current?.click();
                     }
                   }}
-                  className="px-4 py-2 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#334155] border border-[#ccfbf1] font-['Space_Grotesk'] text-[13px] font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  className="px-4 py-2 bg-[#faf7f2] hover:bg-[#f5ecdf] text-[#2a2622] border border-[#e7e0d6] font-['Space_Grotesk'] text-[13px] font-semibold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
-                  <Upload className="w-4 h-4 text-[#64748b]" />
+                  <Upload className="w-4 h-4 text-[#786e65]" />
                   <span>
                     {step === 1
                       ? 'Upload Label File'
@@ -1468,7 +1429,7 @@ export default function Scanner({
                 <button
                   type="button"
                   onClick={startCamera}
-                  className="px-4 py-2 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#2bc4be]"
+                  className="px-4 py-2 bg-[#b8532f] hover:bg-[#a34a2b] text-white font-['Space_Grotesk'] text-[13px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs border border-[#a34a2b]"
                 >
                   <Camera className="w-4 h-4" />
                   <span>{thumbnails.front ? 'Resume Camera' : 'Start Live Scanner'}</span>
@@ -1480,8 +1441,8 @@ export default function Scanner({
 
         {/* Optional Manual Barcode Input bar at bottom */}
         {!isCameraActive && (
-          <form onSubmit={handleManualBarcodeSubmit} className="mt-3 pt-3 border-t border-[#ccfbf1] flex items-center gap-2">
-            <span className="font-['JetBrains_Mono'] text-[10.5px] font-bold text-[#64748b] uppercase tracking-wider shrink-0">
+          <form onSubmit={handleManualBarcodeSubmit} className="mt-3 pt-3 border-t border-[#e7e0d6] flex items-center gap-2">
+            <span className="font-mono text-[10.5px] font-bold text-[#786e65] uppercase tracking-wider shrink-0">
               Manual EAN:
             </span>
             <input
@@ -1489,12 +1450,12 @@ export default function Scanner({
               value={manualBarcode}
               onChange={(e) => setManualBarcode(e.target.value)}
               placeholder="Or enter barcode (e.g. 8901058852371)"
-              className="bg-[#f0fdfc] border border-[#ccfbf1] rounded-md px-3 py-1.5 text-xs text-[#0f172a] placeholder-[#94a3b8] font-['JetBrains_Mono'] flex-1 focus:outline-none focus:border-[#47d1cc]"
+              className="bg-[#faf7f2] border border-[#e7e0d6] rounded-md px-3 py-1.5 text-xs text-[#2a2622] placeholder-[#786e65] font-mono flex-1 focus:outline-none focus:border-[#b8532f]"
             />
             <button
               type="submit"
               disabled={!manualBarcode.trim()}
-              className="px-3.5 py-1.5 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-['Space_Grotesk'] font-bold rounded-md text-xs disabled:opacity-40 cursor-pointer transition shadow-xs border border-[#2bc4be]"
+              className="px-3.5 py-1.5 bg-[#b8532f] hover:bg-[#a34a2b] text-white font-['Space_Grotesk'] font-bold rounded-md text-xs disabled:opacity-40 cursor-pointer transition shadow-xs border border-[#a34a2b]"
             >
               Verify
             </button>
@@ -1505,31 +1466,31 @@ export default function Scanner({
       {/* ========================================================================= */}
       {/* Right: Rule 6 Checklist (8 Plain-Language Declarations) (col-span-4) */}
       {/* ========================================================================= */}
-      <div className="lg:col-span-4 bg-white rounded-xl p-5 sm:p-6 border border-[#ccfbf1] shadow-xs flex flex-col justify-between space-y-4">
+      <div className="lg:col-span-4 bg-white rounded-xl p-5 sm:p-6 border border-[#e7e0d6] shadow-xs flex flex-col justify-between space-y-4">
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="font-['Space_Grotesk'] text-[16px] text-[#0f172a] font-bold">
+            <span className="font-['Space_Grotesk'] text-[16px] text-[#2a2622] font-bold">
               Rule 6 Checklist (8 Declarations)
             </span>
             <motion.span
               key={score}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className={`px-2.5 py-0.5 font-['JetBrains_Mono'] text-[11px] font-bold rounded flex items-center gap-1 border ${
+              className={`px-2.5 py-0.5 font-['Space_Grotesk'] text-[11px] font-bold rounded flex items-center gap-1 border ${
                 isViolationState
-                  ? 'bg-[#fff7ed] text-[#c2410c] border-[#fed7aa]'
-                  : 'bg-[#e6fbf9] text-[#0f766e] border-[#99f6e4]'
+                  ? 'bg-[#fff1f2] text-[#be123c] border-[#fecdd3]'
+                  : 'bg-[#fdfbf7] text-[#8a651e] border-[#f2e5be]'
               }`}
             >
               {isViolationState ? (
-                <AlertTriangle className="w-3.5 h-3.5 text-[#ea580c]" />
+                <AlertTriangle className="w-3.5 h-3.5 text-[#be123c]" />
               ) : (
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#0d9488]" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#b8532f]" />
               )}
               <span>{score}/8 {isViolationState && score < 8 ? 'VERIFIED' : 'PASSED'}</span>
             </motion.span>
           </div>
-          <p className="text-[13px] text-[#64748b] font-normal">
+          <p className="text-[13px] text-[#786e65] font-normal">
             Mandatory label standards verification under Legal Metrology Rules, 2011.
           </p>
 
@@ -1548,18 +1509,18 @@ export default function Scanner({
                   transition={{ delay: index * 0.04, duration: 0.2 }}
                   className={`flex items-center justify-between p-2 rounded border ${
                     isMissing
-                      ? 'bg-[#fff7ed] border-[#fed7aa]'
-                      : 'bg-[#f8fefe] border-[#e2e8f0]'
+                      ? 'bg-[#fff1f2] border-[#fecdd3]'
+                      : 'bg-[#faf7f2] border-[#e7e0d6]'
                   }`}
                 >
-                  <span className={`font-['JetBrains_Mono'] text-[11.5px] font-medium ${isMissing ? 'text-[#9a3412]' : 'text-[#334155]'}`}>
+                  <span className={`font-['Space_Grotesk'] text-[11.5px] font-medium ${isMissing ? 'text-[#be123c]' : 'text-[#2a2622]'}`}>
                     {item.num}. {item.title}
                   </span>
                   <span
-                    className={`px-1.5 py-0.5 font-['JetBrains_Mono'] text-[10px] font-bold rounded border ${
+                    className={`px-1.5 py-0.5 font-['Space_Grotesk'] text-[10px] font-bold rounded border ${
                       isMissing
-                        ? 'bg-[#fee2e2] text-[#b91c1c] border-[#fca5a5]'
-                        : 'bg-[#e6fbf9] text-[#0f766e] border-[#99f6e4]'
+                        ? 'bg-[#ffe4e6] text-[#be123c] border-[#fecdd3]'
+                        : 'bg-[#fdfbf7] text-[#8a651e] border-[#f2e5be]'
                     }`}
                   >
                     {item.rule} {isMissing ? '✗' : '✓'}
@@ -1571,20 +1532,20 @@ export default function Scanner({
         </div>
 
         {/* Section 36 Action Notice Panel */}
-        <div className="p-3.5 bg-[#f0fdfc] border border-[#ccfbf1] rounded-lg space-y-2">
+        <div className="p-3.5 bg-[#fdf2ec] border border-[#f5d5c6] rounded-lg space-y-2">
           <div className="flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-[#0d9488]" />
-            <span className="font-['Space_Grotesk'] text-[12px] font-bold text-[#0f172a] uppercase">
+            <ShieldCheck className="w-4 h-4 text-[#b8532f]" />
+            <span className="font-['Space_Grotesk'] text-[12px] font-bold text-[#2a2622] uppercase">
               Instant Audit Dossier
             </span>
           </div>
-          <p className="text-[12px] text-[#64748b] leading-relaxed">
+          <p className="text-[12px] text-[#786e65] leading-relaxed">
             Section 36 penalty exporter auto-generates statutory notices for state enforcement when discrepancies exceed legal limits.
           </p>
           <button
             type="button"
             onClick={onOpenNoticeModal}
-            className="w-full mt-2 py-2 px-3 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-['Space_Grotesk'] text-[12px] font-bold rounded transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer border border-[#2bc4be]"
+            className="w-full mt-2 py-2 px-3 bg-[#b8532f] hover:bg-[#a34a2b] text-white font-['Space_Grotesk'] text-[12px] font-bold rounded transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer border border-[#a34a2b]"
           >
             <Printer className="w-4 h-4" />
             <span>GENERATE SEC 36 AUDIT REPORT</span>

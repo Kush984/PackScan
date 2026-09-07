@@ -11,8 +11,8 @@ export default function DataSourceBadge({ dataSource, confidence, className = ''
 
   if (src === 'openfoodfacts') {
     return (
-      <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 ${className}`}>
-        <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+      <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[#faf7f2] border border-[#e7e0d6] text-[#b8532f] font-mono ${className}`}>
+        <CheckCircle2 className="w-3 h-3 text-[#b8532f]" />
         <span>Verified — Open Food Facts</span>
       </span>
     );
@@ -20,8 +20,8 @@ export default function DataSourceBadge({ dataSource, confidence, className = ''
 
   if (src === 'catalog') {
     return (
-      <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-sky-500/10 border border-sky-500/25 text-sky-300 ${className}`}>
-        <Database className="w-3 h-3 text-sky-400" />
+      <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[#fef3c7] border border-[#fde68a] text-[#c99a3e] font-mono ${className}`}>
+        <Database className="w-3 h-3 text-[#c99a3e]" />
         <span>Verified — PackScan Catalog</span>
       </span>
     );
@@ -29,8 +29,8 @@ export default function DataSourceBadge({ dataSource, confidence, className = ''
 
   if (src === 'ocr_cache' || (src === 'ocr' && confidence === 'high')) {
     return (
-      <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-violet-500/10 border border-violet-500/25 text-violet-300 ${className}`}>
-        <Zap className="w-3 h-3 text-violet-400" />
+      <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[#faf7f2] border border-[#e7e0d6] text-[#57534e] font-mono ${className}`}>
+        <Zap className="w-3 h-3 text-[#b8532f]" />
         <span>From Previous Scan</span>
       </span>
     );
@@ -38,8 +38,8 @@ export default function DataSourceBadge({ dataSource, confidence, className = ''
 
   if (src === 'ocr') {
     return (
-      <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-amber-500/10 border border-amber-500/25 text-amber-300 ${className}`}>
-        <AlertTriangle className="w-3 h-3 text-amber-400" />
+      <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[#fff1f2] border border-[#fecdd3] text-[#be123c] font-mono ${className}`}>
+        <AlertTriangle className="w-3 h-3 text-[#be123c]" />
         <span>Auto-extracted — please verify</span>
       </span>
     );
@@ -47,8 +47,8 @@ export default function DataSourceBadge({ dataSource, confidence, className = ''
 
   if (src === 'manual') {
     return (
-      <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-700/60 border border-slate-600 text-slate-300 ${className}`}>
-        <PenLine className="w-3 h-3 text-slate-400" />
+      <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[#faf7f2] border border-[#e7e0d6] text-[#78716c] font-mono ${className}`}>
+        <PenLine className="w-3 h-3 text-[#78716c]" />
         <span>Entered Manually</span>
       </span>
     );
@@ -56,9 +56,9 @@ export default function DataSourceBadge({ dataSource, confidence, className = ''
 
   // unknown / fallback
   return (
-    <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 border border-slate-700 text-slate-400 ${className}`}>
-      <Database className="w-3 h-3" />
-      <span>Packaged Commodity</span>
+    <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[#faf7f2] border border-[#e7e0d6] text-[#78716c] font-mono ${className}`}>
+      <Database className="w-3 h-3 text-[#78716c]" />
+      <span>Database Source</span>
     </span>
   );
 }

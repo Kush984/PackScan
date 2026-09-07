@@ -1,15 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   CheckCircle2,
   AlertTriangle,
-  XCircle,
   Scale,
-  FileText,
-  HelpCircle,
-  ExternalLink,
   ShieldCheck,
   ShieldAlert,
-  ChevronDown,
   Info,
   Edit2,
   Check,
@@ -40,6 +36,7 @@ export default function ComplianceReport({
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState(null);
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
+  const [animatedPercent, setAnimatedPercent] = useState(0);
 
   if (!report) return null;
 
@@ -62,40 +59,55 @@ export default function ComplianceReport({
   const displayPercentage = Math.round((displayScore / totalFields) * 100);
   const isFullyCompliant = displayScore === totalFields;
 
+  // Animate score counter smoothly from 0 to displayPercentage
+  useEffect(() => {
+    let start = 0;
+    const end = displayPercentage;
+    const duration = 1000;
+    const startTime = performance.now();
+
+    const frame = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - (1 - progress) * (1 - progress);
+      setAnimatedPercent(Math.round(eased * end));
+      if (progress < 1) {
+        requestAnimationFrame(frame);
+      }
+    };
+    requestAnimationFrame(frame);
+  }, [displayPercentage]);
+
   const getStatusBadge = () => {
     switch (overallStatus) {
       case 'COMPLIANT':
         return {
-          bg: 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300',
-          indicator: 'bg-emerald-500',
+          bg: 'bg-[#f0fdf4] border-[#bbf7d0] text-[#15803d]',
           title: 'FULLY COMPLIANT',
           subtitle: 'Legal Metrology (Packaged Commodities) Rules, 2011 Verified',
-          icon: <ShieldCheck className="w-6 h-6 text-emerald-400" />,
+          icon: <ShieldCheck className="w-6 h-6 text-[#16a34a]" />,
         };
       case 'DIGITAL_RECORD_VERIFIED':
         return {
-          bg: 'bg-sky-500/15 border-sky-500/40 text-sky-300',
-          indicator: 'bg-sky-500',
+          bg: 'bg-[#fff1f2] border-[#fecdd3] text-[#be123c]',
           title: 'DIGITAL REGISTRY MATCHED (AWAITING PHYSICAL LABEL AUDIT)',
           subtitle: 'Brand & Nutrition Verified Online — Point Camera at Pack to Auto-Verify Printed MRP & Batch Date',
-          icon: <Info className="w-6 h-6 text-sky-400" />,
+          icon: <AlertTriangle className="w-6 h-6 text-[#be123c]" />,
         };
       case 'PARTIALLY_COMPLIANT':
         return {
-          bg: 'bg-amber-500/15 border-amber-500/40 text-amber-300',
-          indicator: 'bg-amber-500',
+          bg: 'bg-[#fff1f2] border-[#fecdd3] text-[#be123c]',
           title: 'PARTIALLY COMPLIANT',
           subtitle: 'Some Mandatory Declarations Missing or Non-Standard',
-          icon: <AlertTriangle className="w-6 h-6 text-amber-400" />,
+          icon: <AlertTriangle className="w-6 h-6 text-[#be123c]" />,
         };
       case 'NON_COMPLIANT':
       default:
         return {
-          bg: 'bg-rose-500/15 border-rose-500/40 text-rose-300',
-          indicator: 'bg-rose-500',
+          bg: 'bg-[#fff1f2] border-[#fecdd3] text-[#be123c]',
           title: 'NON-COMPLIANT (VIOLATION DETECTED)',
           subtitle: 'Multiple Statutory Packaging Violations Identified on Physical Label',
-          icon: <ShieldAlert className="w-6 h-6 text-rose-400" />,
+          icon: <ShieldAlert className="w-6 h-6 text-[#be123c]" />,
         };
     }
   };
@@ -180,28 +192,25 @@ export default function ComplianceReport({
   }, [productName, product, barcode, isFullyCompliant, overallStatus, displayScore, totalFields, displayPercentage, fields, localOverrides, violations, fontCompliance]);
 
   return (
-    <div className="bg-slate-900/90 border-2 border-emerald-500/30 rounded-2xl p-4 sm:p-6 shadow-2xl relative overflow-hidden backdrop-blur-md">
-      {/* Background Glow */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
-
-      {/* Primary Section Header - SIH26034 Requirement */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
-        <div className="flex items-center space-x-3">
-          <div className="p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
+    <div className="bg-white border border-[#e8e2d8] rounded-xl p-5 sm:p-7 shadow-xs relative overflow-hidden">
+      {/* Primary Section Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e8e2d8]">
+        <div className="flex items-center space-x-3.5">
+          <div className="p-2.5 rounded-xl bg-[#fbf2ed] border border-[#ecc2b0] text-[#b8532f] shadow-xs">
             <Scale className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="text-[11px] font-black uppercase tracking-widest text-emerald-400">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#b8532f] font-['Space_Grotesk']">
                 Core Compliance Engine (SIH26034)
               </span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-100 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-[#2a2622] tracking-tight font-['Space_Grotesk']">
               Legal Metrology Compliance Report
             </h2>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <p className="text-xs text-slate-400">
-                India Legal Metrology (Packaged Commodities) Rules, 2011 — Mandatory Rule 6 Verification
+              <p className="text-sm text-[#5c554e]">
+                Mandatory Rule 6 Statutory Declaration Verification
               </p>
               {dataSource && (
                 <DataSourceBadge dataSource={dataSource} confidence={confidence} />
@@ -210,57 +219,61 @@ export default function ComplianceReport({
           </div>
         </div>
 
-        {/* Score Meter & Scan Another Product Action */}
+        {/* Animated Score Meter & Scan Another Product */}
         <div className="flex items-center gap-3 self-start sm:self-auto flex-wrap">
           {onNewScan && (
-            <button
+            <motion.button
+              whileTap={{ scale: 0.97 }}
               type="button"
               onClick={onNewScan}
-              className="px-3.5 py-2.5 bg-slate-950 hover:bg-emerald-600 border border-slate-800 hover:border-emerald-500 text-slate-200 hover:text-white font-bold rounded-xl text-xs transition flex items-center space-x-1.5 shadow-md"
+              className="px-4 py-2 bg-[#faf7f2] hover:bg-[#f4efe6] border border-[#e8e2d8] text-[#2a2622] font-['Space_Grotesk'] font-bold rounded-lg text-xs transition flex items-center space-x-1.5 shadow-xs cursor-pointer"
             >
-              <Camera className="w-4 h-4 text-emerald-400" />
+              <Camera className="w-4 h-4 text-[#b8532f]" />
               <span>Scan Another Product</span>
-            </button>
+            </motion.button>
           )}
 
-          <div className="flex items-center space-x-3 bg-slate-950/80 px-4 py-2.5 rounded-xl border border-slate-800">
+          <div className="flex items-center space-x-3.5 bg-[#faf7f2] px-4 py-2.5 rounded-xl border border-[#e8e2d8]">
             <div className="text-right">
-              <div className="text-[10px] uppercase font-bold text-slate-400">Compliance Score</div>
-              <div className="text-lg font-black text-emerald-400 font-mono leading-none">
+              <div className="text-[11px] uppercase font-bold text-[#8c8278] font-['Space_Grotesk']">Compliance Score</div>
+              <div className={`text-lg font-black font-['Space_Grotesk'] leading-none ${
+                isFullyCompliant ? 'text-[#15803d]' : 'text-[#be123c]'
+              }`}>
                 {displayScore} / {totalFields} Fields
               </div>
-              <div className="text-[10px] text-slate-400 font-mono mt-1">
-                <span className="text-emerald-400 font-bold">{detectedCount}</span> detected •{' '}
-                <span className="text-amber-400 font-bold">{unclearCount}</span> unclear •{' '}
-                <span className="text-rose-400 font-bold">{missingCount}</span> missing
+              <div className="text-[11px] text-[#5c554e] mt-1 font-medium">
+                <span className={`${isFullyCompliant ? 'text-[#15803d]' : 'text-[#be123c]'} font-bold`}>{detectedCount}</span> detected •{' '}
+                <span className="text-[#926325] font-bold">{unclearCount}</span> unclear •{' '}
+                <span className="text-[#be123c] font-bold">{missingCount}</span> missing
               </div>
             </div>
+
+            {/* Animated Ring Arc */}
             <div className="w-14 h-14 flex items-center justify-center relative shrink-0">
               <svg className="w-14 h-14 -rotate-90" viewBox="0 0 36 36">
                 <path
-                  className="text-slate-800"
+                  className="text-[#e8e2d8]"
                   strokeWidth="3.5"
                   stroke="currentColor"
                   fill="none"
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
-                <path
-                  className={`transition-all duration-700 ease-out ${
-                    isFullyCompliant || overallStatus === 'COMPLIANT'
-                      ? 'text-emerald-400'
-                      : displayPercentage >= 50
-                      ? 'text-amber-400'
-                      : 'text-rose-400'
-                  }`}
-                  strokeDasharray={`${displayPercentage}, 100`}
+                <motion.path
+                  initial={{ strokeDasharray: '0, 100' }}
+                  animate={{ strokeDasharray: `${displayPercentage}, 100` }}
+                  transition={{ duration: 1.0, ease: 'easeOut' }}
                   strokeWidth="3.5"
                   strokeLinecap="round"
-                  stroke="currentColor"
+                  stroke={isFullyCompliant ? '#16a34a' : '#be123c'}
                   fill="none"
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
               </svg>
-              <span className="absolute text-xs font-black font-mono text-slate-100">{displayPercentage}%</span>
+              <span className={`absolute text-xs font-bold font-['Space_Grotesk'] ${
+                isFullyCompliant ? 'text-[#15803d]' : 'text-[#be123c]'
+              }`}>
+                {animatedPercent}%
+              </span>
             </div>
           </div>
         </div>
@@ -268,8 +281,8 @@ export default function ComplianceReport({
 
       {/* Success Notification for Field Edit */}
       {saveSuccessMsg && (
-        <div className="mt-3 p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-300 text-xs flex items-center space-x-2 animate-fadeIn">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+        <div className="mt-3 p-2.5 bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl text-[#15803d] text-xs flex items-center space-x-2 animate-fadeIn">
+          <CheckCircle2 className="w-4 h-4 text-[#16a34a] shrink-0" />
           <span>{saveSuccessMsg} (saved to local database)</span>
         </div>
       )}
@@ -277,16 +290,16 @@ export default function ComplianceReport({
       {/* Main Status Hero Banner */}
       <div
         className={`mt-4 p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-          isFullyCompliant ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : badge.bg
+          isFullyCompliant ? 'bg-[#f0fdf4] border-[#bbf7d0] text-[#15803d]' : badge.bg
         }`}
       >
         <div className="flex items-center space-x-3">
-          {isFullyCompliant ? <ShieldCheck className="w-6 h-6 text-emerald-400" /> : badge.icon}
+          {isFullyCompliant ? <ShieldCheck className="w-6 h-6 text-[#16a34a]" /> : badge.icon}
           <div>
-            <div className="text-base font-extrabold tracking-tight">
+            <div className="text-base font-extrabold tracking-tight font-['Space_Grotesk']">
               {isFullyCompliant ? 'FULLY COMPLIANT (PHYSICAL DECLARATIONS VERIFIED)' : badge.title}
             </div>
-            <div className="text-xs text-slate-300 mt-0.5">
+            <div className="text-sm text-[#5c554e] mt-0.5 max-w-2xl leading-relaxed">
               {isFullyCompliant
                 ? 'All 8 mandatory declarations under Legal Metrology Rules, 2011 verified & stored.'
                 : summary}
@@ -294,56 +307,43 @@ export default function ComplianceReport({
           </div>
         </div>
         <div className="flex items-center space-x-2 shrink-0 flex-wrap gap-y-1">
-          <button
+          <motion.button
+            whileTap={{ scale: 0.97 }}
             type="button"
             onClick={() => setIsNoticeOpen(true)}
-            className="px-3.5 py-1.5 bg-slate-950 hover:bg-emerald-600 border border-slate-700 hover:border-emerald-500 text-slate-200 hover:text-white font-bold rounded-xl text-xs flex items-center space-x-1.5 shadow-md transition"
+            className="px-3.5 py-2 bg-white hover:bg-[#faf7f2] border border-[#e8e2d8] text-[#2a2622] font-['Space_Grotesk'] font-bold rounded-lg text-xs flex items-center space-x-1.5 shadow-xs transition"
           >
-            <Printer className="w-3.5 h-3.5 text-emerald-400" />
+            <Printer className="w-3.5 h-3.5 text-[#b8532f]" />
             <span>Official Notice (PDF)</span>
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            whileTap={{ scale: 0.97 }}
             type="button"
             onClick={handleExportAuditJson}
             title="Download JSON Audit Trail"
-            className="px-3 py-1.5 bg-slate-950 hover:bg-slate-800 border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white font-bold rounded-xl text-xs flex items-center space-x-1.5 shadow-md transition"
+            className="px-3.5 py-2 bg-white hover:bg-[#faf7f2] border border-[#e8e2d8] text-[#5c554e] font-['Space_Grotesk'] font-bold rounded-lg text-xs flex items-center space-x-1.5 shadow-xs transition"
           >
-            <Download className="w-3.5 h-3.5 text-cyan-400" />
+            <Download className="w-3.5 h-3.5 text-[#c99a3e]" />
             <span>Export JSON</span>
-          </button>
+          </motion.button>
 
-          {!isFullyCompliant && overallStatus === 'DIGITAL_RECORD_VERIFIED' && (
-            <button
-              type="button"
-              onClick={() => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                setTimeout(() => {
-                  const buttons = Array.from(document.querySelectorAll('button'));
-                  const photoBtn = buttons.find((b) => b.textContent.includes('Label OCR Photo'));
-                  if (photoBtn) photoBtn.click();
-                }, 100);
-              }}
-              className="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs flex items-center space-x-1.5 shadow-md transition"
-            >
-              <Camera className="w-3.5 h-3.5" />
-              <span>Photograph Packet Label</span>
-            </button>
-          )}
-          <span className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded bg-black/40 border border-white/10 uppercase">
+          <span className={`text-[11px] font-bold px-2.5 py-1 rounded border uppercase font-['Space_Grotesk'] ${
+            isFullyCompliant ? 'bg-[#dcfce7] text-[#15803d] border-[#86efac]' : 'bg-[#fee2e2] text-[#be123c] border-[#fca5a5]'
+          }`}>
             {isFullyCompliant ? 'COMPLIANT' : overallStatus.replace(/_/g, ' ')}
           </span>
         </div>
       </div>
 
-      {/* 8 Mandatory Declarations Grid */}
+      {/* 8 Mandatory Declarations Grid (Staggered Animation) */}
       <div className="mt-5">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
-          <span>Mandatory 8-Field Statutory Audit Breakdown:</span>
-          <span className="text-[11px] text-emerald-400 lowercase font-mono">Rule 6(1) to 6(11)</span>
+        <h3 className="text-xs font-bold uppercase tracking-wider text-[#8c8278] mb-3 flex items-center justify-between font-['Space_Grotesk']">
+          <span>Mandatory 8-Field Statutory Audit Breakdown</span>
+          <span className="text-[11px] text-[#b8532f] lowercase font-sans">Rule 6(1) to 6(11)</span>
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           {fields.map((field, idx) => {
             const displayVal = localOverrides[idx] !== undefined ? localOverrides[idx] : (field.value || field.snippet);
             const isOverridden = localOverrides[idx] !== undefined;
@@ -353,34 +353,39 @@ export default function ComplianceReport({
             const isEditing = editingFieldIdx === idx;
 
             return (
-              <div
+              <motion.div
                 key={field.id || idx}
-                className={`p-3.5 rounded-xl border transition ${
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: idx * 0.08, ease: 'easeOut' }}
+                className={`p-4 rounded-xl border transition ${
                   isDetected
-                    ? 'bg-slate-950/60 border-emerald-500/30 hover:border-emerald-500/50'
+                    ? 'bg-white border-[#e8e2d8] hover:border-[#ded6c7]'
                     : isUnclear
-                    ? 'bg-amber-950/20 border-amber-500/30'
-                    : 'bg-slate-950/60 border-rose-500/30'
+                    ? 'bg-[#fdf5e6] border-[#eed69e]'
+                    : 'bg-[#fff1f2] border-[#fecdd3]'
                 }`}
               >
                 {/* Field Top Row */}
                 <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2.5">
                     <span
-                      className={`w-6 h-6 rounded-full font-mono text-xs font-black flex items-center justify-center shrink-0 ${
+                      className={`w-6 h-6 rounded-full text-xs font-black flex items-center justify-center shrink-0 ${
                         isDetected
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                          ? 'bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0]'
                           : isUnclear
-                          ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
-                          : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
+                          ? 'bg-[#fef3c7] text-[#926325] border border-[#fde68a]'
+                          : 'bg-[#fee2e2] text-[#be123c] border border-[#fca5a5]'
                       }`}
                     >
                       {isDetected ? '✓' : isUnclear ? '?' : '✗'}
                     </span>
                     <div>
-                      <span className="font-bold text-sm text-slate-200 block">{field.name}</span>
+                      <span className="font-bold text-sm text-[#2a2622] block font-['Space_Grotesk']">
+                        {field.name}
+                      </span>
                       {field.sourcePhoto && isDetected && (
-                        <span className="text-[10px] text-emerald-400/80 font-medium">
+                        <span className="text-[11px] text-[#16a34a] font-medium">
                           Found in: {field.sourcePhoto}
                         </span>
                       )}
@@ -388,61 +393,43 @@ export default function ComplianceReport({
                   </div>
 
                   <div className="flex items-center space-x-1.5">
-                    {/* Inline Edit Button */}
                     {!isEditing && (
                       <button
                         type="button"
                         onClick={() => handleStartEdit(idx, displayVal)}
                         title="Edit this field to correct OCR"
-                        className="p-1 text-slate-400 hover:text-emerald-400 hover:bg-slate-800 rounded-lg transition"
+                        className="p-1.5 text-[#8c8278] hover:text-[#b8532f] hover:bg-[#faf7f2] rounded-lg transition cursor-pointer"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>
                     )}
 
-                    {/* Status & Confidence Pills */}
-                    <div className="flex items-center space-x-1 flex-wrap gap-y-1 justify-end">
-                      {/* Confidence Tag */}
-                      {field.confidence === 'high' && (
-                        <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          High Confidence
-                        </span>
-                      )}
-                      {field.confidence === 'low' && (
-                        <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          Low Confidence
-                        </span>
-                      )}
-
-                      {/* Status Pill */}
-                      <span
-                        className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase shrink-0 ${
-                          isDetected
-                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                            : isUnclear
-                            ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-                            : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
-                        }`}
-                      >
-                        <span>
-                          {isOverridden ? 'VERIFIED' : isDetected ? 'DETECTED' : isUnclear ? 'UNCLEAR' : 'NOT DETECTED'}
-                        </span>
-                      </span>
-                    </div>
+                    {/* Status Pill */}
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold uppercase shrink-0 font-['Space_Grotesk'] ${
+                        isDetected
+                          ? 'bg-[#f0fdf4] text-[#16a34a] border border-[#bbf7d0]'
+                          : isUnclear
+                          ? 'bg-[#fdf5e6] text-[#926325] border border-[#eed69e]'
+                          : 'bg-[#fff1f2] text-[#be123c] border border-[#fecdd3]'
+                      }`}
+                    >
+                      {isOverridden ? 'VERIFIED' : isDetected ? 'DETECTED' : isUnclear ? 'UNCLEAR' : 'NOT DETECTED'}
+                    </span>
                   </div>
                 </div>
 
                 {/* Statutory Rule Citation */}
-                <div className="text-[10px] font-mono text-slate-500 mt-1">{field.legalRule}</div>
+                <div className="text-[12px] text-[#8c8278] mt-1 font-medium">{field.legalRule}</div>
 
                 {/* Inline Editing Form */}
                 {isEditing ? (
-                  <div className="mt-2 space-y-2">
+                  <div className="mt-2.5 space-y-2">
                     <textarea
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
                       rows={2}
-                      className="w-full bg-slate-900 border border-emerald-500/50 rounded-lg p-2 text-xs text-slate-100 font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full bg-[#faf7f2] border border-[#b8532f] rounded-lg p-2.5 text-xs text-[#2a2622] focus:outline-none focus:ring-1 focus:ring-[#b8532f]"
                       placeholder={`Enter corrected ${field.name}...`}
                     />
                     <div className="flex items-center justify-end space-x-1.5">
@@ -450,7 +437,7 @@ export default function ComplianceReport({
                         type="button"
                         onClick={handleCancelEdit}
                         disabled={isSaving}
-                        className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold flex items-center space-x-1"
+                        className="px-3 py-1.5 rounded bg-[#faf7f2] hover:bg-[#f4efe6] text-[#5c554e] text-xs font-semibold flex items-center space-x-1 border border-[#e8e2d8] cursor-pointer"
                       >
                         <X className="w-3 h-3" />
                         <span>Cancel</span>
@@ -459,7 +446,7 @@ export default function ComplianceReport({
                         type="button"
                         onClick={() => handleSaveEdit(field, idx)}
                         disabled={isSaving || !editValue.trim()}
-                        className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center space-x-1 shadow-sm"
+                        className="px-3 py-1.5 rounded bg-[#b8532f] hover:bg-[#a34a2b] text-white text-xs font-bold flex items-center space-x-1 shadow-xs cursor-pointer"
                       >
                         {isSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
                         <span>Save to DB</span>
@@ -470,67 +457,67 @@ export default function ComplianceReport({
                   /* Extracted Value or Failure Reason */
                   <div className="mt-2 text-xs">
                     {isDetected && (
-                      <div className="bg-slate-900/90 rounded-lg p-2 border border-slate-800">
-                        <div className="text-[10px] text-slate-400 uppercase font-semibold">
+                      <div className="bg-[#faf7f2] rounded-lg p-2.5 border border-[#e8e2d8]">
+                        <div className="text-[11px] text-[#8c8278] uppercase font-bold font-['Space_Grotesk']">
                           {isOverridden ? 'User-Corrected Value:' : 'Extracted Text Value:'}
                         </div>
-                        <div className="font-mono text-emerald-300 font-medium text-xs break-words mt-0.5">
+                        <div className="text-[#2a2622] font-semibold text-xs break-words mt-0.5 leading-relaxed">
                           {displayVal}
                         </div>
                       </div>
                     )}
 
                     {isUnclear && (
-                      <div className="bg-amber-950/40 rounded-lg p-2 border border-amber-800/40 text-amber-300">
-                        <div className="text-[10px] uppercase font-semibold">Partial Match:</div>
-                        <div className="font-mono text-xs">{displayVal}</div>
-                        <div className="text-[11px] text-amber-400/90 mt-1">{field.violationMessage}</div>
+                      <div className="bg-[#fdf5e6] rounded-lg p-2.5 border border-[#eed69e] text-[#926325]">
+                        <div className="text-[11px] uppercase font-bold font-['Space_Grotesk']">Partial Match:</div>
+                        <div className="text-xs mt-0.5">{displayVal}</div>
+                        <div className="text-xs text-[#926325] mt-1">{field.violationMessage}</div>
                       </div>
                     )}
 
                     {isMissing && (
-                      <div className="bg-rose-950/30 rounded-lg p-2 border border-rose-800/30 text-rose-300">
-                        <div className="text-[11px] font-medium">
+                      <div className="bg-[#fff1f2] rounded-lg p-2.5 border border-[#fecdd3] text-[#be123c]">
+                        <div className="text-xs font-medium">
                           {field.violationMessage || 'Mandatory declaration not detected in any captured photos.'}
                         </div>
                       </div>
                     )}
                   </div>
                 )}
-              </div>
+              </motion.div>
             );
           })}
         </div>
 
-        {/* STAGE 4: Handling Fields Not Found (Additional Angle Capture) */}
+        {/* Additional Angle Capture Prompt */}
         {fields.some((f, i) => localOverrides[i] === undefined && f.status === 'MISSING') && (
-          <div className="mt-4 p-4 rounded-2xl bg-amber-950/20 border border-amber-500/40 space-y-3">
+          <div className="mt-4 p-4 rounded-xl bg-[#fdf5e6] border border-[#eed69e] space-y-3">
             <div className="flex items-start space-x-3">
-              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 shrink-0">
+              <div className="p-2 rounded-xl bg-white border border-[#eed69e] text-[#c99a3e] shrink-0">
                 <Camera className="w-5 h-5" />
               </div>
               <div className="flex-1">
-                <div className="font-bold text-sm text-amber-300">
-                  Some mandatory fields weren't found on the pack:
+                <div className="font-bold text-sm text-[#926325] font-['Space_Grotesk']">
+                  Some mandatory declarations weren't found on the pack:
                 </div>
-                <div className="text-xs text-slate-300 mt-1">
+                <div className="text-xs text-[#5c554e] mt-1">
                   Missing:{' '}
-                  <span className="text-amber-200 font-semibold">
+                  <span className="text-[#be123c] font-semibold">
                     {fields
                       .filter((f, i) => localOverrides[i] === undefined && f.status === 'MISSING')
                       .map((f) => f.name)
                       .join(', ')}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-[#8c8278] mt-1">
                   Try photographing the side, fold, or bottom of the pack where batch numbers or manufacturer stamps might be printed.
                 </p>
               </div>
             </div>
 
             {onAddAdditionalPhoto && (
-              <div className="flex items-center gap-3 pt-1 border-t border-slate-800">
-                <label className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs shadow-lg shadow-amber-500/20 transition flex items-center space-x-2 cursor-pointer">
+              <div className="flex items-center gap-3 pt-2 border-t border-[#eed69e]">
+                <label className="px-4 py-2 bg-[#c99a3e] hover:bg-[#b1812f] text-white font-bold rounded-lg text-xs shadow-xs transition flex items-center space-x-2 cursor-pointer">
                   <Camera className="w-4 h-4" />
                   <span>Photograph Additional Angle &amp; Merge</span>
                   <input
@@ -544,7 +531,7 @@ export default function ComplianceReport({
                     }}
                   />
                 </label>
-                <span className="text-[11px] text-slate-400">
+                <span className="text-xs text-[#8c8278]">
                   Will re-run OCR on the new photo and merge newly detected fields into your checklist.
                 </span>
               </div>
@@ -553,48 +540,48 @@ export default function ComplianceReport({
         )}
       </div>
 
-      {/* STAGE 3: Barcode-Sourced Registry Information Section (Distinct from packet OCR) */}
-      <div className="mt-5 p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-3">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+      {/* Barcode Registry Information (Distinct from packet OCR) */}
+      <div className="mt-5 p-4 rounded-xl bg-[#faf7f2] border border-[#e8e2d8] space-y-2">
+        <div className="flex items-center justify-between border-b border-[#e8e2d8] pb-2">
           <div className="flex items-center space-x-2">
-            <Info className="w-4 h-4 text-sky-400" />
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
+            <Info className="w-4 h-4 text-[#b8532f]" />
+            <span className="text-xs font-bold uppercase tracking-wider text-[#2a2622] font-['Space_Grotesk']">
               Product Registry Information (Barcode Lookup)
             </span>
           </div>
-          <span className="text-[10px] font-mono text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">
-            Source: Digital Registry
+          <span className="text-[11px] font-bold text-[#b8532f] bg-[#fbf2ed] px-2 py-0.5 rounded border border-[#ecc2b0]">
+            Digital Registry
           </span>
         </div>
-        <p className="text-xs text-slate-400">
-          The following product metadata was retrieved from the Open Food Facts &amp; Indian FMCG Registry database based on the scanned GTIN barcode, rather than this specific pack's printed ink:
+        <p className="text-xs text-[#5c554e]">
+          Metadata retrieved from Open Food Facts &amp; Indian FMCG Registry database for this GTIN barcode:
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300 pt-1">
-          <div className="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
-            <span className="text-[10px] text-slate-500 uppercase block font-semibold">Registered Product Name</span>
-            <span className="text-slate-100 font-medium">{productName || 'Packaged Commodity'}</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+          <div className="bg-white p-2.5 rounded-lg border border-[#e8e2d8]">
+            <span className="text-[11px] text-[#8c8278] uppercase block font-bold font-['Space_Grotesk']">Registered Product Name</span>
+            <span className="text-[#2a2622] font-semibold">{productName || 'Packaged Commodity'}</span>
           </div>
-          <div className="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
-            <span className="text-[10px] text-slate-500 uppercase block font-semibold">Registered GTIN Barcode</span>
-            <span className="text-slate-100 font-mono font-medium">{barcode || 'N/A'}</span>
+          <div className="bg-white p-2.5 rounded-lg border border-[#e8e2d8]">
+            <span className="text-[11px] text-[#8c8278] uppercase block font-bold font-['Space_Grotesk']">Registered GTIN Barcode</span>
+            <span className="text-[#2a2622] font-mono font-medium">{barcode || 'N/A'}</span>
           </div>
         </div>
       </div>
 
-      {/* Violations / Actionable Summary Box */}
+      {/* Violations Box */}
       {violations && violations.length > 0 && overallStatus !== 'DIGITAL_RECORD_VERIFIED' && (
-        <div className="mt-5 p-4 rounded-xl bg-rose-950/30 border border-rose-500/30">
-          <div className="flex items-center space-x-2 text-rose-400 font-bold text-xs uppercase mb-2">
+        <div className="mt-5 p-4 rounded-xl bg-[#fff1f2] border border-[#fecdd3]">
+          <div className="flex items-center space-x-2 text-[#be123c] font-bold text-xs uppercase mb-2 font-['Space_Grotesk']">
             <AlertTriangle className="w-4 h-4" />
             <span>Identified Regulatory Violations on Label ({violations.length})</span>
           </div>
-          <ul className="space-y-1.5 text-xs text-rose-200">
+          <ul className="space-y-1.5 text-xs text-[#be123c]">
             {violations.map((v, i) => (
               <li key={i} className="flex items-start space-x-2">
-                <span className="text-rose-400 font-bold">•</span>
+                <span className="font-bold">•</span>
                 <div>
-                  <span className="font-semibold text-rose-300">{v.field}:</span> {v.message}
-                  <span className="text-[10px] font-mono text-rose-400/80 block">{v.rule}</span>
+                  <span className="font-semibold">{v.field}:</span> {v.message}
+                  <span className="text-[11px] block text-[#9f1239]">{v.rule}</span>
                 </div>
               </li>
             ))}
@@ -602,43 +589,38 @@ export default function ComplianceReport({
         </div>
       )}
 
-      {/* Rule 9 Font Height & Readability Specifications */}
+      {/* Rule 9 Font Height & Readability Specifications (Streamlined) */}
       {fontCompliance && fontCompliance.rule && (
-        <div className="mt-5 p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2.5 text-xs">
+        <div className="mt-5 p-4 rounded-xl bg-[#faf7f2] border border-[#e8e2d8] space-y-2 text-xs">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Scale className="w-4 h-4 text-emerald-400" />
-              <span className="font-bold text-slate-100 uppercase tracking-wider">
-                Rule 9 &amp; Table-I Font Height &amp; Readability Audit
+              <Scale className="w-4 h-4 text-[#b8532f]" />
+              <span className="font-bold text-[#2a2622] uppercase tracking-wider font-['Space_Grotesk']">
+                Rule 9 &amp; Table-I Font Height Audit
               </span>
             </div>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 uppercase">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#fbf2ed] text-[#b8532f] border border-[#ecc2b0] uppercase font-['Space_Grotesk']">
               {fontCompliance.status || 'REVIEW_REQUIRED'}
             </span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-[11px] text-slate-300">
-            <div className="bg-slate-900/90 p-2 rounded-xl border border-slate-800/80">
-              <span className="text-[10px] text-slate-400 block uppercase">Weight Category</span>
-              <strong className="text-slate-200">{fontCompliance.packageWeightBracket || 'Standard'}</strong>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-xs">
+            <div className="bg-white p-2.5 rounded-lg border border-[#e8e2d8]">
+              <span className="text-[11px] text-[#8c8278] block uppercase font-bold font-['Space_Grotesk']">Weight Bracket</span>
+              <strong className="text-[#2a2622]">{fontCompliance.packageWeightBracket || 'Standard'}</strong>
             </div>
-            <div className="bg-slate-900/90 p-2 rounded-xl border border-slate-800/80">
-              <span className="text-[10px] text-slate-400 block uppercase">Prescribed Min. Height</span>
-              <strong className="text-emerald-400">{fontCompliance.prescribedMinHeightMm || '1.0 mm'} ({fontCompliance.prescribedMinHeightPt || '2.8 pt'})</strong>
+            <div className="bg-white p-2.5 rounded-lg border border-[#e8e2d8]">
+              <span className="text-[11px] text-[#8c8278] block uppercase font-bold font-['Space_Grotesk']">Prescribed Min. Height</span>
+              <strong className="text-[#b8532f]">{fontCompliance.prescribedMinHeightMm || '1.0 mm'} ({fontCompliance.prescribedMinHeightPt || '2.8 pt'})</strong>
             </div>
-            <div className="bg-slate-900/90 p-2 rounded-xl border border-slate-800/80">
-              <span className="text-[10px] text-slate-400 block uppercase">Readability Index</span>
-              <strong className="text-slate-200">{fontCompliance.readabilityIndex || 'Adequate'}</strong>
+            <div className="bg-white p-2.5 rounded-lg border border-[#e8e2d8]">
+              <span className="text-[11px] text-[#8c8278] block uppercase font-bold font-['Space_Grotesk']">Readability Index</span>
+              <strong className="text-[#2a2622]">{fontCompliance.readabilityIndex || 'Adequate'}</strong>
             </div>
           </div>
-          {fontCompliance.legalMandate && (
-            <p className="text-[11px] text-slate-400 leading-relaxed border-t border-slate-800/80 pt-2">
-              {fontCompliance.legalMandate}
-            </p>
-          )}
         </div>
       )}
 
-      {/* Official Legal Metrology Notice & Printable PDF Modal */}
+      {/* Official Legal Metrology Notice Modal */}
       <InspectionNoticeModal
         isOpen={isNoticeOpen}
         onClose={() => setIsNoticeOpen(false)}
@@ -654,3 +636,4 @@ export default function ComplianceReport({
     </div>
   );
 }
+

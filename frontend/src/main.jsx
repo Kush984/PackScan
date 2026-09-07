@@ -48,7 +48,7 @@ class ErrorBoundary extends React.Component {
                   localStorage.removeItem('packscan_last_scan');
                   window.location.reload();
                 }}
-                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition shadow-lg"
+                className="px-5 py-2.5 bg-[#b8532f] hover:bg-[#a34a2b] text-white font-bold rounded-xl text-xs transition shadow-sm cursor-pointer"
               >
                 Reload Application
               </button>

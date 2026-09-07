@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { apiFetch } from './utils/api';
 import Header from './components/Header';
 import ProfileModal from './components/ProfileModal';
 import FeedbackForumModal from './components/FeedbackForumModal';
@@ -148,7 +150,7 @@ export default function App() {
     }
 
     // Also sync saved profile from backend if available for this device
-    fetch(`/api/profile/${encodeURIComponent(id)}`)
+    apiFetch(`/api/profile/${encodeURIComponent(id)}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && (data.allergies?.length > 0 || data.conditions?.length > 0)) {
@@ -168,7 +170,7 @@ export default function App() {
 
   const fetchPresets = async () => {
     try {
-      const res = await fetch('/api/presets');
+      const res = await apiFetch('/api/presets');
       if (res.ok) {
         const data = await res.json();
         setPresets(data);
@@ -183,7 +185,7 @@ export default function App() {
     localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(newProfile));
 
     try {
-      await fetch('/api/profile', {
+      await apiFetch('/api/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -195,9 +197,29 @@ export default function App() {
       console.warn('Profile sync failed, cached locally:', err.message);
     }
 
-    // Refresh active product analysis with the new profile if scan result exists
-    if (scanResult?.product?.barcode) {
-      handleScanBarcode(scanResult.product.barcode, newProfile);
+    // Refresh active product health evaluation with the new profile (preserving packaging compliance report!)
+    if (scanResult?.product) {
+      try {
+        const res = await apiFetch('/api/scan/re-evaluate-health', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userProfile: newProfile,
+            product: scanResult.product,
+            rawExtractedText: scanResult.rawExtractedText,
+          }),
+        });
+        if (res.ok) {
+          const updatedHealth = await res.json();
+          setScanResult((prev) => (prev ? {
+            ...prev,
+            healthEvaluation: updatedHealth.healthEvaluation,
+            alternatives: updatedHealth.alternatives,
+          } : prev));
+        }
+      } catch (err) {
+        console.warn('Health re-evaluation error:', err.message);
+      }
     }
   };
 
@@ -208,7 +230,7 @@ export default function App() {
     setNotFoundInfo(null);
 
     try {
-      const res = await fetch('/api/scan/barcode', {
+      const res = await apiFetch('/api/scan/barcode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -249,7 +271,7 @@ export default function App() {
     }
   };
 
-  // Multi-Evidence Scan API (Guided Flow)
+  // 2. Multi-angle photo capture scan handler
   const handleMultiStepScan = async (capturedData) => {
     setIsLoading(true);
     setErrorMessage(null);
@@ -274,7 +296,7 @@ export default function App() {
       }
       formData.append('deviceId', deviceId);
 
-      const response = await fetch('/api/scan/multi-evidence', {
+      const response = await apiFetch('/api/scan/multi-evidence', {
         method: 'POST',
         body: formData,
       });
@@ -313,7 +335,7 @@ export default function App() {
       }
       formData.append('userProfile', JSON.stringify(userProfile || {}));
 
-      const res = await fetch('/api/scan/multi-evidence', {
+      const res = await apiFetch('/api/scan/multi-evidence', {
         method: 'POST',
         body: formData,
       });
@@ -345,13 +367,13 @@ export default function App() {
         });
       }
     } catch (err) {
-      console.error('Additional photo merge error:', err);
+      console.warn('Failed to add additional photo:', err.message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 3. Direct Image OCR Scan API (Upload Label Image)
+  // 3. Single Label / OCR Scan API
   const handleScanImage = async (imageFile, barcode = null) => {
     setIsLoading(true);
     setErrorMessage(null);
@@ -364,7 +386,7 @@ export default function App() {
       if (userProfile) formData.append('userProfile', JSON.stringify(userProfile));
       formData.append('deviceId', deviceId);
 
-      const res = await fetch('/api/scan/image', {
+      const res = await apiFetch('/api/scan/image', {
         method: 'POST',
         body: formData,
       });
@@ -404,7 +426,7 @@ export default function App() {
     if (!scanResult?.product?.barcode) return;
     const barcode = scanResult.product.barcode;
     try {
-      const res = await fetch(`/api/products/${encodeURIComponent(barcode)}`, {
+      const res = await apiFetch(`/api/products/${encodeURIComponent(barcode)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -454,7 +476,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f0fdfc] text-[#334155] font-['Inter'] antialiased flex flex-col selection:bg-[#47d1cc] selection:text-[#042f2e]">
+    <div className="min-h-screen bg-[#faf7f2] text-[#2a2622] font-['Inter'] antialiased flex flex-col selection:bg-[#f6dfd5] selection:text-[#6f331f]">
       {/* TOP APP NAVIGATION (UNIFIED GLOBAL HEADER) */}
       <Header
         activeTab={activeTab}
@@ -462,344 +484,401 @@ export default function App() {
         userProfile={userProfile}
         onResetScan={handleNewScan}
         hasActiveResult={Boolean(scanResult || notFoundInfo)}
-        theme={theme}
-        onToggleTheme={handleToggleTheme}
       />
 
-      {/* MAIN WRAPPER */}
+      {/* MAIN WRAPPER WITH TAB CROSSFADE TRANSITION */}
       <main className="w-full pt-32 max-w-[1280px] mx-auto px-4 sm:px-6 flex-1">
-        {activeTab === 'medical' ? (
-          <MedicalProfileView
-            userProfile={userProfile}
-            onSaveProfile={handleSaveProfile}
-            onNavigateTab={handleSelectTab}
-          />
-        ) : activeTab === 'allergies' ? (
-          <AllergiesThresholdView
-            userProfile={userProfile}
-            onSaveProfile={handleSaveProfile}
-            onNavigateTab={handleSelectTab}
-          />
-        ) : activeTab === 'forum' ? (
-          <ProductForumLedgerView
-            deviceId={deviceId}
-            onSelectProductForAudit={(p) => {
-              handleSelectTab('scan');
-              if (p?.barcode) handleScanBarcode(p.barcode);
-            }}
-          />
-        ) : (
-          <div className="flex flex-col w-full pb-16 space-y-6">
+        <AnimatePresence mode="wait">
+          {activeTab === 'medical' ? (
+            <motion.div
+              key="medical"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.22, ease: 'easeInOut' }}
+            >
+              <MedicalProfileView
+                userProfile={userProfile}
+                onSaveProfile={handleSaveProfile}
+                onNavigateTab={handleSelectTab}
+              />
+            </motion.div>
+          ) : activeTab === 'allergies' ? (
+            <motion.div
+              key="allergies"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.22, ease: 'easeInOut' }}
+            >
+              <AllergiesThresholdView
+                userProfile={userProfile}
+                onSaveProfile={handleSaveProfile}
+                onNavigateTab={handleSelectTab}
+              />
+            </motion.div>
+          ) : activeTab === 'forum' ? (
+            <motion.div
+              key="forum"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.22, ease: 'easeInOut' }}
+            >
+              <ProductForumLedgerView
+                deviceId={deviceId}
+                onSelectProductForAudit={(p) => {
+                  handleSelectTab('scan');
+                  if (p?.barcode) handleScanBarcode(p.barcode);
+                }}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="scan"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.22, ease: 'easeInOut' }}
+              className="flex flex-col w-full pb-16 space-y-6"
+            >
+              {/* SECTION 1: Compliance Banner (Refined White Card on Warm Stone) */}
+              <motion.section
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className="w-full bg-white rounded-xl p-6 sm:p-7 border border-[#e8e2d8] shadow-xs relative overflow-hidden"
+              >
+                {/* Subtle Ambient Warm Glow */}
+                <div className="absolute top-0 right-1/4 w-72 h-72 bg-[#b8532f]/5 rounded-full blur-3xl pointer-events-none" />
 
-          {/* SECTION 1: Compliance Banner (Refined Light Card on Turquoise Tint) */}
-          <section className="w-full bg-white rounded-xl p-6 sm:p-7 border border-[#ccfbf1] shadow-xs relative overflow-hidden">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-              <div className="max-w-3xl space-y-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-2.5 py-1 bg-[#ccfbf1] text-[#0f766e] border border-[#99f6e4] font-['JetBrains_Mono'] text-[10.5px] font-bold uppercase tracking-wider rounded">
-                    LEGAL METROLOGY ACT, 2011
-                  </span>
-                  <span className="text-[#99f6e4] font-mono">|</span>
-                  <span className="font-['JetBrains_Mono'] text-[11.5px] font-semibold text-[#64748b]">
-                    DIRECTIVE 2024/LM-8B
-                  </span>
-                </div>
-                <h1 className="font-['Space_Grotesk'] text-[26px] sm:text-[30px] leading-tight text-[#0f172a] font-extrabold tracking-tight">
-                  Legal Metrology Compliance &amp; Health Guardian
-                </h1>
-                <p className="text-[14px] leading-relaxed text-[#334155] max-w-2xl font-normal">
-                  Instant automated audit for mandatory declarations under Rule 6 &amp; 9, coupled with personalized allergen and additive checking.
-                </p>
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                  <div className="max-w-3xl space-y-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-2.5 py-1 bg-[#fbf2ed] text-[#b8532f] border border-[#ecc2b0] font-['Space_Grotesk'] text-[11px] font-bold uppercase tracking-wider rounded">
+                        LEGAL METROLOGY ACT, 2011
+                      </span>
+                      <span className="text-[#ded6c7] font-sans">|</span>
+                      <span className="font-['Space_Grotesk'] text-[12px] font-semibold text-[#8c8278]">
+                        DIRECTIVE 2024/LM-8B
+                      </span>
+                    </div>
+                    <h1 className="font-['Space_Grotesk'] text-[26px] sm:text-[30px] leading-tight text-[#2a2622] font-extrabold tracking-tight">
+                      Legal Metrology Compliance &amp; Health Guardian
+                    </h1>
+                    <p className="text-[15px] leading-relaxed text-[#5c554e] max-w-2xl font-normal">
+                      Instant automated statutory audit for mandatory declarations under Rule 6 &amp; 9, coupled with personalized allergen and additive checking.
+                    </p>
 
-                {/* 3-Tier Badges Standardized */}
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#e6fbf9] border border-[#99f6e4] text-[#0f766e] rounded-md font-['Space_Grotesk'] text-[12px] font-semibold">
-                    <CheckCircle2 className="w-4 h-4 text-[#0d9488] shrink-0" />
-                    <span>Rule 6 &amp; 9 Mandatory Verification</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#fff7ed] border border-[#fed7aa] text-[#c2410c] rounded-md font-['Space_Grotesk'] text-[12px] font-semibold">
-                    <AlertTriangle className="w-4 h-4 text-[#ea580c] shrink-0" />
-                    <span>Allergen &amp; Additive Guard</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#f0fdfc] border border-[#ccfbf1] text-[#334155] rounded-md font-['Space_Grotesk'] text-[12px] font-semibold">
-                    <Scale className="w-4 h-4 text-[#64748b] shrink-0" />
-                    <span>Section 36 Notice Exporter</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Telemetry Readouts */}
-              <div className="grid grid-cols-3 lg:grid-cols-1 gap-3 w-full lg:w-72 shrink-0">
-                <div className="bg-[#f0fdfc] border border-[#ccfbf1] p-3.5 rounded-lg flex items-center justify-between shadow-xs">
-                  <div>
-                    <div className="font-['JetBrains_Mono'] text-[10.5px] font-bold text-[#64748b] uppercase tracking-wider">
-                      Total Audited
-                    </div>
-                    <div className="font-['Space_Grotesk'] text-[28px] font-extrabold text-[#0f172a] leading-none mt-1">
-                      1,248
-                    </div>
-                    <div className="font-['JetBrains_Mono'] text-[11px] font-semibold text-[#0d9488] mt-1.5 flex items-center gap-1">
-                      <TrendingUp className="w-3.5 h-3.5 text-[#0d9488]" />
-                      <span>Batch Q4 Complete</span>
-                    </div>
-                  </div>
-                  <div className="w-10 h-10 rounded-lg bg-[#e0fbf9] border border-[#99f6e4] flex items-center justify-center text-[#0d9488]">
-                    <Package className="w-5 h-5 text-[#0d9488]" />
-                  </div>
-                </div>
-
-                <div className="bg-[#f0fdfc] border border-[#ccfbf1] p-3.5 rounded-lg flex items-center justify-between shadow-xs">
-                  <div>
-                    <div className="font-['JetBrains_Mono'] text-[10.5px] font-bold text-[#64748b] uppercase tracking-wider">
-                      Non-Compliance Ratio
-                    </div>
-                    <div className="font-['Space_Grotesk'] text-[28px] font-extrabold text-[#ea580c] leading-none mt-1">
-                      8.4%
-                    </div>
-                    <div className="font-['JetBrains_Mono'] text-[11px] font-semibold text-[#ea580c] mt-1.5">
-                      105 Violations Logged
-                    </div>
-                  </div>
-                  <div className="w-10 h-10 rounded-lg bg-[#fff7ed] border border-[#fed7aa] flex items-center justify-center text-[#ea580c]">
-                    <AlertTriangle className="w-5 h-5 text-[#ea580c]" />
-                  </div>
-                </div>
-
-                <div className="bg-[#f0fdfc] border border-[#ccfbf1] p-3.5 rounded-lg flex items-center justify-between shadow-xs">
-                  <div>
-                    <div className="font-['JetBrains_Mono'] text-[10.5px] font-bold text-[#64748b] uppercase tracking-wider">
-                      Avg Latency
-                    </div>
-                    <div className="font-['Space_Grotesk'] text-[28px] font-extrabold text-[#0f172a] leading-none mt-1">
-                      &lt;12ms
-                    </div>
-                    <div className="font-['JetBrains_Mono'] text-[11px] font-semibold text-[#64748b] mt-1.5">
-                      Hardware OCR Engine
+                    {/* 3-Tier Badges Standardized */}
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fbf2ed] border border-[#ecc2b0] text-[#b8532f] rounded-md font-['Space_Grotesk'] text-[13px] font-semibold">
+                        <CheckCircle2 className="w-4 h-4 text-[#b8532f] shrink-0" />
+                        <span>Rule 6 &amp; 9 Mandatory Verification</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fdf5e6] border border-[#eed69e] text-[#926325] rounded-md font-['Space_Grotesk'] text-[13px] font-semibold">
+                        <AlertTriangle className="w-4 h-4 text-[#c99a3e] shrink-0" />
+                        <span>Allergen &amp; Additive Guard</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#faf7f2] border border-[#e8e2d8] text-[#5c554e] rounded-md font-['Space_Grotesk'] text-[13px] font-semibold">
+                        <Scale className="w-4 h-4 text-[#8c8278] shrink-0" />
+                        <span>Section 36 Notice Exporter</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="w-10 h-10 rounded-lg bg-[#e0fbf9] border border-[#99f6e4] flex items-center justify-center text-[#0d9488]">
-                    <Zap className="w-5 h-5 text-[#0d9488]" />
+
+                  {/* Telemetry Readouts */}
+                  <div className="grid grid-cols-3 lg:grid-cols-1 gap-3 w-full lg:w-72 shrink-0">
+                    <div className="bg-[#faf7f2] border border-[#e8e2d8] p-3.5 rounded-lg flex items-center justify-between shadow-xs">
+                      <div>
+                        <div className="text-[11px] font-bold text-[#8c8278] uppercase tracking-wider font-['Space_Grotesk']">
+                          Total Audited
+                        </div>
+                        <div className="font-['Space_Grotesk'] text-[28px] font-extrabold text-[#2a2622] leading-none mt-1">
+                          1,248
+                        </div>
+                        <div className="text-[12px] font-semibold text-[#b8532f] mt-1.5 flex items-center gap-1">
+                          <TrendingUp className="w-3.5 h-3.5 text-[#b8532f]" />
+                          <span>Batch Q4 Complete</span>
+                        </div>
+                      </div>
+                      <div className="w-10 h-10 rounded-lg bg-[#fbf2ed] border border-[#ecc2b0] flex items-center justify-center text-[#b8532f]">
+                        <Package className="w-5 h-5" />
+                      </div>
+                    </div>
+
+                    <div className="bg-[#faf7f2] border border-[#e8e2d8] p-3.5 rounded-lg flex items-center justify-between shadow-xs">
+                      <div>
+                        <div className="text-[11px] font-bold text-[#8c8278] uppercase tracking-wider font-['Space_Grotesk']">
+                          Non-Compliance Ratio
+                        </div>
+                        <div className="font-['Space_Grotesk'] text-[28px] font-extrabold text-[#be123c] leading-none mt-1">
+                          8.4%
+                        </div>
+                        <div className="text-[12px] font-semibold text-[#be123c] mt-1.5">
+                          105 Violations Logged
+                        </div>
+                      </div>
+                      <div className="w-10 h-10 rounded-lg bg-[#fff1f2] border border-[#fecdd3] flex items-center justify-center text-[#be123c]">
+                        <AlertTriangle className="w-5 h-5" />
+                      </div>
+                    </div>
+
+                    <div className="bg-[#faf7f2] border border-[#e8e2d8] p-3.5 rounded-lg flex items-center justify-between shadow-xs">
+                      <div>
+                        <div className="text-[11px] font-bold text-[#8c8278] uppercase tracking-wider font-['Space_Grotesk']">
+                          Avg Latency
+                        </div>
+                        <div className="font-['Space_Grotesk'] text-[28px] font-extrabold text-[#2a2622] leading-none mt-1">
+                          &lt;12ms
+                        </div>
+                        <div className="text-[12px] font-semibold text-[#5c554e] mt-1.5">
+                          Hardware OCR Engine
+                        </div>
+                      </div>
+                      <div className="w-10 h-10 rounded-lg bg-[#fdf5e6] border border-[#eed69e] flex items-center justify-center text-[#926325]">
+                        <Zap className="w-5 h-5 text-[#c99a3e]" />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </section>
+              </motion.section>
 
-          {/* SECTION 2: Precision Viewfinder Workspace & Plain Language Rule 6 Checklist */}
-          <Scanner
-            onCompleteMultiStepScan={handleMultiStepScan}
-            onScanDirectBarcode={handleScanBarcode}
-            onScanImage={handleScanImage}
-            isLoading={isLoading}
-            scanResult={scanResult}
-            onOpenNoticeModal={() => setIsNoticeModalOpen(true)}
-            onResetScan={handleNewScan}
-          />
+              {/* SECTION 2: Precision Viewfinder Workspace & Plain Language Rule 6 Checklist */}
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: 0.08, ease: 'easeOut' }}
+              >
+                <Scanner
+                  onCompleteMultiStepScan={handleMultiStepScan}
+                  onScanDirectBarcode={handleScanBarcode}
+                  onScanImage={handleScanImage}
+                  isLoading={isLoading}
+                  scanResult={scanResult}
+                  onOpenNoticeModal={() => setIsNoticeModalOpen(true)}
+                  onResetScan={handleNewScan}
+                />
+              </motion.div>
 
-          {/* SECTION 3: QUICK 1-CLICK FMCG DEMO CATALOG */}
-          <DemoPresetBar
-            presets={presets}
-            onSelectPreset={handleSelectPreset}
-            isLoading={isLoading}
-          />
+              {/* SECTION 3: QUICK 1-CLICK FMCG DEMO CATALOG */}
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: 0.14, ease: 'easeOut' }}
+              >
+                <DemoPresetBar
+                  presets={presets}
+                  onSelectPreset={handleSelectPreset}
+                  isLoading={isLoading}
+                />
+              </motion.div>
 
-          {/* SECTION 4: Execution Pipeline Tracker */}
-          <section className="w-full bg-white rounded-xl p-4 sm:p-5 border border-[#ccfbf1] shadow-xs">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-[#64748b] font-['JetBrains_Mono'] text-[12px]">
-                <Cpu className="w-4 h-4 text-[#0d9488] shrink-0" />
-                <span className="uppercase tracking-wider font-bold text-[#0f172a]">
-                  Statutory Execution Pipeline
-                </span>
-              </div>
-
-              {/* Steps Pipeline with Turquoise theme */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full md:w-auto font-['JetBrains_Mono'] text-[12px]">
-                <div className="flex items-center gap-2 bg-[#f0fdfc] border border-[#ccfbf1] px-3 py-1.5 rounded-md">
-                  <span className="w-5 h-5 rounded-full bg-[#ccfbf1] text-[#0f766e] flex items-center justify-center font-bold text-[11px]">
-                    01
-                  </span>
-                  <span className="text-[#334155] font-medium">Label Ingestion</span>
-                </div>
-                <div className="flex items-center gap-2 bg-[#f0fdfc] border border-[#ccfbf1] px-3 py-1.5 rounded-md">
-                  <span className="w-5 h-5 rounded-full bg-[#ccfbf1] text-[#0f766e] flex items-center justify-center font-bold text-[11px]">
-                    02
-                  </span>
-                  <span className="text-[#334155] font-medium">OCR Extraction</span>
-                </div>
-                <div className="flex items-center gap-2 bg-[#f0fdfc] border border-[#ccfbf1] px-3 py-1.5 rounded-md">
-                  <span className="w-5 h-5 rounded-full bg-[#ccfbf1] text-[#0f766e] flex items-center justify-center font-bold text-[11px]">
-                    03
-                  </span>
-                  <span className="text-[#334155] font-medium">Rule 9 Optical</span>
-                </div>
-                <div className="flex items-center gap-2 bg-[#e0fbf9] border border-[#47d1cc] text-[#0f766e] px-3 py-1.5 rounded-md shadow-xs">
-                  <span className="w-5 h-5 rounded-full bg-[#47d1cc] text-[#042f2e] flex items-center justify-center font-bold text-[11px]">
-                    04
-                  </span>
-                  <span className="font-bold">Health Match</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 text-[#64748b] font-['JetBrains_Mono'] text-[11.5px] font-semibold">
-                <span className="w-2 h-2 rounded-full bg-[#47d1cc] animate-pulse"></span>
-                <span>LATENCY: 8.2MS READY</span>
-              </div>
-            </div>
-          </section>
-
-          {/* Product Not Found in Database Banner */}
-          {notFoundInfo && (
-            <div className="p-6 bg-white border-2 border-[#ea580c] rounded-xl shadow-xs space-y-4 animate-fadeIn">
-              <div className="flex items-start space-x-3">
-                <div className="p-2.5 rounded-lg bg-[#fff7ed] border border-[#fed7aa] text-[#ea580c] shrink-0">
-                  <AlertCircle className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <h3 className="text-base font-bold text-[#0f172a]">Product Not Available in Database</h3>
-                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[#fff7ed] text-[#c2410c] border border-[#fed7aa]">
-                      #{notFoundInfo.barcode}
+              {/* SECTION 4: Execution Pipeline Tracker */}
+              <motion.section
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: 0.2, ease: 'easeOut' }}
+                className="w-full bg-white rounded-xl p-4 sm:p-5 border border-[#e8e2d8] shadow-xs"
+              >
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-2 text-[#5c554e] text-[13px]">
+                    <Cpu className="w-4 h-4 text-[#b8532f] shrink-0" />
+                    <span className="uppercase tracking-wider font-bold text-[#2a2622] font-['Space_Grotesk']">
+                      Statutory Execution Pipeline
                     </span>
                   </div>
-                  <p className="text-xs text-[#334155] mt-1 leading-relaxed">
-                    This product barcode is not currently registered in OpenFoodFacts or our local Indian FMCG registry.
-                    You can request our team to audit and add it in the Community Feedback Forum, or take a photo of the label for instant OCR analysis!
-                  </p>
-                </div>
-              </div>
 
-              <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-[#fed7aa]">
-                <button
-                  type="button"
-                  onClick={() => openFeedbackWithBarcode(notFoundInfo.barcode)}
-                  className="px-4 py-2 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold rounded-lg text-xs shadow-xs transition flex items-center space-x-1.5 cursor-pointer"
-                >
-                  <MessageSquarePlus className="w-4 h-4" />
-                  <span>Request in Community Forum</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setNotFoundInfo(null)}
-                  className="px-4 py-2 bg-[#f0fdfc] hover:bg-[#e0fbf9] text-[#334155] font-semibold rounded-lg text-xs border border-[#ccfbf1] transition cursor-pointer"
-                >
-                  Dismiss
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Global Error Banner */}
-          {errorMessage && (
-            <div className="p-4 bg-[#fff7ed] border border-[#fed7aa] rounded-xl flex items-start space-x-3 text-[#c2410c] text-xs animate-fadeIn shadow-xs">
-              <AlertCircle className="w-5 h-5 text-[#ea580c] shrink-0 mt-0.5" />
-              <div className="flex-1 font-medium">{errorMessage}</div>
-              <button
-                type="button"
-                onClick={() => setErrorMessage(null)}
-                className="text-[#ea580c] hover:text-[#9a3412] cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-          )}
-
-          {/* ========================================================================= */}
-          {/* SECTION 5: DETAILED AUDIT REPORT (Rendered when product is scanned/selected) */}
-          {/* ========================================================================= */}
-          {scanResult && (
-            <div id="results-anchor" className="space-y-6 pt-4 animate-fadeIn">
-              {/* Target Product Banner */}
-              <div className="p-4 sm:p-5 rounded-xl bg-white border border-[#ccfbf1] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-                <div>
-                  <div className="text-[10px] font-['JetBrains_Mono'] uppercase text-[#0d9488] font-bold tracking-wider">
-                    AUDITED COMMODITY DOSSIER
-                  </div>
-                  <h3 className="text-xl font-['Space_Grotesk'] font-extrabold text-[#0f172a] mt-0.5">
-                    {scanResult.product?.name}
-                  </h3>
-                  <div className="text-xs text-[#64748b] mt-1 font-['JetBrains_Mono']">
-                    Brand: <span className="text-[#0f172a] font-semibold">{scanResult.product?.brand}</span> • Category:{' '}
-                    <span className="text-[#0f172a] font-semibold">{scanResult.product?.category}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-                  {scanResult.product?.dataSource && (
-                    <DataSourceBadge
-                      dataSource={scanResult.product.dataSource}
-                      confidence={scanResult.product.confidence}
-                    />
-                  )}
-                  {scanResult.product?.barcode && (
-                    <div className="font-['JetBrains_Mono'] text-xs px-3 py-1.5 rounded-lg bg-[#f0fdfc] border border-[#ccfbf1] text-[#334155] font-semibold">
-                      Barcode: {scanResult.product.barcode}
+                  {/* Steps Pipeline with Terracotta / Stone Theme */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full md:w-auto text-[13px]">
+                    <div className="flex items-center gap-2 bg-[#faf7f2] border border-[#e8e2d8] px-3 py-1.5 rounded-md">
+                      <span className="w-5 h-5 rounded-full bg-[#e8e2d8] text-[#5c554e] flex items-center justify-center font-bold text-[11px]">
+                        01
+                      </span>
+                      <span className="text-[#5c554e] font-medium">Label Ingestion</span>
                     </div>
-                  )}
+                    <div className="flex items-center gap-2 bg-[#faf7f2] border border-[#e8e2d8] px-3 py-1.5 rounded-md">
+                      <span className="w-5 h-5 rounded-full bg-[#e8e2d8] text-[#5c554e] flex items-center justify-center font-bold text-[11px]">
+                        02
+                      </span>
+                      <span className="text-[#5c554e] font-medium">OCR Extraction</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-[#faf7f2] border border-[#e8e2d8] px-3 py-1.5 rounded-md">
+                      <span className="w-5 h-5 rounded-full bg-[#e8e2d8] text-[#5c554e] flex items-center justify-center font-bold text-[11px]">
+                        03
+                      </span>
+                      <span className="text-[#5c554e] font-medium">Rule 9 Optical</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-[#fbf2ed] border border-[#ecc2b0] text-[#b8532f] px-3 py-1.5 rounded-md shadow-xs">
+                      <span className="w-5 h-5 rounded-full bg-[#b8532f] text-white flex items-center justify-center font-bold text-[11px]">
+                        04
+                      </span>
+                      <span className="font-bold">Health Match</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-[#8c8278] text-[12px] font-semibold">
+                    <span className="w-2 h-2 rounded-full bg-[#b8532f] animate-pulse"></span>
+                    <span>LATENCY: 8.2MS READY</span>
+                  </div>
+                </div>
+              </motion.section>
+
+              {/* Product Not Found in Database Banner */}
+              {notFoundInfo && (
+                <div className="p-6 bg-white border-2 border-[#be123c] rounded-xl shadow-xs space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="p-2.5 rounded-lg bg-[#fff1f2] border border-[#fecdd3] text-[#be123c] shrink-0">
+                      <AlertCircle className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <h3 className="text-base font-bold text-[#2a2622]">Product Not Available in Database</h3>
+                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[#fff1f2] text-[#be123c] border border-[#fecdd3]">
+                          #{notFoundInfo.barcode}
+                        </span>
+                      </div>
+                      <p className="text-sm text-[#5c554e] mt-1 leading-relaxed max-w-2xl">
+                        This product barcode is not currently registered in OpenFoodFacts or our local Indian FMCG registry.
+                        You can request our team to audit and add it in the Community Feedback Forum, or take a photo of the label for instant OCR analysis!
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-[#fecdd3]">
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
+                      type="button"
+                      onClick={() => openFeedbackWithBarcode(notFoundInfo.barcode)}
+                      className="px-4 py-2 bg-[#b8532f] hover:bg-[#a34a2b] text-white font-bold rounded-lg text-xs shadow-xs transition flex items-center space-x-1.5 cursor-pointer"
+                    >
+                      <MessageSquarePlus className="w-4 h-4" />
+                      <span>Request in Community Forum</span>
+                    </motion.button>
+                    <button
+                      type="button"
+                      onClick={() => setNotFoundInfo(null)}
+                      className="px-4 py-2 bg-[#faf7f2] hover:bg-[#f4efe6] text-[#5c554e] font-semibold rounded-lg text-xs border border-[#e8e2d8] transition cursor-pointer"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Global Error Banner */}
+              {errorMessage && (
+                <div className="p-4 bg-[#fff1f2] border border-[#fecdd3] rounded-xl flex items-start space-x-3 text-[#be123c] text-xs shadow-xs">
+                  <AlertCircle className="w-5 h-5 text-[#be123c] shrink-0 mt-0.5" />
+                  <div className="flex-1 font-medium">{errorMessage}</div>
                   <button
                     type="button"
-                    onClick={handleNewScan}
-                    className="px-3.5 py-1.5 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-['Space_Grotesk'] font-bold rounded-lg text-xs border border-[#2bc4be] transition flex items-center space-x-1.5 shadow-xs cursor-pointer"
-                    title="Reset and scan another product"
+                    onClick={() => setErrorMessage(null)}
+                    className="text-[#be123c] hover:text-[#9f1239] cursor-pointer"
                   >
-                    <Camera className="w-3.5 h-3.5" />
-                    <span>Scan Another Product</span>
+                    ✕
                   </button>
                 </div>
-              </div>
+              )}
 
-              {/* 1. Legal Metrology Compliance Report */}
-              <ComplianceReport
-                report={scanResult.complianceReport}
-                productName={scanResult.product?.name}
-                barcode={scanResult.product?.barcode}
-                dataSource={scanResult.product?.dataSource}
-                confidence={scanResult.product?.confidence}
-                imageUrl={scanResult.product?.imageUrl}
-                product={scanResult.product}
-                onUpdateProductField={handleUpdateProductField}
-                onAddAdditionalPhoto={handleAddAdditionalPhoto}
-                onNewScan={handleNewScan}
-              />
+              {/* ========================================================================= */}
+              {/* SECTION 5: DETAILED AUDIT REPORT (Rendered when product is scanned/selected) */}
+              {/* ========================================================================= */}
+              {scanResult && (
+                <div id="results-anchor" className="space-y-6 pt-4">
+                  {/* Target Product Banner */}
+                  <div className="p-5 rounded-xl bg-white border border-[#e8e2d8] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                    <div>
+                      <div className="text-[11px] uppercase text-[#b8532f] font-bold tracking-wider font-['Space_Grotesk']">
+                        AUDITED COMMODITY DOSSIER
+                      </div>
+                      <h3 className="text-xl font-['Space_Grotesk'] font-extrabold text-[#2a2622] mt-0.5">
+                        {scanResult.product?.name}
+                      </h3>
+                      <div className="text-[13px] text-[#5c554e] mt-1">
+                        Brand: <span className="text-[#2a2622] font-semibold">{scanResult.product?.brand}</span> • Category:{' '}
+                        <span className="text-[#2a2622] font-semibold">{scanResult.product?.category}</span>
+                      </div>
+                    </div>
 
-              {/* 2. Personalized Health & Allergy Alerts */}
-              <HealthAlerts
-                healthEvaluation={scanResult.healthEvaluation}
-                userProfile={userProfile}
-                onOpenProfile={() => setIsProfileOpen(true)}
-              />
+                    <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+                      {scanResult.product?.dataSource && (
+                        <DataSourceBadge
+                          dataSource={scanResult.product.dataSource}
+                          confidence={scanResult.product.confidence}
+                        />
+                      )}
+                      {scanResult.product?.barcode && (
+                        <div className="font-mono text-xs px-3 py-1.5 rounded-lg bg-[#faf7f2] border border-[#e8e2d8] text-[#2a2622] font-semibold">
+                          Barcode: {scanResult.product.barcode}
+                        </div>
+                      )}
+                      <motion.button
+                        whileTap={{ scale: 0.97 }}
+                        type="button"
+                        onClick={handleNewScan}
+                        className="px-4 py-2 bg-[#b8532f] hover:bg-[#a34a2b] text-white font-['Space_Grotesk'] font-bold rounded-lg text-xs border border-[#a34a2b] transition flex items-center space-x-1.5 shadow-xs cursor-pointer"
+                        title="Reset and scan another product"
+                      >
+                        <Camera className="w-3.5 h-3.5" />
+                        <span>Scan Another Product</span>
+                      </motion.button>
+                    </div>
+                  </div>
 
-              {/* 3. Multi-Country Regulatory Additives Comparison */}
-              <RegulatoryComparison additives={scanResult.regulatoryAdditives} />
+                  {/* 1. Legal Metrology Compliance Report */}
+                  <ComplianceReport
+                    report={scanResult.complianceReport}
+                    productName={scanResult.product?.name}
+                    barcode={scanResult.product?.barcode}
+                    dataSource={scanResult.product?.dataSource}
+                    confidence={scanResult.product?.confidence}
+                    imageUrl={scanResult.product?.imageUrl}
+                    product={scanResult.product}
+                    onUpdateProductField={handleUpdateProductField}
+                    onAddAdditionalPhoto={handleAddAdditionalPhoto}
+                    onNewScan={handleNewScan}
+                  />
 
-              {/* 4. Alternative Product Suggestions */}
-              <AlternativeSuggestions alternatives={scanResult.alternatives} />
+                  {/* 2. Personalized Health & Allergy Alerts */}
+                  <HealthAlerts
+                    healthEvaluation={scanResult.healthEvaluation}
+                    userProfile={userProfile}
+                    onOpenProfile={() => setIsProfileOpen(true)}
+                  />
 
-              {/* 5. Raw Extracted Text & Metadata Inspection Drawer */}
-              <RawLabelViewer
-                rawText={scanResult.rawExtractedText}
-                product={scanResult.product}
-              />
-            </div>
+                  {/* 3. Multi-Country Regulatory Additives Comparison */}
+                  <RegulatoryComparison additives={scanResult.regulatoryAdditives} />
+
+                  {/* 4. Alternative Product Suggestions */}
+                  <AlternativeSuggestions alternatives={scanResult.alternatives} />
+
+                  {/* 5. Raw Extracted Text & Metadata Inspection Drawer */}
+                  <RawLabelViewer
+                    rawText={scanResult.rawExtractedText}
+                    product={scanResult.product}
+                  />
+                </div>
+              )}
+            </motion.div>
           )}
-        </div>
-        )}
+        </AnimatePresence>
       </main>
 
       {/* FOOTER (UNIFIED GLOBAL FOOTER) */}
-      <footer className="w-full bg-[#e6f7f6] border-t border-[#ccfbf1] py-4 mt-auto">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-3 font-['JetBrains_Mono'] text-[11.5px] text-[#475569]">
+      <footer className="w-full bg-[#f4efe6] border-t border-[#e8e2d8] py-4 mt-auto">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-3 text-[12px] text-[#5c554e]">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-[#0f172a]">PackScan Node ID: 26034-IN</span>
+            <span className="font-semibold text-[#2a2622]">PackScan Node ID: 26034-IN</span>
             <span>•</span>
             <span>Legal Metrology (Packaged Commodities) Rules, 2011 Enforcement Console</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-[#0f766e] font-semibold flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#47d1cc] animate-pulse"></span>
+            <span className="text-[#b8532f] font-semibold flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#b8532f] animate-pulse"></span>
               <span>Systems Operational</span>
             </span>
-            <span className="text-[#94a3b8]">|</span>
+            <span className="text-[#ded6c7]">|</span>
             <span>FSSAI Lab Matrix v2.4</span>
           </div>
         </div>

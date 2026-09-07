@@ -3,33 +3,19 @@
 @tailwind utilities;
 
 :root {
-  --bg-app: #f0fdfc;
+  --bg-app: #faf7f2;
   --bg-card: #ffffff;
-  --bg-card-hover: #f8fefe;
-  --bg-card-subtle: #f0fdfa;
-  --border-card: #ccfbf1;
-  --border-card-subtle: #e2e8f0;
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
-  --accent-turquoise: #47d1cc;
-  --accent-turquoise-dark: #0d9488;
-  --accent-coral: #ea580c;
-}
-
-body.theme-midnight {
-  --bg-app: #0b1120;
-  --bg-card: #111c33;
-  --bg-card-hover: #152340;
-  --bg-card-subtle: #0e172a;
-  --border-card: #1e2f52;
-  --border-card-subtle: #17243e;
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --accent-turquoise: #47d1cc;
-  --accent-turquoise-dark: #06b6d4;
-  --accent-coral: #ea580c;
+  --bg-card-hover: #fdfcfb;
+  --bg-card-subtle: #f7f4ee;
+  --border-card: #e8e2d8;
+  --border-card-subtle: #ded6c7;
+  --text-primary: #2a2622;
+  --text-secondary: #5c554e;
+  --text-muted: #8c8278;
+  --accent-terracotta: #b8532f;
+  --accent-terracotta-hover: #a34a2b;
+  --accent-ochre: #c99a3e;
+  --alert-rose: #be123c;
 }
 
 @layer base {
@@ -40,10 +26,11 @@ body.theme-midnight {
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background-color: var(--bg-app);
-    color: var(--text-secondary);
+    color: var(--text-primary);
     overflow-x: hidden;
     overscroll-behavior: none;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   code, pre {
     font-family: 'JetBrains Mono', ui-monospace, monospace;
@@ -72,100 +59,84 @@ body.theme-midnight {
   vertical-align: middle;
 }
 
-/* Glassmorphism Surface Utilities */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.72);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* Publication Card Surface Utilities */
+.publication-card {
+  background: #ffffff;
+  border: 1px solid #e8e2d8;
+  box-shadow: 0 1px 3px rgba(42, 38, 34, 0.04), 0 1px 2px rgba(42, 38, 34, 0.02);
 }
 
-.glass-panel-subtle {
-  background: rgba(15, 23, 42, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+.publication-card-hover {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s ease;
 }
-
-.glass-card-hover {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.glass-card-hover:hover {
-  border-color: rgba(52, 211, 153, 0.4);
+.publication-card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.6), 0 0 20px 0 rgba(16, 185, 129, 0.15);
+  border-color: #d8cfc0;
+  box-shadow: 0 10px 24px -6px rgba(42, 38, 34, 0.08), 0 4px 10px -2px rgba(42, 38, 34, 0.03);
 }
 
-/* Status Glow Borders */
-.glow-emerald {
-  box-shadow: 0 0 24px -4px rgba(16, 185, 129, 0.25);
-}
-
-.glow-amber {
-  box-shadow: 0 0 24px -4px rgba(245, 158, 11, 0.25);
-}
-
-.glow-rose {
-  box-shadow: 0 0 24px -4px rgba(244, 63, 94, 0.25);
-}
-
-/* High-Tech Camera HUD Reticle */
-.camera-reticle-corner {
-  width: 24px;
-  height: 24px;
-  border-color: #34d399;
-  position: absolute;
-}
-
-/* Custom Scrollbars */
+/* Custom Scrollbars in Warm Neutral */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #020617;
+  background: #faf7f2;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #ded6c7;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #10b981;
+  background: #b8532f;
 }
 
-/* Laser Sweep Animation */
-@keyframes scanSweep {
-  0% {
-    top: 6%;
-    opacity: 0.2;
-  }
-  20% {
-    opacity: 1;
-  }
-  80% {
-    opacity: 1;
-  }
-  100% {
-    top: 92%;
-    opacity: 0.2;
-  }
-}
-
-.scanner-laser {
-  animation: scanSweep 2s ease-in-out infinite alternate;
-}
-
-@keyframes pulseSubtle {
+/* Subtle Ambient Pulse for Brand & Hero */
+@keyframes ambientGlow {
   0%, 100% {
-    opacity: 1;
+    opacity: 0.2;
     transform: scale(1);
   }
   50% {
-    opacity: 0.85;
-    transform: scale(1.02);
+    opacity: 0.42;
+    transform: scale(1.08);
   }
 }
 
-.animate-pulse-subtle {
-  animation: pulseSubtle 3s ease-in-out infinite;
+.animate-ambient-glow {
+  animation: ambientGlow 8s ease-in-out infinite;
 }
+
+/* Metrology Viewfinder Scanning Beam */
+@keyframes reticleSweep {
+  0% {
+    top: 8%;
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    top: 90%;
+    opacity: 0.3;
+  }
+}
+
+.scanner-terracotta-sweep {
+  animation: reticleSweep 2.4s ease-in-out infinite alternate;
+}
+
+/* Smooth Spinner for Loading States */
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 2s linear infinite;
+}
+

@@ -252,7 +252,7 @@ async function saveToLocalDB(product) {
         : product.confidence || 'needs_verification';
 
     const source =
-      existing?.source === 'manual' || existing?.source === 'catalog'
+      existing?.source === 'manual' || existing?.source === 'catalog' || existing?.source === 'GEMINI_VISION_AI'
         ? existing.source
         : product.dataSource || product.source || 'openfoodfacts';
 

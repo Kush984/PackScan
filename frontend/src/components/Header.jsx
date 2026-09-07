@@ -1,5 +1,6 @@
 import React from 'react';
-import { Scan, AlertTriangle, Moon, Sun, ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Scan, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 export default function Header({
   activeTab = 'scan',
@@ -7,39 +8,53 @@ export default function Header({
   userProfile,
   onResetScan,
   hasActiveResult,
-  theme = 'midnight',
-  onToggleTheme,
 }) {
   const activeConditionsCount = userProfile?.conditions?.length || 0;
   const activeAllergiesCount = userProfile?.allergies?.length || 0;
   const totalFlagsCount = activeConditionsCount + activeAllergiesCount;
 
   const navItems = [
-    { id: 'scan', label: 'Scan & Verify', path: 'audit-console' },
-    { id: 'medical', label: 'Medical & Chronic Profile', path: 'medical-profile' },
-    { id: 'allergies', label: 'Allergies & Custom Thresholds', path: 'allergen-matrix' },
-    { id: 'forum', label: 'Product Forum & Ledger', path: 'metrology-ledger' },
+    { id: 'scan', label: 'Scan & Verify' },
+    { id: 'medical', label: 'Medical & Chronic Profile' },
+    { id: 'allergies', label: 'Allergies & Custom Thresholds' },
+    { id: 'forum', label: 'Product Forum & Ledger' },
   ];
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-[#ccfbf1] shadow-xs">
+    <header className="sticky top-0 z-40 bg-white border-b border-[#e8e2d8] shadow-xs">
       <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6">
         {/* Upper Status Bar */}
-        <div className="h-14 border-b border-[#e6fbf9] flex items-center justify-between py-2">
+        <div className="h-14 border-b border-[#f4efe6] flex items-center justify-between py-2 relative">
           {/* Left Brand Area */}
           <div
             className="flex items-center gap-3 cursor-pointer group"
             onClick={() => onSelectTab && onSelectTab('scan')}
           >
-            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#e0fbf9] border border-[#99f6e4] text-[#0d9488] shadow-xs">
-              <Scan className="w-5 h-5 text-[#0d9488]" />
+            {/* Ambient Logo Glow */}
+            <div className="relative">
+              <motion.div
+                className="absolute inset-0 rounded-lg bg-[#b8532f] filter blur-md"
+                animate={{
+                  opacity: [0.15, 0.35, 0.15],
+                  scale: [0.95, 1.1, 0.95],
+                }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              />
+              <div className="relative flex items-center justify-center w-9 h-9 rounded-lg bg-[#b8532f] text-white shadow-xs">
+                <Scan className="w-5 h-5" />
+              </div>
             </div>
+
             <div className="flex flex-col">
-              <span className="font-['Space_Grotesk'] font-extrabold text-[18px] leading-tight text-[#0f172a] tracking-tight group-hover:text-[#0d9488] transition-colors">
+              <span className="font-['Space_Grotesk'] font-extrabold text-[19px] leading-tight text-[#2a2622] tracking-tight group-hover:text-[#b8532f] transition-colors">
                 PackScan
               </span>
-              <span className="font-['JetBrains_Mono'] text-[9.5px] font-bold text-[#0d9488] uppercase tracking-widest leading-none mt-0.5">
-                LEGAL METROLOGY &amp; HEALTH SCANNER
+              <span className="font-['Space_Grotesk'] text-[10px] font-bold text-[#b8532f] uppercase tracking-wider leading-none mt-0.5">
+                Legal Metrology &amp; Health Guardian
               </span>
             </div>
           </div>
@@ -47,30 +62,35 @@ export default function Header({
           {/* Right Controls */}
           <div className="flex items-center gap-2.5">
             {/* Officer Jurisdiction Pill */}
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#f0fdfc] border border-[#ccfbf1] rounded-md text-[12px] font-medium text-[#334155]">
-              <span className="w-2 h-2 rounded-full bg-[#47d1cc] shadow-[0_0_6px_rgba(71,209,204,0.6)]"></span>
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[#faf7f2] border border-[#e8e2d8] rounded-md text-[13px] font-medium text-[#5c554e]">
+              <span className="w-2 h-2 rounded-full bg-[#b8532f]"></span>
               <span>Jurisdiction:</span>
-              <span className="font-['JetBrains_Mono'] font-bold text-[#0f172a]">DL/MH Central</span>
+              <span className="font-semibold text-[#2a2622]">DL/MH Central</span>
             </div>
 
             {/* Health Guardian Alert Badge */}
-            <button
+            <motion.button
+              whileTap={{ scale: 0.97 }}
               type="button"
               onClick={() => onSelectTab && onSelectTab('medical')}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fff7ed] border border-[#fed7aa] text-[#c2410c] rounded-md text-[12px] font-semibold hover:bg-[#ffedd5] transition cursor-pointer"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold border transition-all cursor-pointer ${
+                totalFlagsCount > 0
+                  ? 'bg-[#fdf5e6] border-[#eed69e] text-[#926325] hover:bg-[#fbf0d6]'
+                  : 'bg-[#faf7f2] border-[#e8e2d8] text-[#5c554e] hover:bg-[#f4efe6]'
+              }`}
             >
-              <AlertTriangle className="w-4 h-4 text-[#ea580c] shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-[#c99a3e] shrink-0" />
               <span>
                 Health Guardian:{' '}
-                <strong className="font-['JetBrains_Mono'] font-bold text-[#9a3412]">
-                  {totalFlagsCount > 0 ? `${totalFlagsCount} Conditions Flagged` : '0 Profile Flags'}
+                <strong className={totalFlagsCount > 0 ? 'text-[#926325] font-bold' : 'text-[#2a2622] font-semibold'}>
+                  {totalFlagsCount > 0 ? `${totalFlagsCount} Flags Active` : '0 Flags'}
                 </strong>
               </span>
-            </button>
+            </motion.button>
 
-            {/* Consistent Officer Avatar with DL */}
+            {/* Officer Avatar */}
             <div
-              className="w-8 h-8 rounded-full bg-[#e0fbf9] border border-[#47d1cc] flex items-center justify-center text-[#0f766e] text-[12px] font-['Space_Grotesk'] font-bold cursor-pointer shadow-xs"
+              className="w-8 h-8 rounded-full bg-[#fbf2ed] border border-[#ecc2b0] flex items-center justify-center text-[#b8532f] text-[13px] font-['Space_Grotesk'] font-bold cursor-pointer shadow-xs hover:border-[#b8532f] transition-colors"
               title="Officer ID: DL/2026-IN"
             >
               DL
@@ -89,10 +109,10 @@ export default function Header({
                   type="button"
                   onClick={() => onSelectTab && onSelectTab(item.id)}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`h-11 flex items-center px-3.5 text-[13px] transition-all cursor-pointer ${
+                  className={`h-11 flex items-center px-3.5 text-sm transition-all cursor-pointer ${
                     isActive
-                      ? "border-b-2 border-[#47d1cc] text-[#0f766e] font-['Space_Grotesk'] font-bold bg-[#47d1cc]/15"
-                      : 'text-[#475569] hover:text-[#0f172a] font-medium border-b-2 border-transparent'
+                      ? "border-b-2 border-[#b8532f] text-[#b8532f] font-['Space_Grotesk'] font-bold bg-[#fdf6f2]"
+                      : 'text-[#5c554e] hover:text-[#2a2622] font-medium border-b-2 border-transparent'
                   }`}
                 >
                   {item.label}
@@ -101,23 +121,22 @@ export default function Header({
             })}
           </nav>
 
-          {/* Secondary Subheader status text inside bar */}
-          <div className="hidden lg:flex items-center gap-2">
-            <span className="font-['JetBrains_Mono'] text-[11px] text-[#64748b]">
-              Government of India Legal Metrology (Packaged Commodities) Rules, 2011
-            </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#47d1cc]"></span>
+          {/* Secondary Subheader status text */}
+          <div className="hidden lg:flex items-center gap-2 text-[12px] text-[#8c8278]">
+            <span>Legal Metrology (Packaged Commodities) Rules, 2011</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#b8532f]"></span>
           </div>
         </div>
       </div>
 
-      {/* Secondary Thin Subheader Strip (Mobile) */}
-      <div className="lg:hidden bg-[#e8faf8] border-t border-[#ccfbf1] px-4 py-1.5 flex items-center justify-between text-[11px] font-['JetBrains_Mono'] text-[#475569]">
-        <span>Govt of India LM Rules, 2011</span>
-        <span className="flex items-center gap-1 font-semibold text-[#0f766e]">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#47d1cc]"></span> Active
+      {/* Secondary Mobile Subheader Strip */}
+      <div className="lg:hidden bg-[#f4efe6] border-t border-[#e8e2d8] px-4 py-1.5 flex items-center justify-between text-[12px] text-[#5c554e]">
+        <span>Legal Metrology Rules, 2011</span>
+        <span className="flex items-center gap-1.5 font-semibold text-[#b8532f]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#b8532f]"></span> Enforcement Active
         </span>
       </div>
     </header>
   );
 }
+

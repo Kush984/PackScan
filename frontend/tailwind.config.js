@@ -7,45 +7,66 @@ export default {
   theme: {
     extend: {
       colors: {
-        "teal-primary": "#47d1cc",
-        "teal-dark": "#0d9488",
-        "teal-light": "#f0fdfc",
-        "teal-border": "#ccfbf1",
-        "turquoise-accent": "#47d1cc",
-        "turquoise-hover": "#38c2bd",
-        "turquoise-dark": "#0d9488",
-        "turquoise-deep": "#042f2e",
-        "canvas-bg": "#f0fdfc",
-        "canvas-subtle": "#eefcfb",
-        "alert-coral": "#ea580c",
-        "alert-coral-bg": "#fff7ed",
-        "alert-coral-border": "#fed7aa",
-        primary: {
-          50: '#f0fdfc',
-          100: '#ccfbf1',
-          200: '#99f6e4',
-          300: '#5eead4',
-          400: '#47d1cc', // Vivid turquoise accent #47d1cc
-          500: '#14b8a6',
-          600: '#0d9488',
-          700: '#0f766e',
-          800: '#115e59',
-          900: '#134e4a',
-          950: '#042f2e',
+        // Core Palette Tokens
+        canvas: {
+          DEFAULT: '#faf7f2', // Warm muted stone/ivory paper canvas
+          subtle: '#f4efe6',
+          muted: '#ede6d8',
+          border: '#e8e2d8',
         },
-        alert: {
-          50: '#fff7ed',
-          500: '#f97316',
-          600: '#ea580c', // Standardized Alert/Warning: #ea580c
-          700: '#c2410c',
+        card: {
+          DEFAULT: '#ffffff',
+          hover: '#fdfcfb',
+          border: '#e8e2d8',
+          borderHover: '#d8cfc0',
         },
-        brand: {
-          50: '#ecfdf5',
-          100: '#d1fae5',
-          500: '#10b981',
-          600: '#059669',
-          700: '#047857',
-          900: '#064e3b',
+        // Primary: Deep Terracotta / Burnt Sienna
+        terracotta: {
+          50: '#fdf6f2',
+          100: '#fbf2ed',
+          200: '#f6dfd5',
+          300: '#ecc2b0',
+          400: '#df9e84',
+          500: '#d07b5a',
+          600: '#b8532f', // Primary Accent
+          700: '#a34a2b', // Hover State
+          800: '#863b22', // Active / Pressed
+          900: '#6f331f',
+          950: '#3c180d',
+        },
+        // Secondary: Warm Ochre / Mustard Gold
+        ochre: {
+          50: '#fdfbf5',
+          100: '#fbf5e6',
+          200: '#f5e8c7',
+          300: '#eed69e',
+          400: '#dfba63',
+          500: '#c99a3e', // Secondary Accent
+          600: '#b1812f',
+          700: '#926325',
+          800: '#795025',
+          900: '#654222',
+        },
+        // Alert / Warning Only: Deeper Rose-Red
+        roseAlert: {
+          50: '#fff1f2',
+          100: '#ffe4e6',
+          200: '#fecdd3',
+          300: '#fda4af',
+          400: '#fb7185',
+          500: '#f43f5e',
+          600: '#e11d48',
+          700: '#be123c', // Violation & Strict Alert
+          800: '#9f1239',
+          900: '#881337',
+        },
+        // Text / Typography: Near-black warm charcoal
+        charcoal: {
+          900: '#2a2622', // Primary Body & Titles
+          700: '#5c554e', // Secondary / Body
+          500: '#8c8278', // Muted / Labels
+          400: '#b0a79d', // Placeholder
+          200: '#ded7ce', // Hairlines
         },
       },
       fontFamily: {
@@ -54,7 +75,6 @@ export default {
         mono: ['"JetBrains Mono"', 'monospace'],
         spaceGrotesk: ['"Space Grotesk"', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
-        jetbrainsMono: ['"JetBrains Mono"', 'monospace'],
       },
     },
   },

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import {
   X,
   ShieldAlert,
@@ -185,35 +186,35 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white border border-[#e7e0d6] rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/60">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e7e0d6] bg-white">
           <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+            <div className="p-2 rounded-xl bg-[#faf7f2] border border-[#e7e0d6] text-[#b8532f]">
               <Stethoscope className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-100">Personal Health, Disease & Allergy Profile</h2>
-              <p className="text-xs text-slate-400">Stored locally on your device for instant safety alerts on scans</p>
+              <h2 className="text-lg font-bold text-[#2a2622] font-['Space_Grotesk']">Personal Health & Allergy Profile</h2>
+              <p className="text-xs text-[#57534e]">Stored locally on your device for instant safety alerts on scans</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="p-2 rounded-lg text-[#78716c] hover:text-[#2a2622] hover:bg-[#faf7f2] transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1 text-sm">
+        <div className="p-6 overflow-y-auto space-y-6 flex-1 text-sm bg-[#faf7f2]">
           {/* Section 1: Medical Conditions & Diseases */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-2">
-                <Activity className="w-4 h-4 text-emerald-400" />
-                <h3 className="font-bold text-slate-200 uppercase tracking-wider text-xs">
+                <Activity className="w-4 h-4 text-[#b8532f]" />
+                <h3 className="font-bold text-[#2a2622] uppercase tracking-wider text-xs font-['Space_Grotesk']">
                   1. Medical Diseases & Conditions ({conditions.length} Selected)
                 </h3>
               </div>
@@ -229,26 +230,26 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
                     onClick={() => toggleCondition(dis.id)}
                     className={`cursor-pointer p-3 rounded-xl border transition flex flex-col justify-between ${
                       isSelected
-                        ? 'bg-emerald-950/40 border-emerald-500 text-emerald-200 shadow-md shadow-emerald-950/40'
-                        : 'bg-slate-800/40 border-slate-700/60 text-slate-300 hover:border-slate-600 hover:bg-slate-800/60'
+                        ? 'bg-[#fef3c7] border-[#c99a3e] text-[#2a2622] shadow-sm'
+                        : 'bg-white border-[#e7e0d6] text-[#2a2622] hover:border-[#b8532f]'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <div className="font-bold text-xs text-slate-100">{dis.name}</div>
-                        <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-black/40 text-emerald-400 border border-emerald-500/20 inline-block mt-0.5">
+                        <div className="font-bold text-xs text-[#2a2622] font-['Space_Grotesk']">{dis.name}</div>
+                        <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-white text-[#c99a3e] border border-[#fde68a] inline-block mt-0.5">
                           {dis.tag}
                         </span>
                       </div>
                       <div
                         className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 mt-0.5 ${
-                          isSelected ? 'bg-emerald-500 border-emerald-500' : 'border-slate-600'
+                          isSelected ? 'bg-[#c99a3e] border-[#c99a3e]' : 'border-[#e7e0d6]'
                         }`}
                       >
-                        {isSelected && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
+                        {isSelected && <Check className="w-3 h-3 text-white stroke-[3]" />}
                       </div>
                     </div>
-                    <p className="text-[11px] text-slate-400 mt-1.5 leading-tight">{dis.desc}</p>
+                    <p className="text-[11px] text-[#57534e] mt-1.5 leading-tight">{dis.desc}</p>
                   </div>
                 );
               })}
@@ -256,7 +257,7 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
 
             {/* Add Custom Disease Input */}
             <div className="mt-3">
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-[#2a2622] mb-1.5">
                 Add Custom Disease / Health Condition:
               </label>
               <div className="flex items-center space-x-2">
@@ -271,12 +272,12 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
                       addCustomCondition();
                     }
                   }}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+                  className="w-full bg-white border border-[#e7e0d6] rounded-xl px-3.5 py-2 text-xs text-[#2a2622] placeholder-[#a8a29e] focus:outline-none focus:border-[#b8532f] transition"
                 />
                 <button
                   type="button"
                   onClick={addCustomCondition}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1 transition shrink-0"
+                  className="px-4 py-2 bg-[#b8532f] hover:bg-[#a34a2b] text-white rounded-xl text-xs font-semibold flex items-center space-x-1 transition shrink-0 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add</span>
@@ -291,13 +292,13 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
                     .map((customC) => (
                       <span
                         key={customC}
-                        className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-medium"
+                        className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white border border-[#e7e0d6] text-[#b8532f] text-xs font-medium"
                       >
                         <span className="capitalize">{customC}</span>
                         <button
                           type="button"
                           onClick={() => toggleCondition(customC)}
-                          className="hover:text-white ml-1 text-emerald-400"
+                          className="hover:text-[#be123c] ml-1 text-[#78716c] cursor-pointer"
                         >
                           ×
                         </button>
@@ -309,10 +310,10 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
 
             {/* Configurable Threshold Sliders for Diabetic & Hypertension */}
             {conditions.includes('diabetic') && (
-              <div className="mt-3 p-3 bg-slate-950/50 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div className="mt-3 p-3 bg-white rounded-xl border border-[#e7e0d6] flex items-center justify-between">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300">Custom Sugar Flag Threshold:</label>
-                  <p className="text-[11px] text-slate-500">Alert triggers if product sugar exceeds this value</p>
+                  <label className="text-xs font-semibold text-[#2a2622]">Custom Sugar Flag Threshold:</label>
+                  <p className="text-[11px] text-[#78716c]">Alert triggers if product sugar exceeds this value</p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <input
@@ -322,9 +323,9 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
                     step="1"
                     value={sugarThreshold}
                     onChange={(e) => setSugarThreshold(Number(e.target.value))}
-                    className="w-24 accent-emerald-500"
+                    className="w-24 accent-[#b8532f]"
                   />
-                  <span className="font-mono font-bold text-emerald-400 text-xs w-16 text-right">
+                  <span className="font-mono font-bold text-[#b8532f] text-xs w-16 text-right">
                     {sugarThreshold} g/100g
                   </span>
                 </div>
@@ -332,10 +333,10 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
             )}
 
             {conditions.includes('hypertension') && (
-              <div className="mt-2 p-3 bg-slate-950/50 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div className="mt-2 p-3 bg-white rounded-xl border border-[#e7e0d6] flex items-center justify-between">
                 <div>
-                  <label className="text-xs font-semibold text-slate-300">Custom Sodium Flag Threshold:</label>
-                  <p className="text-[11px] text-slate-500">Alert triggers if sodium exceeds this value</p>
+                  <label className="text-xs font-semibold text-[#2a2622]">Custom Sodium Flag Threshold:</label>
+                  <p className="text-[11px] text-[#78716c]">Alert triggers if sodium exceeds this value</p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <input
@@ -345,9 +346,9 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
                     step="50"
                     value={sodiumThreshold}
                     onChange={(e) => setSodiumThreshold(Number(e.target.value))}
-                    className="w-24 accent-emerald-500"
+                    className="w-24 accent-[#b8532f]"
                   />
-                  <span className="font-mono font-bold text-emerald-400 text-xs w-20 text-right">
+                  <span className="font-mono font-bold text-[#b8532f] text-xs w-20 text-right">
                     {sodiumThreshold} mg/100g
                   </span>
                 </div>
@@ -356,11 +357,11 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
           </div>
 
           {/* Section 2: Allergies Selection */}
-          <div className="pt-2 border-t border-slate-800">
+          <div className="pt-2 border-t border-[#e7e0d6]">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-2">
-                <Heart className="w-4 h-4 text-emerald-400" />
-                <h3 className="font-bold text-slate-200 uppercase tracking-wider text-xs">
+                <Heart className="w-4 h-4 text-[#b8532f]" />
+                <h3 className="font-bold text-[#2a2622] uppercase tracking-wider text-xs font-['Space_Grotesk']">
                   2. Select Allergies ({allergies.length} Active)
                 </h3>
               </div>
@@ -375,15 +376,15 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
                     key={item.id}
                     type="button"
                     onClick={() => toggleAllergy(item.id)}
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-xl text-left border transition text-xs ${
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-xl text-left border transition text-xs cursor-pointer ${
                       isSelected
-                        ? 'bg-emerald-500/20 border-emerald-500 text-emerald-200 font-semibold'
-                        : 'bg-slate-800/40 border-slate-700/50 text-slate-300 hover:bg-slate-800'
+                        ? 'bg-[#fef3c7] border-[#c99a3e] text-[#2a2622] font-semibold'
+                        : 'bg-white border-[#e7e0d6] text-[#2a2622] hover:bg-[#faf7f2]'
                     }`}
                   >
                     <span>{item.icon}</span>
                     <span className="truncate flex-1">{item.label}</span>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
+                    {isSelected && <Check className="w-3.5 h-3.5 text-[#c99a3e] shrink-0" />}
                   </button>
                 );
               })}
@@ -391,7 +392,7 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
 
             {/* Freeform Autocomplete Tag Adder */}
             <div className="mt-3">
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-[#2a2622] mb-1.5">
                 Add Custom or Specific Allergen:
               </label>
               <div className="relative flex items-center space-x-2">
@@ -406,12 +407,12 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
                       addCustomAllergy();
                     }
                   }}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+                  className="w-full bg-white border border-[#e7e0d6] rounded-xl px-3.5 py-2 text-xs text-[#2a2622] placeholder-[#a8a29e] focus:outline-none focus:border-[#b8532f] transition"
                 />
                 <button
                   type="button"
                   onClick={() => addCustomAllergy()}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1 transition shrink-0"
+                  className="px-4 py-2 bg-[#b8532f] hover:bg-[#a34a2b] text-white rounded-xl text-xs font-semibold flex items-center space-x-1 transition shrink-0 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add</span>
@@ -420,13 +421,13 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
 
               {/* Suggestions */}
               {allergySuggestions.length > 0 && (
-                <div className="mt-1 bg-slate-950 border border-slate-800 rounded-xl p-1.5 flex flex-wrap gap-1">
+                <div className="mt-1 bg-white border border-[#e7e0d6] rounded-xl p-1.5 flex flex-wrap gap-1">
                   {allergySuggestions.map((sug) => (
                     <button
                       key={sug}
                       type="button"
                       onClick={() => addCustomAllergy(sug)}
-                      className="px-2.5 py-1 bg-slate-800 hover:bg-emerald-600 text-slate-200 hover:text-white rounded-lg text-[11px] transition"
+                      className="px-2.5 py-1 bg-[#faf7f2] hover:bg-[#f7f4ee] text-[#2a2622] rounded-lg text-[11px] transition cursor-pointer"
                     >
                       + {sug}
                     </button>
@@ -440,13 +441,13 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
                   {allergies.map((allergy) => (
                     <span
                       key={allergy}
-                      className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-medium"
+                      className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white border border-[#e7e0d6] text-[#b8532f] text-xs font-medium"
                     >
                       <span className="capitalize">{allergy}</span>
                       <button
                         type="button"
                         onClick={() => toggleAllergy(allergy)}
-                        className="hover:text-white ml-1 text-emerald-400"
+                        className="hover:text-[#be123c] ml-1 text-[#78716c] cursor-pointer"
                       >
                         ×
                       </button>
@@ -459,29 +460,30 @@ export default function ProfileModal({ isOpen, onClose, userProfile, onSaveProfi
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 border-t border-slate-800 bg-slate-950/60 flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-[#e7e0d6] bg-white flex items-center justify-between">
           <button
             onClick={() => {
               setAllergies([]);
               setConditions([]);
             }}
-            className="text-xs text-slate-400 hover:text-slate-200 underline"
+            className="text-xs text-[#78716c] hover:text-[#2a2622] underline cursor-pointer"
           >
             Clear All
           </button>
           <div className="flex items-center space-x-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-medium transition"
+              className="px-4 py-2 rounded-xl bg-[#faf7f2] hover:bg-[#f7f4ee] border border-[#e7e0d6] text-xs text-[#57534e] font-medium transition cursor-pointer"
             >
               Cancel
             </button>
-            <button
+            <motion.button
+              whileTap={{ scale: 0.97 }}
               onClick={handleSave}
-              className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold shadow-lg shadow-emerald-500/20 transition"
+              className="px-5 py-2 rounded-xl bg-[#b8532f] hover:bg-[#a34a2b] text-white text-xs font-bold shadow-sm transition cursor-pointer font-['Space_Grotesk']"
             >
               Save Profile Preferences
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>

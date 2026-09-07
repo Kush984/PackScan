@@ -225,8 +225,9 @@ app.post('/api/scan/extract-barcode', upload.single('frame'), async (req, res) =
         .toBuffer();
 
       const candidateModels = [
-        'gemini-3.1-flash-lite-preview',
-        'gemini-3.6-flash',
+        'gemini-flash-lite-latest',
+        'gemini-3.1-flash-lite',
+        'gemini-flash-latest',
       ];
 
       const tasks = candidateModels.map(async (model) => {
@@ -311,6 +312,33 @@ app.post('/api/scan/barcode', async (req, res) => {
   }
 });
 
+// ── RE-EVALUATE HEALTH & ALLERGIES (PRESERVES LEGAL METROLOGY REPORT) ──────────
+// When a user updates their personal allergy/disease profile, recalculate ONLY
+// the personalized health safety alerts and alternative recommendations.
+// The statutory Legal Metrology packaging compliance is NEVER affected.
+app.post('/api/scan/re-evaluate-health', async (req, res) => {
+  try {
+    const { userProfile, product, rawExtractedText } = req.body;
+    if (!product) return res.status(400).json({ error: 'Product required' });
+
+    const text = [
+      rawExtractedText || '',
+      product.ingredients_text || '',
+      product.ingredients || '',
+      product.name ? `Product Name: ${product.name}` : '',
+    ].filter(Boolean).join('\n');
+
+    const nutriments = product.nutriments || {};
+    const healthEvaluation = evaluateAllergiesAndHealth(text, nutriments, userProfile || {});
+    const alternatives = await findSaferAlternatives(product, userProfile || {});
+
+    res.json({ healthEvaluation, alternatives });
+  } catch (err) {
+    console.error('Re-evaluate health error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── MULTI-EVIDENCE GUIDED CAPTURE (STAGE 2 & 3) ─────────────────────────
 app.post(
   '/api/scan/multi-evidence',
@@ -376,12 +404,13 @@ app.post(
           confidence: 98,
         });
 
+        const firstUploadedPath = uploadedImagePaths && uploadedImagePaths.length > 0 ? uploadedImagePaths[0] : null;
         productData = {
           product_name: geminiResult.product_name || productData?.product_name || 'Scanned Packaged Commodity',
           brand: geminiResult.brand || productData?.brand || 'Verified Brand',
           barcode: barcode || productData?.barcode,
           categories: productData?.categories || 'Packaged Commodity',
-          image_url: productData?.image_url || `/uploads/${path.basename(uploadedImagePaths[0])}`,
+          image_url: productData?.image_url || (firstUploadedPath ? `/uploads/${path.basename(firstUploadedPath)}` : null),
           ingredients_text: geminiResult.ingredients_text || productData?.ingredients_text || '',
           nutriments: {
             ...(productData?.nutriments || {}),
@@ -427,6 +456,7 @@ app.post(
       }
 
       // 4. Run Unified Legal Metrology and Safety Analysis
+      const firstPhotoPath = req.files?.frontPhoto?.[0]?.path || req.files?.backPhoto?.[0]?.path || null;
       const analysis = await runUnifiedAnalysis({
         labelText: combinedOCR,
         productData: productData || {
@@ -440,10 +470,25 @@ app.post(
         deviceId,
         barcode,
         evidenceSources,
-        imagePath: req.files?.frontPhoto?.[0]?.path || req.files?.backPhoto?.[0]?.path || null,
+        imagePath: firstPhotoPath ? `/uploads/${path.basename(firstPhotoPath)}` : null,
       });
 
       analysis.ocrResults = ocrResults;
+
+      // Persist verified product details to local cache if barcode exists
+      if (barcode) {
+        saveToLocalDB({
+          barcode,
+          product_name: productData?.product_name || 'Scanned Packaged Commodity',
+          brand: productData?.brands || productData?.brand || '',
+          ingredients_text: combinedOCR || productData?.ingredients_text || '',
+          nutriments: productData?.nutriments || {},
+          categories: productData?.categories || '',
+          source: productData?.source || 'GEMINI_VISION_AI',
+          confidence: 'high',
+        }).catch((e) => console.warn('[DB] Failed to save multi-evidence product:', e.message));
+      }
+
       res.json(analysis);
     } catch (err) {
       console.error('[Multi-Evidence Scan Error]:', err);

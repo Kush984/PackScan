@@ -130,11 +130,11 @@ Return ONLY a valid JSON object matching this schema:
       },
     ];
 
-    // Priority: Fast models first with 16s timeout
+    // Priority: Fast, verified responsive models with 10s timeout
     const candidateModels = [
+      'gemini-flash-lite-latest',
+      'gemini-3.1-flash-lite',
       'gemini-flash-latest',
-      'gemini-3.6-flash',
-      'gemini-3.1-flash-lite-preview',
     ];
     let candidateText = null;
 
@@ -153,7 +153,7 @@ Return ONLY a valid JSON object matching this schema:
               temperature: 0.1,
             },
           }),
-          signal: AbortSignal.timeout(16000), // 16-second hard timeout
+          signal: AbortSignal.timeout(10000), // 10-second responsive timeout
         });
 
         if (!res.ok) {

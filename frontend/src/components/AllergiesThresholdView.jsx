@@ -299,38 +299,38 @@ export default function AllergiesThresholdView({
       className="flex flex-col w-full pb-16 space-y-6"
     >
       {/* HEADER CARD */}
-      <div className="w-full bg-white rounded-xl p-6 sm:p-7 shadow-xs border border-[#ccfbf1]">
+      <div className="w-full bg-white rounded-xl p-6 sm:p-7 shadow-xs border border-[#e7e0d6]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="px-2.5 py-0.5 bg-[#e6fbf9] border border-[#99f6e4] text-[#0f766e] font-['JetBrains_Mono'] text-[11px] font-semibold uppercase rounded">
+              <span className="px-2.5 py-0.5 bg-[#fdf2ec] border border-[#f5d5c6] text-[#b8532f] font-['Space_Grotesk'] text-[11px] font-semibold uppercase rounded">
                 Personal Safety Profile
               </span>
-              <span className="text-[#ccfbf1]">•</span>
-              <span className="text-[#64748b] font-['JetBrains_Mono'] text-xs font-medium">
+              <span className="text-[#e7e0d6]">•</span>
+              <span className="text-[#786e65] font-['Space_Grotesk'] text-xs font-medium">
                 Local Device Configuration
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold font-['Space_Grotesk'] text-[#0f172a] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold font-['Space_Grotesk'] text-[#2a2622] tracking-tight">
               Allergies &amp; Custom Threshold Matrix
             </h1>
-            <p className="text-[#334155] text-sm mt-1 max-w-3xl">
+            <p className="text-[#574f46] text-sm mt-1 max-w-3xl leading-relaxed">
               Configure food allergies and personal sugar limits for instant on-device warnings when scanning.
             </p>
           </div>
 
           {/* Clean Privacy / Local Storage Badge */}
-          <div className="flex items-center gap-3 bg-[#f0fdfc] border border-[#ccfbf1] px-4 py-2.5 rounded-xl shrink-0 self-start sm:self-auto">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <div className="flex items-center gap-3 bg-[#faf7f2] border border-[#e7e0d6] px-4 py-2.5 rounded-xl shrink-0 self-start sm:self-auto">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#c99a3e] animate-pulse"></span>
             <div className="flex flex-col">
-              <span className="font-['JetBrains_Mono'] text-xs font-bold text-[#0f172a]">
+              <span className="font-['Space_Grotesk'] text-xs font-bold text-[#2a2622]">
                 On-Device Storage
               </span>
-              <span className="font-['JetBrains_Mono'] text-[11px] text-[#64748b]">
+              <span className="font-['Space_Grotesk'] text-[11px] text-[#786e65]">
                 Private &amp; Offline Verification
               </span>
             </div>
-            <ShieldCheck className="w-5 h-5 text-[#0d9488] ml-1" />
+            <ShieldCheck className="w-5 h-5 text-[#b8532f] ml-1" />
           </div>
         </div>
       </div>
@@ -341,26 +341,26 @@ export default function AllergiesThresholdView({
         <button
           type="button"
           onClick={() => onNavigateTab && onNavigateTab('medical')}
-          className="flex items-center justify-between p-3.5 bg-white border border-[#ccfbf1] text-[#334155] hover:bg-[#f0fdfc] hover:border-[#47d1cc] transition-all rounded-xl shadow-xs group cursor-pointer"
+          className="flex items-center justify-between p-3.5 bg-white border border-[#e7e0d6] text-[#2a2622] hover:bg-[#faf7f2] hover:border-[#b8532f]/40 transition-all rounded-xl shadow-xs group cursor-pointer"
         >
           <div className="flex items-center gap-3">
-            <span className="w-7 h-7 rounded-lg bg-[#f0fdfc] border border-[#ccfbf1] text-[#64748b] group-hover:border-[#47d1cc] group-hover:text-[#0d9488] flex items-center justify-center font-['JetBrains_Mono'] text-xs font-semibold transition-colors">
+            <span className="w-7 h-7 rounded-lg bg-[#faf7f2] border border-[#e7e0d6] text-[#786e65] group-hover:border-[#b8532f] group-hover:text-[#b8532f] flex items-center justify-center font-['Space_Grotesk'] text-xs font-semibold transition-colors">
               01
             </span>
-            <span className="font-['Space_Grotesk'] text-sm font-semibold text-[#334155] group-hover:text-[#0d9488] transition-colors">
+            <span className="font-['Space_Grotesk'] text-sm font-semibold text-[#2a2622] group-hover:text-[#b8532f] transition-colors">
               1. Medical Conditions
             </span>
           </div>
-          <ArrowRight className="w-4 h-4 text-[#64748b] group-hover:text-[#0d9488] transition-colors" />
+          <ArrowRight className="w-4 h-4 text-[#786e65] group-hover:text-[#b8532f] transition-colors" />
         </button>
 
         {/* Step 2 (Active) */}
-        <div className="flex items-center justify-between p-3.5 bg-[#e0fbf9] text-[#0f766e] rounded-xl shadow-xs border-2 border-[#47d1cc] cursor-default">
+        <div className="flex items-center justify-between p-3.5 bg-[#fdf2ec] text-[#b8532f] rounded-xl shadow-xs border-2 border-[#b8532f] cursor-default">
           <div className="flex items-center gap-3">
-            <span className="w-7 h-7 rounded-lg bg-[#47d1cc] text-[#042f2e] flex items-center justify-center font-['JetBrains_Mono'] text-xs font-bold">
+            <span className="w-7 h-7 rounded-lg bg-[#b8532f] text-white flex items-center justify-center font-['Space_Grotesk'] text-xs font-bold">
               02
             </span>
-            <span className="font-['Space_Grotesk'] text-sm font-bold text-[#0f766e]">
+            <span className="font-['Space_Grotesk'] text-sm font-bold text-[#b8532f]">
               2. Allergens &amp; Thresholds (Active)
             </span>
           </div>
@@ -368,7 +368,7 @@ export default function AllergiesThresholdView({
             key={totalAllergensCount}
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
-            className="px-2 py-0.5 rounded bg-[#47d1cc] text-[#042f2e] font-['JetBrains_Mono'] text-xs font-bold"
+            className="px-2 py-0.5 rounded bg-[#b8532f] text-white font-['Space_Grotesk'] text-xs font-bold"
           >
             {totalAllergensCount} ACTIVE
           </motion.span>
@@ -378,17 +378,17 @@ export default function AllergiesThresholdView({
         <button
           type="button"
           onClick={() => onNavigateTab && onNavigateTab('forum')}
-          className="flex items-center justify-between p-3.5 bg-white border border-[#ccfbf1] text-[#334155] hover:bg-[#f0fdfc] hover:border-[#47d1cc] transition-all rounded-xl shadow-xs group cursor-pointer"
+          className="flex items-center justify-between p-3.5 bg-white border border-[#e7e0d6] text-[#2a2622] hover:bg-[#faf7f2] hover:border-[#b8532f]/40 transition-all rounded-xl shadow-xs group cursor-pointer"
         >
           <div className="flex items-center gap-3">
-            <span className="w-7 h-7 rounded-lg bg-[#f0fdfc] border border-[#ccfbf1] text-[#64748b] group-hover:border-[#47d1cc] group-hover:text-[#0d9488] flex items-center justify-center font-['JetBrains_Mono'] text-xs font-semibold transition-colors">
+            <span className="w-7 h-7 rounded-lg bg-[#faf7f2] border border-[#e7e0d6] text-[#786e65] group-hover:border-[#b8532f] group-hover:text-[#b8532f] flex items-center justify-center font-['Space_Grotesk'] text-xs font-semibold transition-colors">
               03
             </span>
-            <span className="font-['Space_Grotesk'] text-sm font-semibold text-[#334155] group-hover:text-[#0d9488] transition-colors">
+            <span className="font-['Space_Grotesk'] text-sm font-semibold text-[#2a2622] group-hover:text-[#b8532f] transition-colors">
               3. Forum &amp; Metrology Ledger
             </span>
           </div>
-          <ArrowRight className="w-4 h-4 text-[#64748b] group-hover:text-[#0d9488] transition-colors" />
+          <ArrowRight className="w-4 h-4 text-[#786e65] group-hover:text-[#b8532f] transition-colors" />
         </button>
       </div>
 
@@ -397,15 +397,15 @@ export default function AllergiesThresholdView({
         {/* LEFT COLUMN: Auxiliary metabolism & Sugar Threshold */}
         <div className="lg:col-span-5 space-y-6">
           {/* Section: Auxiliary Metabolism Triggers */}
-          <section className="bg-white rounded-xl p-6 shadow-xs border border-[#ccfbf1] space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[#ccfbf1]">
+          <section className="bg-white rounded-xl p-6 shadow-xs border border-[#e7e0d6] space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-[#e7e0d6]">
               <div className="flex items-center gap-2">
-                <Dna className="w-5 h-5 text-[#0d9488]" />
-                <h2 className="font-['Space_Grotesk'] text-base font-bold text-[#0f172a] uppercase tracking-wide">
+                <Dna className="w-5 h-5 text-[#b8532f]" />
+                <h2 className="font-['Space_Grotesk'] text-base font-bold text-[#2a2622] uppercase tracking-wide">
                   Metabolic Sensitivities
                 </h2>
               </div>
-              <span className="font-['JetBrains_Mono'] text-[11px] text-[#64748b] font-medium uppercase">
+              <span className="font-['Space_Grotesk'] text-[11px] text-[#786e65] font-medium uppercase">
                 Advisory Watch
               </span>
             </div>
@@ -415,16 +415,16 @@ export default function AllergiesThresholdView({
               onClick={toggleNAFLD}
               className={`group flex items-start gap-3.5 p-3.5 rounded-xl cursor-pointer transition-all ${
                 isNafldActive
-                  ? 'bg-[#e8faf8] border-2 border-[#47d1cc] shadow-xs'
-                  : 'bg-[#f0fdfc] hover:bg-[#e0fbf9] border border-[#ccfbf1]'
+                  ? 'bg-[#fdf7f4] border-2 border-[#b8532f] shadow-xs'
+                  : 'bg-[#faf7f2] hover:bg-[#f5ecdf] border border-[#e7e0d6]'
               }`}
             >
               <div className="pt-0.5">
                 <div
                   className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${
                     isNafldActive
-                      ? 'bg-[#47d1cc] text-[#042f2e] shadow-xs'
-                      : 'border border-[#cbd5e1] bg-white text-transparent'
+                      ? 'bg-[#b8532f] text-white shadow-xs'
+                      : 'border border-[#e7e0d6] bg-white text-transparent'
                   }`}
                 >
                   <Check className="w-3.5 h-3.5 font-bold stroke-[3]" />
@@ -432,18 +432,18 @@ export default function AllergiesThresholdView({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-bold text-[#0f172a]">
+                  <span className="text-sm font-bold text-[#2a2622]">
                     Fatty Liver (NAFLD)
                   </span>
-                  <span className="px-2 py-0.5 bg-[#fff7ed] border border-[#fed7aa] text-[#c2410c] font-['JetBrains_Mono'] text-[10px] rounded font-bold uppercase tracking-wider">
+                  <span className="px-2 py-0.5 bg-[#fff1f2] border border-[#fecdd3] text-[#be123c] font-['Space_Grotesk'] text-[10px] rounded font-bold uppercase tracking-wider">
                     Fructose &amp; Trans Fats
                   </span>
                 </div>
-                <p className="text-xs text-[#334155] mt-1">
+                <p className="text-xs text-[#574f46] mt-1 leading-relaxed">
                   Flags high fructose corn syrup solids, liquid glucose, chemically inverted sugars &amp; hydrogenated palm oils.
                 </p>
                 <div className="flex items-center gap-1.5 mt-2">
-                  <span className="font-['JetBrains_Mono'] text-[11px] text-[#64748b] font-medium">
+                  <span className="font-['Space_Grotesk'] text-[11px] text-[#786e65] font-medium">
                     TRIGGER: HFCS &gt; 0% | TRANS-FAT &gt; 0.2g
                   </span>
                 </div>
@@ -453,26 +453,26 @@ export default function AllergiesThresholdView({
             {/* Add Custom Disease / Metabolic Sensitivity */}
             <div className="pt-2 space-y-2">
               <label
-                className="block font-['JetBrains_Mono'] text-xs font-semibold uppercase text-[#64748b]"
+                className="block font-['Space_Grotesk'] text-xs font-semibold uppercase text-[#786e65]"
                 htmlFor="custom-disease-input"
               >
                 Add Custom Metabolic Sensitivity
               </label>
               <form onSubmit={handleAddCustomCondition} className="flex items-center gap-2">
                 <div className="relative flex-1">
-                  <Shield className="w-4 h-4 text-[#64748b] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Shield className="w-4 h-4 text-[#786e65] absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     id="custom-disease-input"
                     type="text"
                     value={customConditionInput}
                     onChange={(e) => setCustomConditionInput(e.target.value)}
                     placeholder="Type condition (e.g. Migraine, Histamine)..."
-                    className="w-full bg-[#f0fdfc] border border-[#ccfbf1] text-[#0f172a] placeholder:text-[#94a3b8] pl-9 pr-3 py-2 rounded-lg text-xs font-medium focus:outline-none focus:border-[#47d1cc] focus:bg-white transition-all"
+                    className="w-full bg-[#faf7f2] border border-[#e7e0d6] text-[#2a2622] placeholder:text-[#786e65] pl-9 pr-3 py-2 rounded-lg text-xs font-medium focus:outline-none focus:border-[#b8532f] focus:bg-white transition-all"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="h-9 px-4 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-semibold text-xs rounded-lg flex items-center gap-1.5 shadow-xs transition-all shrink-0 cursor-pointer border border-[#2bc4be]"
+                  className="h-9 px-4 bg-[#b8532f] hover:bg-[#a34a2b] text-white font-semibold text-xs rounded-lg flex items-center gap-1.5 shadow-xs transition-all shrink-0 cursor-pointer border border-[#a34a2b]"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add</span>
@@ -488,13 +488,13 @@ export default function AllergiesThresholdView({
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#e6fbf9] border border-[#99f6e4] text-[#0f766e] font-['JetBrains_Mono'] text-xs font-medium rounded-md"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#fdf9ee] border border-[#f2e5be] text-[#8a651e] font-['Space_Grotesk'] text-xs font-medium rounded-md"
                     >
                       <span>{cond}</span>
                       <button
                         type="button"
                         onClick={() => handleRemoveCustomCondition(cond)}
-                        className="text-[#0d9488] hover:text-[#042f2e] transition-colors cursor-pointer"
+                        className="text-[#8a651e] hover:text-[#2a2622] transition-colors cursor-pointer"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -506,22 +506,22 @@ export default function AllergiesThresholdView({
           </section>
 
           {/* Section: Sugar Flagging Sensitivity Slider */}
-          <section className="bg-white rounded-xl p-6 shadow-xs border border-[#ccfbf1] space-y-4">
+          <section className="bg-white rounded-xl p-6 shadow-xs border border-[#e7e0d6] space-y-4">
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <Gauge className="w-5 h-5 text-[#0d9488]" />
-                  <h2 className="font-['Space_Grotesk'] text-base font-bold text-[#0f172a] uppercase tracking-wide">
+                  <Gauge className="w-5 h-5 text-[#b8532f]" />
+                  <h2 className="font-['Space_Grotesk'] text-base font-bold text-[#2a2622] uppercase tracking-wide">
                     Sugar Flagging Sensitivity
                   </h2>
                 </div>
-                <p className="text-xs text-[#334155] mt-1">
+                <p className="text-xs text-[#574f46] mt-1 leading-relaxed">
                   Alert triggers instantly if scanned product total sugar content exceeds this threshold.
                 </p>
               </div>
               {/* Readout Pill */}
-              <div className="bg-[#f0fdfc] border border-[#ccfbf1] px-3.5 py-1.5 rounded-xl flex flex-col items-end shrink-0">
-                <span className="font-['JetBrains_Mono'] text-[10px] text-[#64748b] uppercase tracking-wider font-bold">
+              <div className="bg-[#faf7f2] border border-[#e7e0d6] px-3.5 py-1.5 rounded-xl flex flex-col items-end shrink-0">
+                <span className="font-['Space_Grotesk'] text-[10px] text-[#786e65] uppercase tracking-wider font-bold">
                   Active Limit
                 </span>
                 <span className={`font-['Space_Grotesk'] text-xl font-bold leading-none mt-0.5 ${sugarColorClass}`}>
@@ -540,60 +540,60 @@ export default function AllergiesThresholdView({
                   step="1"
                   value={sugarThreshold}
                   onChange={(e) => setSugarThreshold(Number(e.target.value))}
-                  className="w-full h-2.5 bg-[#f0fdfc] rounded-lg appearance-none cursor-pointer border border-[#ccfbf1] accent-[#47d1cc]"
+                  className="w-full h-2.5 bg-[#e7e0d6] rounded-lg appearance-none cursor-pointer border border-[#d6ccc0] accent-[#b8532f]"
                 />
               </div>
               {/* Calibration Hash Marks */}
-              <div className="flex justify-between font-['JetBrains_Mono'] text-[11px] text-[#64748b] px-1 pt-1">
+              <div className="flex justify-between font-['Space_Grotesk'] text-[11px] text-[#786e65] px-1 pt-1">
                 <div className="flex flex-col items-center">
-                  <span className="font-semibold text-[#334155]">0g</span>
-                  <span className="text-[9px] text-[#94a3b8]">Strict</span>
+                  <span className="font-semibold text-[#2a2622]">0g</span>
+                  <span className="text-[9px] text-[#786e65]">Strict</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-[#334155] font-bold">10g</span>
-                  <span className="text-[9px] text-[#94a3b8]">Low Sugar</span>
+                  <span className="text-[#2a2622] font-bold">10g</span>
+                  <span className="text-[9px] text-[#786e65]">Low Sugar</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-[#ea580c] font-bold">15g</span>
-                  <span className="text-[9px] text-[#ea580c] font-semibold">Standard Limit</span>
+                  <span className="text-[#b8532f] font-bold">15g</span>
+                  <span className="text-[9px] text-[#b8532f] font-semibold">Standard Limit</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="font-semibold text-[#334155]">25g</span>
-                  <span className="text-[9px] text-[#94a3b8]">Moderate</span>
+                  <span className="font-semibold text-[#2a2622]">25g</span>
+                  <span className="text-[9px] text-[#786e65]">Moderate</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-[#334155] font-bold">50g</span>
-                  <span className="text-[9px] text-[#94a3b8]">Confectionery</span>
+                  <span className="text-[#2a2622] font-bold">50g</span>
+                  <span className="text-[9px] text-[#786e65]">Confectionery</span>
                 </div>
               </div>
             </div>
 
             {/* Telemetry Comparison Card */}
-            <div className="bg-[#f0fdfc] border border-[#ccfbf1] p-3.5 rounded-xl flex items-center justify-between gap-4">
+            <div className="bg-[#faf7f2] border border-[#e7e0d6] p-3.5 rounded-xl flex items-center justify-between gap-4">
               <div className="flex flex-col min-w-0">
-                <span className="font-['JetBrains_Mono'] text-xs text-[#0f172a] uppercase font-bold">
+                <span className="font-['Space_Grotesk'] text-xs text-[#2a2622] uppercase font-bold">
                   Inspection Impact
                 </span>
-                <span className="text-xs text-[#64748b] truncate mt-0.5">
+                <span className="text-xs text-[#786e65] truncate mt-0.5">
                   At {sugarThreshold}g/100g, ~{impactPct}% of packaged cereals &amp; sodas trigger instant warning flags.
                 </span>
               </div>
-              <svg className="w-24 h-9 shrink-0 text-[#0d9488]" fill="none" viewBox="0 0 100 40">
+              <svg className="w-24 h-9 shrink-0 text-[#b8532f]" fill="none" viewBox="0 0 100 40">
                 <path
                   d="M0 35 Q 25 32, 45 20 T 75 14 T 100 4"
                   fill="none"
-                  stroke="#47d1cc"
+                  stroke="#b8532f"
                   strokeLinecap="round"
                   strokeWidth="2"
                 />
                 <circle
                   cx={Math.min(95, Math.max(5, (sugarThreshold / 50) * 100))}
                   cy={Math.max(5, 35 - (sugarThreshold / 50) * 30)}
-                  fill="#0d9488"
+                  fill="#b8532f"
                   r="3.5"
                 />
                 <line
-                  stroke="#0d9488"
+                  stroke="#b8532f"
                   strokeDasharray="2 2"
                   strokeWidth="1.5"
                   x1={Math.min(95, Math.max(5, (sugarThreshold / 50) * 100))}
@@ -606,18 +606,18 @@ export default function AllergiesThresholdView({
           </section>
 
           {/* Context Reference Card */}
-          <div className="bg-white rounded-xl p-4 shadow-xs border border-[#ccfbf1] flex gap-3.5 items-center">
-            <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-[#e0fbf9] border border-[#99f6e4] flex items-center justify-center text-[#0d9488]">
-              <Dna className="w-7 h-7 text-[#0d9488]" />
+          <div className="bg-white rounded-xl p-4 shadow-xs border border-[#e7e0d6] flex gap-3.5 items-center">
+            <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-[#fdf2ec] border border-[#f5d5c6] flex items-center justify-center text-[#b8532f]">
+              <Dna className="w-7 h-7 text-[#b8532f]" />
             </div>
             <div className="min-w-0 flex-1">
-              <span className="font-['JetBrains_Mono'] text-[10px] text-[#0d9488] uppercase font-bold tracking-wider">
+              <span className="font-['Space_Grotesk'] text-[10px] text-[#b8532f] uppercase font-bold tracking-wider">
                 Statutory Reference
               </span>
-              <p className="font-['Space_Grotesk'] text-sm font-bold text-[#0f172a] truncate">
+              <p className="font-['Space_Grotesk'] text-sm font-bold text-[#2a2622] truncate">
                 Legal Metrology Packaged Rule 12
               </p>
-              <p className="text-xs text-[#334155] line-clamp-2 mt-0.5">
+              <p className="text-xs text-[#574f46] line-clamp-2 mt-0.5">
                 Mandatory declaration of sugars, added sucrose, and artificial sweeteners per 100g serving size.
               </p>
             </div>
@@ -626,64 +626,66 @@ export default function AllergiesThresholdView({
 
         {/* RIGHT COLUMN: Allergen Grid & Custom Tag Tray */}
         <div className="lg:col-span-7 space-y-6">
-          <section className="bg-white rounded-xl p-6 shadow-xs border border-[#ccfbf1] space-y-5">
+          <section className="bg-white rounded-xl p-6 shadow-xs border border-[#e7e0d6] space-y-5">
             {/* Header with Active Allergen Count */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#ccfbf1] gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#e7e0d6] gap-2">
               <div>
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-6 h-6 text-[#0d9488]" />
-                  <h2 className="font-['Space_Grotesk'] text-lg font-bold text-[#0f172a] uppercase tracking-tight">
+                  <ShieldCheck className="w-6 h-6 text-[#b8532f]" />
+                  <h2 className="font-['Space_Grotesk'] text-lg font-bold text-[#2a2622] uppercase tracking-tight">
                     Select Active Allergens
                   </h2>
                 </div>
-                <p className="text-xs text-[#64748b] mt-0.5">
+                <p className="text-xs text-[#786e65] mt-0.5">
                   Automated ingredient cross-referencing on every packaging scan
                 </p>
               </div>
               <div className="flex items-center gap-2 self-start sm:self-auto">
-                <span className="px-3 py-1 bg-[#fff7ed] border border-[#fed7aa] text-[#c2410c] font-['JetBrains_Mono'] text-xs rounded-md font-bold uppercase tracking-wider">
+                <span className="px-3 py-1 bg-[#fdf2ec] border border-[#f5d5c6] text-[#b8532f] font-['Space_Grotesk'] text-xs rounded-md font-bold uppercase tracking-wider">
                   {totalAllergensCount} ACTIVE ALLERGEN{totalAllergensCount === 1 ? '' : 'S'}
                 </span>
               </div>
             </div>
 
-            {/* Allergen Grid (2 columns) */}
+            {/* Allergen Grid (2 columns) with spring-based bounce */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {BUILTIN_ALLERGENS.map((item) => {
                 const active = isAllergenActive(item.id);
                 return (
-                  <div
+                  <motion.div
                     key={item.id}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => toggleAllergen(item.id)}
                     className={`cursor-pointer p-3.5 rounded-xl flex items-center justify-between group transition-all ${
                       item.colSpan || ''
                     } ${
                       active
-                        ? 'bg-[#e8faf8] text-[#0f172a] shadow-xs border-2 border-[#47d1cc]'
-                        : 'bg-[#f0fdfc] border border-[#ccfbf1] hover:bg-[#e0fbf9] text-[#334155]'
+                        ? 'bg-[#fdf7f4] text-[#2a2622] shadow-xs border-2 border-[#b8532f]'
+                        : 'bg-[#faf7f2] border border-[#e7e0d6] hover:bg-[#f5ecdf] text-[#574f46]'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div
                         className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                           active
-                            ? 'bg-[#47d1cc]/20 border border-[#47d1cc]'
-                            : 'bg-white border border-[#ccfbf1]'
+                            ? 'bg-[#fdf2ec] border border-[#f5d5c6]'
+                            : 'bg-white border border-[#e7e0d6]'
                         }`}
                       >
-                        {renderAllergenIcon(item.id, `w-5 h-5 ${active ? 'text-[#0d9488]' : 'text-[#64748b]'}`)}
+                        {renderAllergenIcon(item.id, `w-5 h-5 ${active ? 'text-[#b8532f]' : 'text-[#786e65]'}`)}
                       </div>
                       <div className="min-w-0">
                         <p
                           className={`text-sm font-bold truncate ${
-                            active ? 'text-[#0f172a]' : 'text-[#334155] group-hover:text-[#0f172a]'
+                            active ? 'text-[#2a2622]' : 'text-[#574f46] group-hover:text-[#2a2622]'
                           }`}
                         >
                           {item.name}
                         </p>
                         <p
-                          className={`font-['JetBrains_Mono'] text-[11px] truncate ${
-                            active ? 'text-[#0d9488]' : 'text-[#64748b]'
+                          className={`font-['Space_Grotesk'] text-[11px] truncate ${
+                            active ? 'text-[#b8532f]' : 'text-[#786e65]'
                           }`}
                         >
                           {item.sub}
@@ -693,13 +695,13 @@ export default function AllergiesThresholdView({
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${
                         active
-                          ? 'bg-[#47d1cc] text-[#042f2e] shadow-xs'
-                          : 'bg-white border border-[#cbd5e1] text-transparent'
+                          ? 'bg-[#b8532f] text-white shadow-xs'
+                          : 'bg-white border border-[#e7e0d6] text-transparent'
                       }`}
                     >
                       <Check className="w-3.5 h-3.5 font-bold stroke-[3]" />
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
@@ -707,26 +709,26 @@ export default function AllergiesThresholdView({
             {/* Custom Allergen Input Section */}
             <div className="pt-3 space-y-3">
               <label
-                className="block font-['JetBrains_Mono'] text-xs font-semibold uppercase text-[#64748b]"
+                className="block font-['Space_Grotesk'] text-xs font-semibold uppercase text-[#786e65]"
                 htmlFor="custom-allergen-input"
               >
                 Add Custom Allergen or Ingredient
               </label>
               <form onSubmit={handleAddCustomAllergen} className="flex items-center gap-2">
                 <div className="relative flex-1">
-                  <Search className="w-4 h-4 text-[#64748b] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-[#786e65] absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     id="custom-allergen-input"
                     type="text"
                     value={customAllergenInput}
                     onChange={(e) => setCustomAllergenInput(e.target.value)}
                     placeholder="Type custom allergen (e.g. Strawberry, MSG, Cashew)..."
-                    className="w-full bg-[#f0fdfc] border border-[#ccfbf1] text-[#0f172a] placeholder:text-[#94a3b8] pl-9 pr-3 py-2 rounded-lg text-xs font-medium focus:outline-none focus:border-[#47d1cc] focus:bg-white transition-all"
+                    className="w-full bg-[#faf7f2] border border-[#e7e0d6] text-[#2a2622] placeholder:text-[#786e65] pl-9 pr-3 py-2 rounded-lg text-xs font-medium focus:outline-none focus:border-[#b8532f] focus:bg-white transition-all"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="h-9 px-4 bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] font-semibold text-xs rounded-lg flex items-center gap-1.5 shadow-xs transition-all shrink-0 cursor-pointer border border-[#2bc4be]"
+                  className="h-9 px-4 bg-[#b8532f] hover:bg-[#a34a2b] text-white font-semibold text-xs rounded-lg flex items-center gap-1.5 shadow-xs transition-all shrink-0 cursor-pointer border border-[#a34a2b]"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add</span>
@@ -736,13 +738,13 @@ export default function AllergiesThresholdView({
               {/* Active Chips Tray */}
               <div className="pt-2">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-['JetBrains_Mono'] text-[11px] uppercase tracking-wider text-[#64748b] font-semibold">
+                  <span className="font-['Space_Grotesk'] text-[11px] uppercase tracking-wider text-[#786e65] font-semibold">
                     Active Enforcement Chips:
                   </span>
                   <button
                     type="button"
                     onClick={handleDeselectAllAllergens}
-                    className="font-['JetBrains_Mono'] text-[11px] text-[#0d9488] hover:text-[#042f2e] font-semibold cursor-pointer underline"
+                    className="font-['Space_Grotesk'] text-[11px] text-[#b8532f] hover:text-[#a34a2b] font-semibold cursor-pointer underline"
                   >
                     Deselect All
                   </button>
@@ -761,14 +763,14 @@ export default function AllergiesThresholdView({
                           initial={{ opacity: 0, scale: 0.85 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.85 }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#e6fbf9] text-[#0f766e] font-['JetBrains_Mono'] text-xs font-semibold rounded-lg border border-[#99f6e4]"
+                          className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#fdf2ec] text-[#b8532f] font-['Space_Grotesk'] text-xs font-semibold rounded-lg border border-[#f5d5c6]"
                         >
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[#0d9488]" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#b8532f]" />
                           <span className="capitalize">{displayLabel}</span>
                           <button
                             type="button"
                             onClick={() => handleRemoveAllergen(tag)}
-                            className="text-[#0d9488] hover:text-[#042f2e] transition-colors ml-1 cursor-pointer"
+                            className="text-[#b8532f] hover:text-[#2a2622] transition-colors ml-1 cursor-pointer"
                           >
                             <X className="w-3.5 h-3.5" />
                           </button>
@@ -777,7 +779,7 @@ export default function AllergiesThresholdView({
                     })}
                   </AnimatePresence>
                   {selectedAllergens.length === 0 && (
-                    <span className="font-['JetBrains_Mono'] text-xs text-[#64748b] italic">
+                    <span className="font-['Space_Grotesk'] text-xs text-[#786e65] italic">
                       No allergens currently active. Select above or add a custom term.
                     </span>
                   )}
@@ -787,22 +789,22 @@ export default function AllergiesThresholdView({
           </section>
 
           {/* Inspection Verification Callout */}
-          <div className="bg-white rounded-xl p-4 shadow-xs border border-[#ccfbf1] flex items-center justify-between gap-4">
+          <div className="bg-white rounded-xl p-4 shadow-xs border border-[#e7e0d6] flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-lg bg-[#e0fbf9] border border-[#99f6e4] flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-5 h-5 text-[#0d9488]" />
+              <div className="w-10 h-10 rounded-lg bg-[#fdf2ec] border border-[#f5d5c6] flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5 text-[#b8532f]" />
               </div>
               <div className="min-w-0">
-                <p className="font-['Space_Grotesk'] text-sm font-bold text-[#0f172a] truncate">
+                <p className="font-['Space_Grotesk'] text-sm font-bold text-[#2a2622] truncate">
                   Instant Optical Ingredient Cross-Check
                 </p>
-                <p className="text-xs text-[#334155] truncate">
+                <p className="text-xs text-[#574f46] truncate">
                   Configured allergens automatically match text on scanned nutrition and ingredient panels.
                 </p>
               </div>
             </div>
             <div className="shrink-0">
-              <span className="px-2.5 py-1 bg-[#e6fbf9] border border-[#99f6e4] text-[#0f766e] font-['JetBrains_Mono'] text-xs font-bold rounded uppercase">
+              <span className="px-2.5 py-1 bg-[#fdfbf7] border border-[#f2e5be] text-[#8a651e] font-['Space_Grotesk'] text-xs font-bold rounded uppercase">
                 READY
               </span>
             </div>
@@ -813,15 +815,15 @@ export default function AllergiesThresholdView({
       {/* ACTION FOOTER BANNER */}
       <aside
         aria-label="Profile actions"
-        className="w-full bg-white/95 backdrop-blur-md border border-[#ccfbf1] shadow-lg p-5 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4"
+        className="w-full bg-white/95 backdrop-blur-md border border-[#e7e0d6] shadow-lg p-5 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4"
       >
         <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-[#0d9488]" />
-            <span className="font-['Space_Grotesk'] text-sm font-bold text-[#0f172a]">
+            <ShieldCheck className="w-5 h-5 text-[#b8532f]" />
+            <span className="font-['Space_Grotesk'] text-sm font-bold text-[#2a2622]">
               Current Status:
             </span>
-            <span className="font-['JetBrains_Mono'] text-xs text-[#0f766e] font-bold px-2.5 py-1 bg-[#e6fbf9] border border-[#99f6e4] rounded">
+            <span className="font-['Space_Grotesk'] text-xs text-[#b8532f] font-bold px-2.5 py-1 bg-[#fdf2ec] border border-[#f5d5c6] rounded">
               {totalAllergensCount} Allergen{totalAllergensCount === 1 ? '' : 's'} •{' '}
               {totalCustomConditionsCount} Custom Condition{totalCustomConditionsCount === 1 ? '' : 's'}
             </span>
@@ -829,9 +831,9 @@ export default function AllergiesThresholdView({
           <button
             type="button"
             onClick={handleResetAll}
-            className="text-[#64748b] hover:text-[#0f172a] font-medium text-xs flex items-center gap-1 transition-colors cursor-pointer"
+            className="text-[#786e65] hover:text-[#2a2622] font-medium text-xs flex items-center gap-1 transition-colors cursor-pointer"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-[#64748b]" />
+            <RotateCcw className="w-3.5 h-3.5 text-[#786e65]" />
             <span>Clear All</span>
           </button>
         </div>
@@ -840,17 +842,18 @@ export default function AllergiesThresholdView({
           <button
             type="button"
             onClick={() => onNavigateTab && onNavigateTab('scan')}
-            className="px-5 py-2.5 rounded-lg border border-[#ccfbf1] bg-[#f0fdfc] text-[#334155] hover:bg-[#e0fbf9] font-semibold text-sm transition-all cursor-pointer"
+            className="px-5 py-2.5 rounded-lg border border-[#e7e0d6] bg-[#faf7f2] text-[#2a2622] hover:bg-[#f5ecdf] font-semibold text-sm transition-all cursor-pointer"
           >
             Cancel
           </button>
-          <button
+          <motion.button
             type="button"
+            whileTap={{ scale: 0.97 }}
             onClick={handleSave}
             className={`px-6 py-2.5 rounded-lg font-semibold text-sm shadow-xs active:scale-95 flex items-center gap-2 transition-all cursor-pointer border ${
               saveSuccess
-                ? 'bg-emerald-600 text-white border-emerald-700'
-                : 'bg-[#47d1cc] hover:bg-[#38c2bd] text-[#042f2e] border-[#2bc4be]'
+                ? 'bg-[#8c3b1e] text-white border-[#702f18]'
+                : 'bg-[#b8532f] hover:bg-[#a34a2b] text-white border-[#a34a2b]'
             }`}
           >
             {saveSuccess ? (
@@ -859,7 +862,7 @@ export default function AllergiesThresholdView({
               <Save className="w-4 h-4" />
             )}
             <span>{saveSuccess ? 'Preferences Saved Successfully!' : 'Save Allergen Preferences'}</span>
-          </button>
+          </motion.button>
         </div>
       </aside>
     </motion.div>
