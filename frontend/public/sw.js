@@ -1,48 +1,29 @@
-const CACHE_NAME = 'packscan-v1';
-const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/favicon.svg',
-  '/manifest.json',
-];
+const CACHE_NAME = 'packscan-v4';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Caching app shell');
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keyList) => {
-      return Promise.all(
-        keyList.map((key) => {
-          if (key !== CACHE_NAME) {
-            console.log('[Service Worker] Removing old cache', key);
-            return caches.delete(key);
-          }
-        })
-      );
-    })
+    caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
-  // Pass API requests straight to network
-  if (event.request.url.includes('/api/') || event.request.url.includes('/uploads/')) {
+  // Always fetch documents, navigation, and API requests directly from network
+  if (
+    event.request.mode === 'navigate' ||
+    event.request.destination === 'document' ||
+    event.request.url.includes('/api/') ||
+    event.request.url.includes('/uploads/')
+  ) {
     return;
   }
 
+  // Network-first for static assets with cache fallback
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request).catch(() => {
-        return caches.match('/');
-      });
-    })
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });
