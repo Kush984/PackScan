@@ -19,6 +19,8 @@ Thumbs.db
 
 # Chrome / Test profiles
 chrome_profile/
+.chrome_tmp/
+frontend/.chrome_tmp/
 
 # Environment Variables & Secrets
 .env
