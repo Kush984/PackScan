@@ -473,7 +473,12 @@ export default function Scanner({
       if (!blob) return;
       const file = new File([blob], `photo_step${step}_${Date.now()}.jpg`, { type: 'image/jpeg' });
       setCurrentFile(file);
-      setCurrentPreviewUrl(URL.createObjectURL(blob));
+      setCurrentPreviewUrl((prev) => {
+        if (prev) {
+          try { URL.revokeObjectURL(prev); } catch (_) {}
+        }
+        return URL.createObjectURL(blob);
+      });
       setIsZoomed(false);
       stopCamera();
     }, 'image/jpeg', 0.98);
@@ -483,7 +488,12 @@ export default function Scanner({
     const file = e.target.files?.[0];
     if (!file) return;
     setCurrentFile(file);
-    setCurrentPreviewUrl(URL.createObjectURL(file));
+    setCurrentPreviewUrl((prev) => {
+      if (prev) {
+        try { URL.revokeObjectURL(prev); } catch (_) {}
+      }
+      return URL.createObjectURL(file);
+    });
     setIsZoomed(false);
     stopCamera();
   };
@@ -563,10 +573,22 @@ export default function Scanner({
     stopCamera();
     setStep(1);
     setCapturedData({ barcode: null, frontPhoto: null, backPhoto: null, sidePhoto: null });
-    setThumbnails({ front: null, back: null, side: null });
+    setThumbnails((prev) => {
+      try {
+        if (prev.front) URL.revokeObjectURL(prev.front);
+        if (prev.back) URL.revokeObjectURL(prev.back);
+        if (prev.side) URL.revokeObjectURL(prev.side);
+      } catch (_) {}
+      return { front: null, back: null, side: null };
+    });
     setLockedPromptOpen(false);
     setCurrentFile(null);
-    setCurrentPreviewUrl(null);
+    setCurrentPreviewUrl((prev) => {
+      if (prev) {
+        try { URL.revokeObjectURL(prev); } catch (_) {}
+      }
+      return null;
+    });
     if (onResetScan) onResetScan();
   };
 
@@ -574,7 +596,12 @@ export default function Scanner({
     setStep(5);
     stopCamera();
     setCurrentFile(null);
-    setCurrentPreviewUrl(null);
+    setCurrentPreviewUrl((prev) => {
+      if (prev) {
+        try { URL.revokeObjectURL(prev); } catch (_) {}
+      }
+      return null;
+    });
     setIsZoomed(false);
     if (onCompleteMultiStepScan) {
       onCompleteMultiStepScan(dataToSubmit);
@@ -636,7 +663,12 @@ export default function Scanner({
 
   const handleRetake = () => {
     setCurrentFile(null);
-    setCurrentPreviewUrl(null);
+    setCurrentPreviewUrl((prev) => {
+      if (prev) {
+        try { URL.revokeObjectURL(prev); } catch (_) {}
+      }
+      return null;
+    });
     setIsZoomed(false);
     startCamera();
   };
@@ -647,14 +679,14 @@ export default function Scanner({
 
   // Rule 6 statutory items list
   const rule6Declarations = [
-    { num: '1', title: 'Manufacturer / Packer Name & Address', rule: 'RULE 6(1)(a)', fieldId: 'manufacturer' },
-    { num: '2', title: 'Common / Generic Product Name', rule: 'RULE 6(1)(b)', fieldId: 'generic_name' },
-    { num: '3', title: 'Net Quantity & Standard Weight', rule: 'RULE 6(1)(c)', fieldId: 'net_quantity' },
+    { num: '1', title: 'Manufacturer / Packer Name & Address', rule: 'RULE 6(1)(a)', fieldId: 'manufacturer_address' },
+    { num: '2', title: 'Common / Generic Product Name', rule: 'RULE 6(1)(c)', fieldId: 'generic_name' },
+    { num: '3', title: 'Net Quantity & Standard Weight', rule: 'RULE 6(1)(b)', fieldId: 'net_quantity' },
     { num: '4', title: 'Month and Year of Manufacture / Pack', rule: 'RULE 6(1)(d)', fieldId: 'mfg_date' },
     { num: '5', title: 'Price (MRP inclusive of all taxes)', rule: 'RULE 6(1)(e)', fieldId: 'mrp' },
-    { num: '6', title: 'Package Dimensions & Size', rule: 'RULE 6(1)(f)', fieldId: 'unit_sale_price' },
-    { num: '7', title: 'Consumer Helpline & Grievance Info', rule: 'RULE 6(1)(g)', fieldId: 'consumer_care' },
-    { num: '8', title: 'Country of Origin (Imported units)', rule: 'RULE 6(1)(h)', fieldId: 'country_of_origin' },
+    { num: '6', title: 'Unit Sale Price (USP per g/ml)', rule: 'RULE 6(11)', fieldId: 'unit_sale_price' },
+    { num: '7', title: 'Consumer Helpline & Grievance Info', rule: 'RULE 6(1)(n)', fieldId: 'consumer_care' },
+    { num: '8', title: 'Country of Origin (Imported/Mfg)', rule: 'RULE 6(1)(m)', fieldId: 'country_of_origin' },
   ];
 
   // Dynamic Rule 6 status based on active scanResult or default 8/8
@@ -1500,6 +1532,24 @@ export default function Scanner({
               // Check status from active report if available
               const matchedField = reportFields.find((f) => f.id === item.fieldId);
               const isMissing = matchedField && matchedField.status === 'MISSING';
+              const isUnclear = matchedField && matchedField.status === 'UNCLEAR';
+
+              let rowBg = 'bg-[#faf7f2] border-[#e7e0d6]';
+              let textColor = 'text-[#2a2622]';
+              let badgeBg = 'bg-[#fdfbf7] text-[#8a651e] border-[#f2e5be]';
+              let symbol = '✓';
+
+              if (isMissing) {
+                rowBg = 'bg-[#fff1f2] border-[#fecdd3]';
+                textColor = 'text-[#be123c]';
+                badgeBg = 'bg-[#ffe4e6] text-[#be123c] border-[#fecdd3]';
+                symbol = '✗';
+              } else if (isUnclear) {
+                rowBg = 'bg-[#fefce8] border-[#fef08a]';
+                textColor = 'text-[#854d0e]';
+                badgeBg = 'bg-[#fef9c3] text-[#854d0e] border-[#fde047]';
+                symbol = '⚠';
+              }
 
               return (
                 <motion.div
@@ -1507,23 +1557,15 @@ export default function Scanner({
                   initial={{ opacity: 0, x: 8 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.04, duration: 0.2 }}
-                  className={`flex items-center justify-between p-2 rounded border ${
-                    isMissing
-                      ? 'bg-[#fff1f2] border-[#fecdd3]'
-                      : 'bg-[#faf7f2] border-[#e7e0d6]'
-                  }`}
+                  className={`flex items-center justify-between p-2 rounded border ${rowBg}`}
                 >
-                  <span className={`font-['Space_Grotesk'] text-[11.5px] font-medium ${isMissing ? 'text-[#be123c]' : 'text-[#2a2622]'}`}>
+                  <span className={`font-['Space_Grotesk'] text-[11.5px] font-medium ${textColor}`}>
                     {item.num}. {item.title}
                   </span>
                   <span
-                    className={`px-1.5 py-0.5 font-['Space_Grotesk'] text-[10px] font-bold rounded border ${
-                      isMissing
-                        ? 'bg-[#ffe4e6] text-[#be123c] border-[#fecdd3]'
-                        : 'bg-[#fdfbf7] text-[#8a651e] border-[#f2e5be]'
-                    }`}
+                    className={`px-1.5 py-0.5 font-['Space_Grotesk'] text-[10px] font-bold rounded border ${badgeBg}`}
                   >
-                    {item.rule} {isMissing ? '✗' : '✓'}
+                    {item.rule} {symbol}
                   </span>
                 </motion.div>
               );

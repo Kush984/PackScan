@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Send,
 } from 'lucide-react';
+import { apiFetch } from '../utils/api';
 
 export default function FeedbackForumModal({
   isOpen,
@@ -48,7 +49,7 @@ export default function FeedbackForumModal({
 
   const fetchFeedbackList = async () => {
     try {
-      const res = await fetch('/api/feedback');
+      const res = await apiFetch('/api/feedback');
       if (res.ok) {
         const data = await res.json();
         setFeedbackList(data);
@@ -61,7 +62,7 @@ export default function FeedbackForumModal({
   const handleUpvote = async (id, e) => {
     e.stopPropagation();
     try {
-      const res = await fetch(`/api/feedback/${id}/upvote`, { method: 'POST' });
+      const res = await apiFetch(`/api/feedback/${id}/upvote`, { method: 'POST' });
       if (res.ok) {
         const data = await res.json();
         setFeedbackList((prev) =>
@@ -81,7 +82,7 @@ export default function FeedbackForumModal({
     setSubmitSuccess(false);
 
     try {
-      const res = await fetch('/api/feedback', {
+      const res = await apiFetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

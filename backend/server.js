@@ -32,6 +32,16 @@ const {
 const { extractTextFromImage, cleanOCRText } = require('./services/ocrService');
 const { isGeminiAvailable, analyzePackagingWithGemini } = require('./services/geminiVisionService');
 
+function safeJsonParse(val, fallback = {}) {
+  if (!val) return fallback;
+  if (typeof val === 'object') return val;
+  try {
+    return JSON.parse(val);
+  } catch (_) {
+    return fallback;
+  }
+}
+
 const app = express();
 const PORT = process.env.PORT || 5001;
 
@@ -47,7 +57,11 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+}));
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use('/uploads', express.static(uploadDir));
@@ -727,7 +741,7 @@ app.get('/api/enforcement/analytics', async (req, res) => {
 
     recentRows.forEach((r) => {
       try {
-        const report = JSON.parse(r.compliance_report || '{}');
+        const report = safeJsonParse(r.compliance_report, {});
         if (report.violations) {
           report.violations.forEach((v) => {
             if (v.field?.includes('MRP')) ruleCounts['MRP & Tax Declaration (Rule 6(1)(e))']++;
@@ -764,7 +778,7 @@ app.get('/api/enforcement/analytics', async (req, res) => {
       topOffendingBrands,
       recentInspections: recentRows.map((r) => ({
         ...r,
-        compliance_report: JSON.parse(r.compliance_report || '{}'),
+        compliance_report: safeJsonParse(r.compliance_report, {}),
       })),
     });
   } catch (err) {
@@ -778,9 +792,9 @@ app.get('/api/enforcement/inspection/:id', async (req, res) => {
     if (!row) return res.status(404).json({ error: 'Inspection record not found' });
     res.json({
       ...row,
-      compliance_report: JSON.parse(row.compliance_report || '{}'),
-      allergy_alerts: JSON.parse(row.allergy_alerts || '{}'),
-      regulatory_flags: JSON.parse(row.regulatory_flags || '[]'),
+      compliance_report: safeJsonParse(row.compliance_report, {}),
+      allergy_alerts: safeJsonParse(row.allergy_alerts, {}),
+      regulatory_flags: safeJsonParse(row.regulatory_flags, []),
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

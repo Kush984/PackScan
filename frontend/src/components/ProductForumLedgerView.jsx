@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import EnforcementDashboard from './EnforcementDashboard';
+import { apiFetch } from '../utils/api';
 import {
   Scale,
   CheckCircle2,
@@ -76,7 +77,7 @@ export default function ProductForumLedgerView({
 
   const fetchCommunityRequests = async () => {
     try {
-      const res = await fetch('/api/feedback');
+      const res = await apiFetch('/api/feedback');
       if (res.ok) {
         const data = await res.json();
         if (data && data.length > 0) {
@@ -113,7 +114,7 @@ export default function ProductForumLedgerView({
     // Check if real backend numeric id
     if (typeof id === 'number') {
       try {
-        const res = await fetch(`/api/feedback/${id}/upvote`, { method: 'POST' });
+        const res = await apiFetch(`/api/feedback/${id}/upvote`, { method: 'POST' });
         if (res.ok) {
           const data = await res.json();
           setFeedbackList((prev) =>
@@ -162,7 +163,7 @@ export default function ProductForumLedgerView({
     setIsLoading(true);
 
     try {
-      const res = await fetch('/api/feedback', {
+      const res = await apiFetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

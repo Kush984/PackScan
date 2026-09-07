@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import DataSourceBadge from './DataSourceBadge';
 import InspectionNoticeModal from './InspectionNoticeModal';
+import { apiFetch } from '../utils/api';
 
 export default function ComplianceReport({
   report,
@@ -133,7 +134,7 @@ export default function ComplianceReport({
       if (onUpdateProductField) {
         await onUpdateProductField(field.id || field.name, editValue.trim());
       } else if (barcode) {
-        await fetch(`/api/products/${encodeURIComponent(barcode)}`, {
+        await apiFetch(`/api/products/${encodeURIComponent(barcode)}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

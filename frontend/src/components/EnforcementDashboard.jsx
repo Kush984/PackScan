@@ -18,6 +18,7 @@ import {
   Download,
 } from 'lucide-react';
 import InspectionNoticeModal from './InspectionNoticeModal';
+import { apiFetch } from '../utils/api';
 
 export default function EnforcementDashboard({ onSelectProductForAudit }) {
   const [analytics, setAnalytics] = useState(null);
@@ -30,7 +31,7 @@ export default function EnforcementDashboard({ onSelectProductForAudit }) {
   const fetchAnalytics = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/enforcement/analytics');
+      const res = await apiFetch('/api/enforcement/analytics');
       if (res.ok) {
         const data = await res.json();
         setAnalytics(data);
