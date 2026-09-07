@@ -45,7 +45,7 @@ class ErrorBoundary extends React.Component {
               <button
                 onClick={() => {
                   this.setState({ hasError: false, error: null, errorInfo: null });
-                  localStorage.removeItem('packscan_last_scan');
+                  try { localStorage.removeItem('packscan_last_scan'); } catch (_) {}
                   window.location.reload();
                 }}
                 className="px-5 py-2.5 bg-[#b8532f] hover:bg-[#a34a2b] text-white font-bold rounded-xl text-xs transition shadow-sm cursor-pointer"

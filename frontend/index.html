@@ -3,32 +3,87 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
     <meta name="theme-color" content="#b8532f" />
     <meta name="description" content="PackScan - India Legal Metrology (Packaged Commodities) Rules 2011 Compliance & Personalized Health Allergen Scanner (SIH26034)" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
     <title>PackScan | Legal Metrology & Health Compliance</title>
+    
     <!-- Google Fonts & Material Symbols -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- 1. Immediate PWA / Stale ServiceWorker Eviction (Executes before any modules) -->
+    <script>
+      (function() {
+        try {
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+              for (var i = 0; i < registrations.length; i++) {
+                registrations[i].unregister();
+              }
+            });
+          }
+          if ('caches' in window) {
+            caches.keys().then(function(names) {
+              for (var i = 0; i < names.length; i++) {
+                caches.delete(names[i]);
+              }
+            });
+          }
+        } catch (e) {
+          console.warn('Storage purge warning:', e);
+        }
+      })();
+    </script>
+
+    <!-- 2. Global Diagnostic Overlay Trap -->
+    <script>
+      function showBootError(msg, src, line) {
+        var box = document.getElementById('debug-error-box');
+        if (box) {
+          box.style.display = 'block';
+          box.innerHTML = '<div style="background:#fff1f2;border:2px solid #be123c;padding:16px;border-radius:12px;margin:16px;font-family:system-ui,-apple-system,sans-serif;color:#9f1239;box-shadow:0 10px 25px rgba(0,0,0,0.15);">' +
+            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
+            '<span style="font-size:22px;">⚠️</span>' +
+            '<h3 style="margin:0;font-size:15px;font-weight:700;">PackScan Mobile Diagnostics</h3>' +
+            '</div>' +
+            '<p style="margin:0 0 8px;font-size:12px;font-family:monospace;background:#ffe4e6;padding:8px;border-radius:6px;word-break:break-all;">' + (msg || 'Unknown runtime error') + '</p>' +
+            (src ? '<div style="font-size:11px;color:#881337;margin-bottom:12px;">Source: ' + src + ':' + (line || '?') + '</div>' : '') +
+            '<button onclick="localStorage.clear();sessionStorage.clear();if(\'caches\' in window){caches.keys().then(function(k){return Promise.all(k.map(function(c){return caches.delete(c)}))}).then(function(){location.reload(true)})}else{location.reload(true)};" style="width:100%;padding:10px 14px;background:#be123c;color:#fff;border:none;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;">Reset App & Clear Cache</button>' +
+            '</div>';
+        }
+      }
+      window.addEventListener('error', function(e) {
+        showBootError(e.message, e.filename, e.lineno);
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        showBootError('Promise Rejection: ' + (e.reason?.message || e.reason || 'Network or script error'));
+      });
+    </script>
   </head>
   <body class="bg-[#faf7f2] text-[#2a2622] font-sans antialiased min-h-screen flex flex-col selection:bg-[#f6dfd5] selection:text-[#6f331f]">
-    <div id="root"></div>
+    <div id="debug-error-box" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;"></div>
+
+    <div id="root">
+      <!-- Instant Visual Splash Loader (Replaced automatically when React mounts) -->
+      <div id="app-boot-splash" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#faf7f2;color:#2a2622;font-family:system-ui,-apple-system,sans-serif;padding:24px;text-align:center;">
+        <div style="width:52px;height:52px;border-radius:14px;background:#b8532f;display:flex;align-items:center;justify-content:center;color:#ffffff;font-size:26px;font-weight:bold;margin-bottom:16px;box-shadow:0 6px 16px rgba(184,83,47,0.28);">
+          📦
+        </div>
+        <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#2a2622;margin-bottom:4px;">PackScan</div>
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:#b8532f;margin-bottom:24px;">Legal Metrology & Health Guardian</div>
+        <div style="width:36px;height:36px;border:3px solid #eed69e;border-top-color:#b8532f;border-radius:50%;animation:packscan-spin 0.7s linear infinite;"></div>
+        <style>
+          @keyframes packscan-spin { to { transform: rotate(360deg); } }
+        </style>
+      </div>
+    </div>
+
+    <!-- Main React App -->
     <script type="module" src="/src/main.jsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').then((reg) => {
-            reg.update();
-            console.log('PackScan PWA ServiceWorker registered with scope:', reg.scope);
-          }).catch((err) => {
-            console.warn('PWA ServiceWorker registration failed:', err);
-          });
-        });
-      }
-    </script>
   </body>
 </html>

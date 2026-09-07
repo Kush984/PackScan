@@ -40,6 +40,30 @@ import {
 const DEVICE_ID_KEY = 'packscan_device_id';
 const PROFILE_STORAGE_KEY = 'packscan_user_profile';
 
+const safeStorage = {
+  getItem: (key) => {
+    try {
+      return typeof window !== 'undefined' && window.localStorage ? window.localStorage.getItem(key) : null;
+    } catch (_) {
+      return null;
+    }
+  },
+  setItem: (key, val) => {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem(key, val);
+      }
+    } catch (_) {}
+  },
+  removeItem: (key) => {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.removeItem(key);
+      }
+    } catch (_) {}
+  }
+};
+
 const sampleInspectionData = {
   productName: 'Nestlé Maggi 2-Minute Masala',
   brand: 'Nestlé India Limited',
@@ -91,10 +115,7 @@ export default function App() {
     return 'scan';
   });
   const [theme, setTheme] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('packscan_theme') || 'midnight';
-    }
-    return 'midnight';
+    return safeStorage.getItem('packscan_theme') || 'midnight';
   });
 
   useEffect(() => {
@@ -105,7 +126,7 @@ export default function App() {
       document.body.classList.remove('theme-steel-ice');
       document.body.classList.add('theme-midnight');
     }
-    localStorage.setItem('packscan_theme', theme);
+    safeStorage.setItem('packscan_theme', theme);
   }, [theme]);
 
   const handleToggleTheme = () => {
@@ -135,14 +156,14 @@ export default function App() {
 
   // Initialize device ID & load profile from localStorage and API
   useEffect(() => {
-    let id = localStorage.getItem(DEVICE_ID_KEY);
+    let id = safeStorage.getItem(DEVICE_ID_KEY);
     if (!id) {
       id = 'dev_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now().toString(36);
-      localStorage.setItem(DEVICE_ID_KEY, id);
+      safeStorage.setItem(DEVICE_ID_KEY, id);
     }
     setDeviceId(id);
 
-    const savedLocal = localStorage.getItem(PROFILE_STORAGE_KEY);
+    const savedLocal = safeStorage.getItem(PROFILE_STORAGE_KEY);
     if (savedLocal) {
       try {
         setUserProfile(JSON.parse(savedLocal));
@@ -182,7 +203,7 @@ export default function App() {
 
   const handleSaveProfile = async (newProfile) => {
     setUserProfile(newProfile);
-    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(newProfile));
+    safeStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(newProfile));
 
     try {
       await apiFetch('/api/profile', {
