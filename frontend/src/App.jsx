@@ -487,7 +487,7 @@ export default function App() {
       />
 
       {/* MAIN WRAPPER WITH TAB CROSSFADE TRANSITION */}
-      <main className="w-full pt-32 max-w-[1280px] mx-auto px-4 sm:px-6 flex-1">
+      <main className="w-full max-w-[1280px] mx-auto px-3 sm:px-6 flex-1 py-4 sm:py-6">
         <AnimatePresence mode="wait">
           {activeTab === 'medical' ? (
             <motion.div
