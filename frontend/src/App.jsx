@@ -17,7 +17,6 @@ import EnforcementDashboard from './components/EnforcementDashboard';
 import MedicalProfileView from './components/MedicalProfileView';
 import AllergiesThresholdView from './components/AllergiesThresholdView';
 import ProductForumLedgerView from './components/ProductForumLedgerView';
-import PresentationModal from './components/PresentationModal';
 import {
   Scale,
   ShieldCheck,
@@ -137,16 +136,6 @@ export default function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
-  const [isPresentationOpen, setIsPresentationOpen] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return (
-        window.location.hash === '#presentation' ||
-        new URLSearchParams(window.location.search).has('deck') ||
-        new URLSearchParams(window.location.search).has('presentation')
-      );
-    }
-    return false;
-  });
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -516,7 +505,6 @@ export default function App() {
         userProfile={userProfile}
         onResetScan={handleNewScan}
         hasActiveResult={Boolean(scanResult || notFoundInfo)}
-        onOpenPresentation={() => setIsPresentationOpen(true)}
       />
 
       {/* MAIN WRAPPER WITH TAB CROSSFADE TRANSITION */}
@@ -938,12 +926,6 @@ export default function App() {
         onClose={() => setIsFeedbackOpen(false)}
         initialBarcode={unlistedBarcode}
         deviceId={deviceId}
-      />
-
-      {/* SIH 2026 Executive Pitch Deck & Presentation Modal */}
-      <PresentationModal
-        isOpen={isPresentationOpen}
-        onClose={() => setIsPresentationOpen(false)}
       />
     </div>
   );

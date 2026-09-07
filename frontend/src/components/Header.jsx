@@ -8,7 +8,6 @@ export default function Header({
   userProfile,
   onResetScan,
   hasActiveResult,
-  onOpenPresentation,
 }) {
   const activeConditionsCount = userProfile?.conditions?.length || 0;
   const activeAllergiesCount = userProfile?.allergies?.length || 0;
@@ -68,18 +67,6 @@ export default function Header({
               <span>Jurisdiction:</span>
               <span className="font-semibold text-[#2a2622]">DL/MH Central</span>
             </div>
-
-            {/* SIH 2026 Presentation Deck Button */}
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              type="button"
-              onClick={onOpenPresentation}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs sm:text-[13px] font-semibold bg-[#0F2D25] border border-[#1E4A3D] text-[#34D399] hover:bg-[#13382E] transition-all cursor-pointer shadow-xs shrink-0"
-              title="Open SIH 2026 Executive Pitch Deck & Download PPTX"
-            >
-              <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
-              <span className="font-mono font-bold tracking-tight">SIH Deck</span>
-            </motion.button>
 
             {/* Health Guardian Alert Badge */}
             <motion.button

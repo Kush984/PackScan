@@ -14,9 +14,10 @@ yarn-debug.log*
 yarn-error.log*
 *.tmp
 
-# OS generated files
+# OS & Office generated files
 .DS_Store
 Thumbs.db
+~$*
 
 # Chrome / Test profiles
 chrome_profile/
