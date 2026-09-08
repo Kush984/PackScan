@@ -839,25 +839,25 @@ export default function Scanner({
             <div className="flex items-center gap-1.5 flex-wrap">
               <button
                 type="button"
-                onClick={() => handleBarcodeFound('8901393019469')}
+                onClick={() => handleBarcodeFound('7622202324871')}
                 className="px-2.5 py-1 bg-white hover:bg-[#faf7f2] text-[#2a2622] font-semibold rounded border border-[#e7e0d6] transition shadow-2xs hover:scale-105 cursor-pointer text-[11px] flex items-center gap-1"
-                title="Happydent Wave (8901393019469)"
+                title="Cadbury Dairy Milk Fruit & Nut (7622202324871)"
               >
-                🍬 Happydent Wave
+                🍫 Dairy Milk
               </button>
               <button
                 type="button"
-                onClick={() => handleBarcodeFound('8901058852371')}
+                onClick={() => handleBarcodeFound('8901058017687')}
                 className="px-2.5 py-1 bg-white hover:bg-[#faf7f2] text-[#2a2622] font-semibold rounded border border-[#e7e0d6] transition shadow-2xs hover:scale-105 cursor-pointer text-[11px] flex items-center gap-1"
-                title="Maggi 2-Min (8901058852371)"
+                title="Maggi 2-Min Noodles (8901058017687)"
               >
                 🍜 Maggi
               </button>
               <button
                 type="button"
-                onClick={() => handleBarcodeFound('8901764012297')}
+                onClick={() => handleBarcodeFound('8901764012990')}
                 className="px-2.5 py-1 bg-white hover:bg-[#faf7f2] text-[#2a2622] font-semibold rounded border border-[#e7e0d6] transition shadow-2xs hover:scale-105 cursor-pointer text-[11px] flex items-center gap-1"
-                title="Coca-Cola (8901764012297)"
+                title="Coca-Cola 740ml (8901764012990)"
               >
                 🥤 Coca-Cola
               </button>

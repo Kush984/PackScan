@@ -76,6 +76,7 @@ async function runUnifiedAnalysis({
 }) {
   const combinedText = [
     labelText || '',
+    productData?.label_text || '',
     productData?.ingredients_text || '',
     productData?.product_name ? `Product Name: ${productData.product_name}` : '',
     productData?.brands ? `Brand: ${productData.brands}` : '',
@@ -84,6 +85,8 @@ async function runUnifiedAnalysis({
     productData?.generic_name ? `Generic Name: ${productData.generic_name}` : '',
     productData?.manufacturing_places ? `Manufactured by: ${productData.manufacturing_places}` : '',
     productData?.customer_service ? `Consumer Care: ${productData.customer_service}` : '',
+    productData?.mrp ? `MRP: ${productData.mrp}` : '',
+    productData?.unit_sale_price ? `Unit Sale Price: ${productData.unit_sale_price}` : '',
   ].filter(Boolean).join('\n');
 
   const complianceReport = analyzeLegalMetrologyCompliance(combinedText, {
@@ -96,6 +99,10 @@ async function runUnifiedAnalysis({
     country_of_origin: productData?.country_of_origin,
     generic_name: productData?.generic_name,
     manufacturing_places: productData?.manufacturing_places,
+    mrp: productData?.mrp,
+    unit_sale_price: productData?.unit_sale_price,
+    mfg_date: productData?.mfg_date,
+    consumer_care: productData?.customer_service || productData?.consumer_care,
     evidenceSources,
   });
 
