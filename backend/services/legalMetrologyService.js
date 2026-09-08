@@ -343,39 +343,59 @@ function checkMfgDate(text, meta = {}) {
   // 1. Check verified metadata from product catalog
   if (meta && (meta.mfg_date || meta.date_of_packing)) {
     const val = (meta.mfg_date || meta.date_of_packing).toString().trim();
+    const exp = (meta.expiry_date || meta.use_by || meta.best_before)?.toString().trim();
+    const displayVal = exp && !val.toLowerCase().includes('exp') ? `${val} (Exp: ${exp})` : val;
     return {
       id: 'mfg_date',
       name: ruleName,
       legalRule,
       status: 'DETECTED',
       confidence: 'high',
-      value: val,
-      snippet: val,
-      detail: 'Month & Year of Manufacture verified from statutory declaration metadata.',
+      value: displayVal,
+      snippet: displayVal,
+      detail: exp 
+        ? `Month & Year of Manufacture: ${val} | Expiry: ${exp} under Rule 6(1)(d).`
+        : 'Month & Year of Manufacture verified from statutory declaration metadata.',
     };
   }
 
   const datePatterns = [
-    // Explicit Prefix + Date (DD/MM/YY, DD/MM/YYYY, MM/YY, MM/YYYY): "MFG: 06/07/26", "MFG: 07/2026", "PKD: 01/26", "Mfd Date: 06/07/2026"
-    /(?:mfg|mfd|pkd|pkg|packed|manufacturing|packing|date\s*of\s*(?:mfg|pkg|packing))\s*(?:date)?\s*[:\-\s]*([0-3]?\d[\/\.\-][0-1]?\d[\/\.\-](?:20)?\d{2}|[0-1]?\d[\/\.\-](?:20)?\d{2}|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s\/\.\-]+(?:20)?\d{2,4})/i,
-    // Month & Year prefix: "Month & Year of Mfg: 07/26" or "Month & Year of Packing: August 2026"
+    // 1. Explicit Prefix + Date (with optional dot e.g. MFG. / MFD. / PKD. / PKG.):
+    // Matches: "MFG: 06/07/26", "MFG. AUG/26", "MFG: AUG/26", "MFG: 1/26", "PKD: 01/26", "Mfd Date: 06/07/2026"
+    /(?:mfg|mfd|pkd|pkg|packed|manufacturing|packing|date\s*of\s*(?:mfg|pkg|packing))\s*\.?\s*(?:date)?\s*[:\-\s]*([0-3]?\d[\/\.\-][0-1]?\d[\/\.\-](?:20)?\d{2}|[0-1]?\d[\/\.\-](?:20)?\d{2}|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s\/\.\-]+(?:20)?\d{2,4})/i,
+
+    // 2. "MFG ... TO EXP ..." range: e.g. "AUG/26 TO EXP APR 27" or "MFG AUG/26 TO EXP APR 27"
+    /(?:(?:mfg|mfd|pkd)\.?\s*[:\-\s]*)?((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s\/\.\-]+(?:20)?\d{2}|[0-1]?\d[\/\.\-](?:20)?\d{2})\s*(?:to|-)\s*(?:exp|use\s*by|expiry)/i,
+
+    // 3. Month & Year prefix: "Month & Year of Mfg: 07/26" or "Month & Year of Packing: August 2026"
     /(?:month\s*(?:and|&)\s*year\s*of\s*(?:mfg|packing|import))\s*[:\-\s]*([0-1]?\d[\/\.\-](?:20)?\d{2}|[a-z]{3,9}\s*(?:20)?\d{2,4})/i,
-    // Standalone DD/MM/YY or DD/MM/YYYY: "06/07/26", "06/07/2026", "06-07-26"
+
+    // 4. Standalone DD/MM/YY or DD/MM/YYYY: "06/07/26", "06/07/2026", "06-07-26"
     /\b(?:0[1-9]|[12]\d|3[01])[\/\.\-](?:0[1-9]|1[0-2])[\/\.\-](?:20\d{2}|2[4-9])\b/,
-    // Standalone MM/YY or MM/YYYY (e.g. "07/26", "07-2026", "08.26")
-    /\b(?:0[1-9]|1[0-2])[\/\.\-](?:20\d{2}|2[4-9])\b/,
+
+    // 5. Standalone MM/YY or M/YY or MM/YYYY: "01/26", "1/26", "07/26", "08/26"
+    /\b(?:0?[1-9]|1[0-2])[\/\.\-](?:20\d{2}|2[4-9])\b/,
+
+    // 6. Standalone Mon/YY or Mon YY: "AUG/26", "AUG 26", "AUG-26", "JAN/26"
+    /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s\/\.\-]+(?:20\d{2}|2[4-9])\b/i,
   ];
 
   for (const pat of datePatterns) {
     const match = text.match(pat);
     if (match) {
+      let matchedVal = (match[1] || match[0]).trim();
+      const expMatch = text.match(/(?:to\s*exp(?:iry)?|use\s*by|best\s*before|exp(?:iry)?\s*(?:date)?)\s*[:\-\s]*((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s\/\.\-]+(?:20)?\d{2,4}|[0-3]?\d[\/\.\-][0-1]?\d[\/\.\-](?:20)?\d{2,4}|[0-1]?\d[\/\.\-](?:20)?\d{2,4})/i);
+      let displayVal = matchedVal;
+      if (expMatch && !matchedVal.toLowerCase().includes('exp') && !matchedVal.toLowerCase().includes(expMatch[1].trim().toLowerCase())) {
+        displayVal = `${matchedVal} (Exp: ${expMatch[1].trim()})`;
+      }
       return {
         id: 'mfg_date',
         name: ruleName,
         legalRule,
         status: 'DETECTED',
         confidence: 'high',
-        value: match[0].trim(),
+        value: displayVal,
         snippet: match[0],
         detail: 'Manufacturing / Packing date identified under Rule 6(1)(d).',
       };

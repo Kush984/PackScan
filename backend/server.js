@@ -88,6 +88,7 @@ async function runUnifiedAnalysis({
     productData?.mrp ? `MRP: ${productData.mrp}` : '',
     productData?.unit_sale_price ? `Unit Sale Price: ${productData.unit_sale_price}` : '',
     productData?.mfg_date ? `Month & Year of Mfg: ${productData.mfg_date}` : '',
+    productData?.expiry_date ? `Expiry Date: ${productData.expiry_date}` : '',
   ].filter(Boolean).join('\n');
 
   const complianceReport = analyzeLegalMetrologyCompliance(combinedText, {
@@ -103,6 +104,7 @@ async function runUnifiedAnalysis({
     mrp: productData?.mrp,
     unit_sale_price: productData?.unit_sale_price,
     mfg_date: productData?.mfg_date,
+    expiry_date: productData?.expiry_date,
     consumer_care: productData?.customer_service || productData?.consumer_care,
     evidenceSources,
   });
@@ -449,6 +451,7 @@ app.post(
           mrp: geminiResult.mrp_declaration || catalogData?.mrp || productData?.mrp,
           quantity: geminiResult.net_quantity || catalogData?.quantity || productData?.quantity,
           mfg_date: geminiResult.mfg_date || catalogData?.mfg_date || productData?.mfg_date,
+          expiry_date: geminiResult.expiry_date || catalogData?.expiry_date || productData?.expiry_date,
           unit_sale_price: geminiResult.unit_sale_price || catalogData?.unit_sale_price || productData?.unit_sale_price,
           customer_service: geminiResult.consumer_care || catalogData?.customer_service || productData?.customer_service,
           generic_name: geminiResult.generic_name || catalogData?.generic_name || productData?.generic_name,
