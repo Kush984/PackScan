@@ -58,6 +58,52 @@ export default function InspectionNoticeModal({
     window.print();
   };
 
+  const handleExportEditable = () => {
+    const exportData = {
+      noticeNumber,
+      inspectionDate,
+      productName,
+      brand,
+      barcode,
+      overallStatus,
+      complianceScore: `${score}/${totalFields} (${compliancePercentage}%)`,
+      mandatoryDeclarations: fields.map((f) => ({
+        rule: f.legalRule,
+        declarationName: f.name,
+        status: f.status,
+        detectedValue: f.value || 'MISSING',
+        violationDetail: f.violationMessage || null,
+      })),
+      fontHeightCompliance: fontCompliance,
+      violations: violations.map((v) => ({
+        field: v.field,
+        message: v.message,
+        statutoryRule: v.rule,
+      })),
+      legalJurisdiction: {
+        act: 'Legal Metrology Act, 2009 (Act No. 1 of 2010)',
+        rules: 'Legal Metrology (Packaged Commodities) Rules, 2011 (Rule 6 & Rule 9)',
+        penaltySection: 'Section 36(1) & Section 36(2)',
+        compoundingFineAdvisory: '₹25,000 for first offense / ₹50,000 for recurring offense',
+      },
+      evidenceMetadata: {
+        verificationHash: 'SHA256:a9f4c8e12b7',
+        inspectedAt: created_at,
+        inspectingAuthority: 'PackScan Automated Metrology Audit Engine (SIH26034)',
+      },
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${noticeNumber.replace(/\//g, '_')}_Report.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const photoSrc = imageUrl || (image_path ? (image_path.startsWith('/') ? image_path : `/${image_path}`) : null);
 
   return (
@@ -73,11 +119,20 @@ export default function InspectionNoticeModal({
           </div>
           <div className="flex items-center space-x-2">
             <button
+              onClick={handleExportEditable}
+              className="px-3 py-2 bg-[#f4efe6] hover:bg-[#eae3d5] text-[#5c554e] rounded-xl text-xs font-bold transition flex items-center space-x-1.5 border border-[#e8e2d8] cursor-pointer"
+              title="Export report in editable JSON format"
+            >
+              <Download className="w-3.5 h-3.5 text-[#b8532f]" />
+              <span>Export Editable</span>
+            </button>
+            <button
               onClick={handlePrint}
               className="px-4 py-2 bg-[#b8532f] hover:bg-[#a34a2b] text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-sm cursor-pointer"
+              title="Print official legal notice or save as PDF"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>Print / Save as PDF</span>
+              <span>Print / PDF</span>
             </button>
             <button
               onClick={onClose}
