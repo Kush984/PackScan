@@ -431,7 +431,7 @@ export default function Scanner({
     } catch (err) {
       if (!isSilent) {
         console.warn('AI Barcode extraction error:', err);
-        setCameraError('AI Barcode extraction encountered network latency. Use the 1-Click Demo Bar below.');
+        setCameraError('AI Barcode extraction encountered network latency. Please retake photo or enter barcode manually.');
       }
     } finally {
       if (!isSilent) setIsExtractingBarcode(false);
@@ -830,40 +830,6 @@ export default function Scanner({
           </div>
         </div>
 
-        {/* 1-Click Quick Demo Bar for Fast Barcode Selection */}
-        {step === 1 && !capturedData.barcode && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 bg-[#fdf9ee] border border-[#f2e5be] rounded-lg my-1.5 sm:my-2 text-xs">
-            <span className="font-['Space_Grotesk'] text-[10.5px] sm:text-[11px] font-bold text-[#8a651e] uppercase tracking-wider flex items-center gap-1 shrink-0">
-              <Sparkles className="w-3.5 h-3.5 text-[#c99a3e] shrink-0" /> 1-Click Demo Barcode:
-            </span>
-            <div className="grid grid-cols-3 gap-1.5 w-full sm:w-auto">
-              <button
-                type="button"
-                onClick={() => handleBarcodeFound('7622202324871')}
-                className="px-2 py-1 bg-white hover:bg-[#faf7f2] text-[#2a2622] font-semibold rounded border border-[#e7e0d6] transition shadow-2xs active:scale-95 text-[10px] sm:text-[11px] flex items-center justify-center gap-1 cursor-pointer truncate"
-                title="Cadbury Dairy Milk Fruit & Nut (7622202324871)"
-              >
-                🍫 Dairy Milk
-              </button>
-              <button
-                type="button"
-                onClick={() => handleBarcodeFound('8901058017687')}
-                className="px-2 py-1 bg-white hover:bg-[#faf7f2] text-[#2a2622] font-semibold rounded border border-[#e7e0d6] transition shadow-2xs active:scale-95 text-[10px] sm:text-[11px] flex items-center justify-center gap-1 cursor-pointer truncate"
-                title="Maggi 2-Min Noodles (8901058017687)"
-              >
-                🍜 Maggi
-              </button>
-              <button
-                type="button"
-                onClick={() => handleBarcodeFound('8901764012990')}
-                className="px-2 py-1 bg-white hover:bg-[#faf7f2] text-[#2a2622] font-semibold rounded border border-[#e7e0d6] transition shadow-2xs active:scale-95 text-[10px] sm:text-[11px] flex items-center justify-center gap-1 cursor-pointer truncate"
-                title="Coca-Cola 740ml (8901764012990)"
-              >
-                🥤 Coca-Cola
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Viewfinder Stage */}
         <div className="relative w-full flex-1 bg-[#fcfaf7] rounded-lg flex items-center justify-center p-3 sm:p-6 my-2.5 sm:my-4 overflow-hidden select-none border border-[#e7e0d6] min-h-[260px] sm:min-h-[290px]">
