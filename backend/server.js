@@ -87,6 +87,7 @@ async function runUnifiedAnalysis({
     productData?.customer_service ? `Consumer Care: ${productData.customer_service}` : '',
     productData?.mrp ? `MRP: ${productData.mrp}` : '',
     productData?.unit_sale_price ? `Unit Sale Price: ${productData.unit_sale_price}` : '',
+    productData?.mfg_date ? `Month & Year of Mfg: ${productData.mfg_date}` : '',
   ].filter(Boolean).join('\n');
 
   const complianceReport = analyzeLegalMetrologyCompliance(combinedText, {
