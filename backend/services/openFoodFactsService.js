@@ -80,6 +80,7 @@ async function lookupInLocalDB(barcodeCandidates) {
       const row = await db.get('SELECT * FROM scanned_products WHERE barcode = ?', [b]);
       if (row) {
         console.log(`[DB] scanned_products hit: ${b} (source: ${row.source})`);
+        const raw = row.raw_data ? JSON.parse(row.raw_data) : null;
         return {
           source: row.source === 'openfoodfacts' ? 'OPEN_FOOD_FACTS' :
                   row.source === 'catalog'       ? 'CATALOG_DB'      :
@@ -90,11 +91,16 @@ async function lookupInLocalDB(barcodeCandidates) {
           product_name: row.product_name,
           brands: row.brand,
           ingredients_text: row.ingredients,
+          label_text: row.ingredients,
+          mfg_date: raw?.mfg_date,
+          mrp: raw?.mrp,
+          unit_sale_price: raw?.unit_sale_price,
+          quantity: raw?.quantity || raw?.net_quantity,
           nutriments: row.nutriments ? JSON.parse(row.nutriments) : {},
           allergens: row.allergens ? JSON.parse(row.allergens) : [],
           categories: row.categories,
           image_url: row.image_url,
-          raw_data: row.raw_data ? JSON.parse(row.raw_data) : null,
+          raw_data: raw,
         };
       }
     } catch (err) {
@@ -125,8 +131,13 @@ function lookupInCatalog(barcodeCandidates) {
           product_name: match.name,
           brands: match.brand,
           ingredients_text: match.label_text,
+          label_text: match.label_text,
+          mfg_date: match.mfg_date,
+          mrp: match.mrp,
+          unit_sale_price: match.unit_sale_price,
+          quantity: match.net_quantity || match.quantity,
           nutriments: match.nutriments || {},
-          allergens: [],
+          allergens: match.allergens || [],
           categories: match.category,
           image_url: match.image_url,
           raw_data: match,

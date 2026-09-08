@@ -425,21 +425,42 @@ app.post(
           confidence: 98,
         });
 
+        // Auto-detect barcode from transcribed text if not provided
+        let resolvedBarcode = barcode || productData?.barcode;
+        if (!resolvedBarcode && geminiResult.raw_transcribed_text) {
+          const bcMatch = geminiResult.raw_transcribed_text.match(/\b(890\d{10}|762\d{10}|\d{12,14})\b/);
+          if (bcMatch) resolvedBarcode = bcMatch[1];
+        }
+
+        let catalogData = null;
+        if (resolvedBarcode) {
+          catalogData = await lookupProductByBarcode(resolvedBarcode);
+        }
+
         const firstUploadedPath = uploadedImagePaths && uploadedImagePaths.length > 0 ? uploadedImagePaths[0] : null;
         productData = {
-          product_name: geminiResult.product_name || productData?.product_name || 'Scanned Packaged Commodity',
-          brand: geminiResult.brand || productData?.brand || 'Verified Brand',
-          barcode: barcode || productData?.barcode,
-          categories: productData?.categories || 'Packaged Commodity',
-          image_url: productData?.image_url || (firstUploadedPath ? `/uploads/${path.basename(firstUploadedPath)}` : null),
-          ingredients_text: geminiResult.ingredients_text || productData?.ingredients_text || '',
+          product_name: geminiResult.product_name || catalogData?.product_name || productData?.product_name || 'Scanned Packaged Commodity',
+          brand: geminiResult.brand || catalogData?.brand || productData?.brand || 'Verified Brand',
+          barcode: resolvedBarcode || productData?.barcode,
+          categories: catalogData?.categories || productData?.categories || 'Packaged Commodity',
+          image_url: productData?.image_url || (firstUploadedPath ? `/uploads/${path.basename(firstUploadedPath)}` : catalogData?.image_url),
+          ingredients_text: geminiResult.ingredients_text || catalogData?.ingredients_text || productData?.ingredients_text || '',
+          mrp: geminiResult.mrp_declaration || catalogData?.mrp || productData?.mrp,
+          quantity: geminiResult.net_quantity || catalogData?.quantity || productData?.quantity,
+          mfg_date: geminiResult.mfg_date || catalogData?.mfg_date || productData?.mfg_date,
+          unit_sale_price: geminiResult.unit_sale_price || catalogData?.unit_sale_price || productData?.unit_sale_price,
+          customer_service: geminiResult.consumer_care || catalogData?.customer_service || productData?.customer_service,
+          generic_name: geminiResult.generic_name || catalogData?.generic_name || productData?.generic_name,
+          country_of_origin: geminiResult.country_of_origin || catalogData?.country_of_origin || productData?.country_of_origin,
+          manufacturing_places: geminiResult.manufacturer_address || catalogData?.manufacturing_places || productData?.manufacturing_places,
           nutriments: {
+            ...(catalogData?.nutriments || {}),
             ...(productData?.nutriments || {}),
             ...(geminiResult.nutriments || {}),
           },
-          dataSource: 'GEMINI_VISION_AI',
+          dataSource: catalogData ? 'CATALOG_DB' : 'GEMINI_VISION_AI',
           confidence: 'high',
-          source: 'GEMINI_VISION_AI',
+          source: catalogData ? 'CATALOG_DB' : 'GEMINI_VISION_AI',
         };
       } else {
         // Fallback to local offline Tesseract.js OCR
