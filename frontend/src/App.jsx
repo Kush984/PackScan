@@ -568,96 +568,96 @@ export default function App() {
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, ease: 'easeOut' }}
-                className="w-full bg-white rounded-xl p-6 sm:p-7 border border-[#e8e2d8] shadow-xs relative overflow-hidden"
+                className="w-full bg-white rounded-xl p-4 sm:p-7 border border-[#e8e2d8] shadow-xs relative overflow-hidden"
               >
                 {/* Subtle Ambient Warm Glow */}
                 <div className="absolute top-0 right-1/4 w-72 h-72 bg-[#b8532f]/5 rounded-full blur-3xl pointer-events-none" />
 
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-                  <div className="max-w-3xl space-y-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-2.5 py-1 bg-[#fbf2ed] text-[#b8532f] border border-[#ecc2b0] font-['Space_Grotesk'] text-[11px] font-bold uppercase tracking-wider rounded">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6 relative z-10">
+                  <div className="max-w-3xl space-y-2.5 sm:space-y-3">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                      <span className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-[#fbf2ed] text-[#b8532f] border border-[#ecc2b0] font-['Space_Grotesk'] text-[10px] sm:text-[11px] font-bold uppercase tracking-wider rounded">
                         LEGAL METROLOGY ACT, 2011
                       </span>
                       <span className="text-[#ded6c7] font-sans">|</span>
-                      <span className="font-['Space_Grotesk'] text-[12px] font-semibold text-[#8c8278]">
+                      <span className="font-['Space_Grotesk'] text-[11px] sm:text-[12px] font-semibold text-[#8c8278]">
                         DIRECTIVE 2024/LM-8B
                       </span>
                     </div>
-                    <h1 className="font-['Space_Grotesk'] text-[26px] sm:text-[30px] leading-tight text-[#2a2622] font-extrabold tracking-tight">
+                    <h1 className="font-['Space_Grotesk'] text-[21px] sm:text-[30px] leading-tight text-[#2a2622] font-extrabold tracking-tight">
                       Legal Metrology Compliance &amp; Health Guardian
                     </h1>
-                    <p className="text-[15px] leading-relaxed text-[#5c554e] max-w-2xl font-normal">
+                    <p className="text-[13px] sm:text-[15px] leading-relaxed text-[#5c554e] max-w-2xl font-normal">
                       Instant automated statutory audit for mandatory declarations under Rule 6 &amp; 9, coupled with personalized allergen and additive checking.
                     </p>
 
                     {/* 3-Tier Badges Standardized */}
-                    <div className="flex flex-wrap items-center gap-2 pt-1">
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fbf2ed] border border-[#ecc2b0] text-[#b8532f] rounded-md font-['Space_Grotesk'] text-[13px] font-semibold">
-                        <CheckCircle2 className="w-4 h-4 text-[#b8532f] shrink-0" />
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1">
+                      <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-[#fbf2ed] border border-[#ecc2b0] text-[#b8532f] rounded-md font-['Space_Grotesk'] text-[11.5px] sm:text-[13px] font-semibold">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#b8532f] shrink-0" />
                         <span>Rule 6 &amp; 9 Mandatory Verification</span>
                       </div>
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fdf5e6] border border-[#eed69e] text-[#926325] rounded-md font-['Space_Grotesk'] text-[13px] font-semibold">
-                        <AlertTriangle className="w-4 h-4 text-[#c99a3e] shrink-0" />
+                      <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-[#fdf5e6] border border-[#eed69e] text-[#926325] rounded-md font-['Space_Grotesk'] text-[11.5px] sm:text-[13px] font-semibold">
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#c99a3e] shrink-0" />
                         <span>Allergen &amp; Additive Guard</span>
                       </div>
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#faf7f2] border border-[#e8e2d8] text-[#5c554e] rounded-md font-['Space_Grotesk'] text-[13px] font-semibold">
-                        <Scale className="w-4 h-4 text-[#8c8278] shrink-0" />
+                      <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-[#faf7f2] border border-[#e8e2d8] text-[#5c554e] rounded-md font-['Space_Grotesk'] text-[11.5px] sm:text-[13px] font-semibold">
+                        <Scale className="w-3.5 h-3.5 text-[#8c8278] shrink-0" />
                         <span>Section 36 Notice Exporter</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Telemetry Readouts */}
-                  <div className="grid grid-cols-3 lg:grid-cols-1 gap-3 w-full lg:w-72 shrink-0">
-                    <div className="bg-[#faf7f2] border border-[#e8e2d8] p-3.5 rounded-lg flex items-center justify-between shadow-xs">
-                      <div>
-                        <div className="text-[11px] font-bold text-[#8c8278] uppercase tracking-wider font-['Space_Grotesk']">
+                  <div className="grid grid-cols-3 lg:grid-cols-1 gap-2 sm:gap-3 w-full lg:w-72 shrink-0">
+                    <div className="bg-[#faf7f2] border border-[#e8e2d8] p-2.5 sm:p-3.5 rounded-lg flex items-center justify-between shadow-2xs">
+                      <div className="min-w-0 w-full">
+                        <div className="text-[9.5px] sm:text-[11px] font-bold text-[#8c8278] uppercase tracking-wider font-['Space_Grotesk'] truncate">
                           Total Audited
                         </div>
-                        <div className="font-['Space_Grotesk'] text-[28px] font-extrabold text-[#2a2622] leading-none mt-1">
+                        <div className="font-['Space_Grotesk'] text-[19px] sm:text-[28px] font-extrabold text-[#2a2622] leading-tight mt-0.5 sm:mt-1">
                           1,248
                         </div>
-                        <div className="text-[12px] font-semibold text-[#b8532f] mt-1.5 flex items-center gap-1">
-                          <TrendingUp className="w-3.5 h-3.5 text-[#b8532f]" />
-                          <span>Batch Q4 Complete</span>
+                        <div className="text-[10px] sm:text-[12px] font-semibold text-[#b8532f] mt-0.5 sm:mt-1.5 flex items-center gap-1 truncate">
+                          <TrendingUp className="w-3 h-3 text-[#b8532f] shrink-0" />
+                          <span className="truncate">Batch Q4</span>
                         </div>
                       </div>
-                      <div className="w-10 h-10 rounded-lg bg-[#fbf2ed] border border-[#ecc2b0] flex items-center justify-center text-[#b8532f]">
+                      <div className="hidden sm:flex w-10 h-10 rounded-lg bg-[#fbf2ed] border border-[#ecc2b0] items-center justify-center text-[#b8532f] shrink-0 ml-2">
                         <Package className="w-5 h-5" />
                       </div>
                     </div>
 
-                    <div className="bg-[#faf7f2] border border-[#e8e2d8] p-3.5 rounded-lg flex items-center justify-between shadow-xs">
-                      <div>
-                        <div className="text-[11px] font-bold text-[#8c8278] uppercase tracking-wider font-['Space_Grotesk']">
-                          Non-Compliance Ratio
+                    <div className="bg-[#faf7f2] border border-[#e8e2d8] p-2.5 sm:p-3.5 rounded-lg flex items-center justify-between shadow-2xs">
+                      <div className="min-w-0 w-full">
+                        <div className="text-[9.5px] sm:text-[11px] font-bold text-[#8c8278] uppercase tracking-wider font-['Space_Grotesk'] truncate">
+                          Non-Compliance
                         </div>
-                        <div className="font-['Space_Grotesk'] text-[28px] font-extrabold text-[#be123c] leading-none mt-1">
+                        <div className="font-['Space_Grotesk'] text-[19px] sm:text-[28px] font-extrabold text-[#be123c] leading-tight mt-0.5 sm:mt-1">
                           8.4%
                         </div>
-                        <div className="text-[12px] font-semibold text-[#be123c] mt-1.5">
-                          105 Violations Logged
+                        <div className="text-[10px] sm:text-[12px] font-semibold text-[#be123c] mt-0.5 sm:mt-1.5 truncate">
+                          105 Violations
                         </div>
                       </div>
-                      <div className="w-10 h-10 rounded-lg bg-[#fff1f2] border border-[#fecdd3] flex items-center justify-center text-[#be123c]">
+                      <div className="hidden sm:flex w-10 h-10 rounded-lg bg-[#fff1f2] border border-[#fecdd3] items-center justify-center text-[#be123c] shrink-0 ml-2">
                         <AlertTriangle className="w-5 h-5" />
                       </div>
                     </div>
 
-                    <div className="bg-[#faf7f2] border border-[#e8e2d8] p-3.5 rounded-lg flex items-center justify-between shadow-xs">
-                      <div>
-                        <div className="text-[11px] font-bold text-[#8c8278] uppercase tracking-wider font-['Space_Grotesk']">
+                    <div className="bg-[#faf7f2] border border-[#e8e2d8] p-2.5 sm:p-3.5 rounded-lg flex items-center justify-between shadow-2xs">
+                      <div className="min-w-0 w-full">
+                        <div className="text-[9.5px] sm:text-[11px] font-bold text-[#8c8278] uppercase tracking-wider font-['Space_Grotesk'] truncate">
                           Avg Latency
                         </div>
-                        <div className="font-['Space_Grotesk'] text-[28px] font-extrabold text-[#2a2622] leading-none mt-1">
+                        <div className="font-['Space_Grotesk'] text-[19px] sm:text-[28px] font-extrabold text-[#2a2622] leading-tight mt-0.5 sm:mt-1">
                           &lt;12ms
                         </div>
-                        <div className="text-[12px] font-semibold text-[#5c554e] mt-1.5">
-                          Hardware OCR Engine
+                        <div className="text-[10px] sm:text-[12px] font-semibold text-[#5c554e] mt-0.5 sm:mt-1.5 truncate">
+                          Hardware OCR
                         </div>
                       </div>
-                      <div className="w-10 h-10 rounded-lg bg-[#fdf5e6] border border-[#eed69e] flex items-center justify-center text-[#926325]">
+                      <div className="hidden sm:flex w-10 h-10 rounded-lg bg-[#fdf5e6] border border-[#eed69e] items-center justify-center text-[#926325] shrink-0 ml-2">
                         <Zap className="w-5 h-5 text-[#c99a3e]" />
                       </div>
                     </div>

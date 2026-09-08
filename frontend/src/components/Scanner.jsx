@@ -722,16 +722,16 @@ export default function Scanner({
       {/* ========================================================================= */}
       {/* Left: Precision Metrology Viewfinder (col-span-8) */}
       {/* ========================================================================= */}
-      <div className="lg:col-span-8 bg-white rounded-xl p-5 sm:p-6 border border-[#e7e0d6] shadow-xs flex flex-col justify-between relative overflow-hidden min-h-[440px]">
+      <div className="lg:col-span-8 bg-white rounded-xl p-3.5 sm:p-6 border border-[#e7e0d6] shadow-xs flex flex-col justify-between relative overflow-hidden min-h-[420px] sm:min-h-[440px]">
         {/* Header inside panel */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#e7e0d6]">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#b8532f]"></span>
-            <span className="font-['Space_Grotesk'] text-[13px] text-[#2a2622] font-bold tracking-wider uppercase">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 pb-2.5 sm:pb-3 border-b border-[#e7e0d6]">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#b8532f] shrink-0"></span>
+            <span className="font-['Space_Grotesk'] text-[12px] sm:text-[13px] text-[#2a2622] font-bold tracking-wider uppercase truncate">
               Metrology Viewfinder // Rule 9 Optical Micrometer
             </span>
           </div>
-          <div className="flex items-center gap-2 text-[#786e65] font-['Space_Grotesk'] text-[11px]">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-[#786e65] font-['Space_Grotesk'] text-[10px] sm:text-[11px] shrink-0">
             <span>CALIBRATION: 0.05MM / PX</span>
             <span>•</span>
             <span className="text-[#b8532f] font-bold">
@@ -741,7 +741,7 @@ export default function Scanner({
         </div>
 
         {/* Streamlined Stepper Progress Bar (Smart 2-Shot Architecture) */}
-        <div className="grid grid-cols-3 gap-2 pt-3 pb-1">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2 pt-2.5 sm:pt-3 pb-1">
           {/* Step 1 Pill */}
           <div
             onClick={() => {
@@ -750,7 +750,7 @@ export default function Scanner({
                 setStep(1);
               }
             }}
-            className={`p-2 rounded-lg border text-center transition-all ${
+            className={`p-1.5 sm:p-2 rounded-lg border text-center transition-all ${
               step > 1 && !isLoading ? 'cursor-pointer hover:border-[#b8532f]' : ''
             } ${
               step === 1
@@ -760,11 +760,11 @@ export default function Scanner({
                 : 'bg-[#faf7f2] border-[#e7e0d6] text-[#786e65]'
             }`}
           >
-            <div className="flex items-center justify-center gap-1 font-['Space_Grotesk'] text-[10.5px] font-bold uppercase tracking-wider">
-              {capturedData.barcode ? <Check className="w-3 h-3 text-[#b8532f]" /> : null}
-              <span>{capturedData.barcode ? 'Barcode Set' : '1. Barcode'}</span>
+            <div className="flex items-center justify-center gap-1 font-['Space_Grotesk'] text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-wider">
+              {capturedData.barcode ? <Check className="w-3 h-3 text-[#b8532f] shrink-0" /> : null}
+              <span className="truncate">{capturedData.barcode ? 'Barcode Set' : '1. Barcode'}</span>
             </div>
-            <div className="font-mono text-[11px] font-semibold truncate mt-0.5">
+            <div className="font-mono text-[10px] sm:text-[11px] font-semibold truncate mt-0.5">
               {capturedData.barcode ? capturedData.barcode : 'Scan / Lookup'}
             </div>
           </div>
@@ -778,7 +778,7 @@ export default function Scanner({
                 startCamera();
               }
             }}
-            className={`p-2 rounded-lg border text-center transition-all cursor-pointer hover:border-[#b8532f] ${
+            className={`p-1.5 sm:p-2 rounded-lg border text-center transition-all cursor-pointer hover:border-[#b8532f] ${
               step === 2
                 ? 'bg-[#fdf2ec] border-[#b8532f] text-[#b8532f] ring-1 ring-[#b8532f]'
                 : thumbnails.front
@@ -786,15 +786,15 @@ export default function Scanner({
                 : 'bg-[#faf7f2] border-[#e7e0d6] text-[#786e65]'
             }`}
           >
-            <div className="flex items-center justify-center gap-1 font-['Space_Grotesk'] text-[10.5px] font-bold uppercase tracking-wider">
-              {thumbnails.front ? <Check className="w-3 h-3 text-[#b8532f]" /> : null}
-              <span>{thumbnails.front ? 'Shot 1 Done' : '2. Front'}</span>
+            <div className="flex items-center justify-center gap-1 font-['Space_Grotesk'] text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-wider">
+              {thumbnails.front ? <Check className="w-3 h-3 text-[#b8532f] shrink-0" /> : null}
+              <span className="truncate">{thumbnails.front ? 'Shot 1 Done' : '2. Front'}</span>
             </div>
-            <div className="font-['Space_Grotesk'] text-[11px] font-semibold truncate mt-0.5 flex items-center justify-center gap-1">
+            <div className="font-['Space_Grotesk'] text-[10px] sm:text-[11px] font-semibold truncate mt-0.5 flex items-center justify-center gap-1">
               {thumbnails.front && (
-                <img src={thumbnails.front} alt="Front" className="w-3.5 h-3.5 rounded object-cover" />
+                <img src={thumbnails.front} alt="Front" className="w-3 h-3 rounded object-cover shrink-0" />
               )}
-              <span>Brand &amp; Weight</span>
+              <span className="truncate">Brand & Weight</span>
             </div>
           </div>
 
@@ -807,7 +807,7 @@ export default function Scanner({
                 startCamera();
               }
             }}
-            className={`p-2 rounded-lg border text-center transition-all ${
+            className={`p-1.5 sm:p-2 rounded-lg border text-center transition-all ${
               thumbnails.front && !isLoading ? 'cursor-pointer hover:border-[#b8532f]' : ''
             } ${
               step === 3 || step === 4
@@ -817,30 +817,30 @@ export default function Scanner({
                 : 'bg-[#faf7f2] border-[#e7e0d6] text-[#786e65]'
             }`}
           >
-            <div className="flex items-center justify-center gap-1 font-['Space_Grotesk'] text-[10.5px] font-bold uppercase tracking-wider">
-              {thumbnails.back ? <Check className="w-3 h-3 text-[#b8532f]" /> : null}
-              <span>{thumbnails.back ? (step === 4 ? 'Shot 3 (Flap)' : 'Shot 2 Done') : '3. Back / Rules'}</span>
+            <div className="flex items-center justify-center gap-1 font-['Space_Grotesk'] text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-wider">
+              {thumbnails.back ? <Check className="w-3 h-3 text-[#b8532f] shrink-0" /> : null}
+              <span className="truncate">{thumbnails.back ? (step === 4 ? 'Shot 3 (Flap)' : 'Shot 2 Done') : '3. Back / Rules'}</span>
             </div>
-            <div className="font-['Space_Grotesk'] text-[11px] font-semibold truncate mt-0.5 flex items-center justify-center gap-1">
+            <div className="font-['Space_Grotesk'] text-[10px] sm:text-[11px] font-semibold truncate mt-0.5 flex items-center justify-center gap-1">
               {thumbnails.back && (
-                <img src={thumbnails.back} alt="Back" className="w-3.5 h-3.5 rounded object-cover" />
+                <img src={thumbnails.back} alt="Back" className="w-3 h-3 rounded object-cover shrink-0" />
               )}
-              <span>{step === 4 ? 'Side / Flap (Opt)' : 'MRP &amp; Nutrition'}</span>
+              <span className="truncate">{step === 4 ? 'Side Flap' : 'MRP & Nutrition'}</span>
             </div>
           </div>
         </div>
 
         {/* 1-Click Quick Demo Bar for Fast Barcode Selection */}
         {step === 1 && !capturedData.barcode && (
-          <div className="flex items-center justify-between gap-2 px-3 py-1.5 bg-[#fdf9ee] border border-[#f2e5be] rounded-lg my-1.5 text-xs">
-            <span className="font-['Space_Grotesk'] text-[10.5px] font-bold text-[#8a651e] uppercase tracking-wider flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-[#c99a3e]" /> 1-Click Demo Barcode:
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 bg-[#fdf9ee] border border-[#f2e5be] rounded-lg my-1.5 sm:my-2 text-xs">
+            <span className="font-['Space_Grotesk'] text-[10.5px] sm:text-[11px] font-bold text-[#8a651e] uppercase tracking-wider flex items-center gap-1 shrink-0">
+              <Sparkles className="w-3.5 h-3.5 text-[#c99a3e] shrink-0" /> 1-Click Demo Barcode:
             </span>
-            <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="grid grid-cols-3 gap-1.5 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => handleBarcodeFound('7622202324871')}
-                className="px-2.5 py-1 bg-white hover:bg-[#faf7f2] text-[#2a2622] font-semibold rounded border border-[#e7e0d6] transition shadow-2xs hover:scale-105 cursor-pointer text-[11px] flex items-center gap-1"
+                className="px-2 py-1 bg-white hover:bg-[#faf7f2] text-[#2a2622] font-semibold rounded border border-[#e7e0d6] transition shadow-2xs active:scale-95 text-[10px] sm:text-[11px] flex items-center justify-center gap-1 cursor-pointer truncate"
                 title="Cadbury Dairy Milk Fruit & Nut (7622202324871)"
               >
                 🍫 Dairy Milk
@@ -848,7 +848,7 @@ export default function Scanner({
               <button
                 type="button"
                 onClick={() => handleBarcodeFound('8901058017687')}
-                className="px-2.5 py-1 bg-white hover:bg-[#faf7f2] text-[#2a2622] font-semibold rounded border border-[#e7e0d6] transition shadow-2xs hover:scale-105 cursor-pointer text-[11px] flex items-center gap-1"
+                className="px-2 py-1 bg-white hover:bg-[#faf7f2] text-[#2a2622] font-semibold rounded border border-[#e7e0d6] transition shadow-2xs active:scale-95 text-[10px] sm:text-[11px] flex items-center justify-center gap-1 cursor-pointer truncate"
                 title="Maggi 2-Min Noodles (8901058017687)"
               >
                 🍜 Maggi
@@ -856,7 +856,7 @@ export default function Scanner({
               <button
                 type="button"
                 onClick={() => handleBarcodeFound('8901764012990')}
-                className="px-2.5 py-1 bg-white hover:bg-[#faf7f2] text-[#2a2622] font-semibold rounded border border-[#e7e0d6] transition shadow-2xs hover:scale-105 cursor-pointer text-[11px] flex items-center gap-1"
+                className="px-2 py-1 bg-white hover:bg-[#faf7f2] text-[#2a2622] font-semibold rounded border border-[#e7e0d6] transition shadow-2xs active:scale-95 text-[10px] sm:text-[11px] flex items-center justify-center gap-1 cursor-pointer truncate"
                 title="Coca-Cola 740ml (8901764012990)"
               >
                 🥤 Coca-Cola
@@ -866,7 +866,7 @@ export default function Scanner({
         )}
 
         {/* Viewfinder Stage */}
-        <div className="relative w-full flex-1 bg-[#fcfaf7] rounded-lg flex items-center justify-center p-6 my-4 overflow-hidden select-none border border-[#e7e0d6] min-h-[290px]">
+        <div className="relative w-full flex-1 bg-[#fcfaf7] rounded-lg flex items-center justify-center p-3 sm:p-6 my-2.5 sm:my-4 overflow-hidden select-none border border-[#e7e0d6] min-h-[260px] sm:min-h-[290px]">
           {/* Subtle Grid Background */}
           <svg className="absolute inset-0 w-full h-full opacity-40 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
             <defs>
