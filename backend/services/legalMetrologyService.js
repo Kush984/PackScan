@@ -367,17 +367,23 @@ function checkMfgDate(text, meta = {}) {
     // 2. "MFG ... TO EXP ..." range: e.g. "AUG/26 TO EXP APR 27" or "MFG AUG/26 TO EXP APR 27"
     /(?:(?:mfg|mfd|pkd)\.?\s*[:\-\s]*)?((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s\/\.\-]+(?:20)?\d{2}|[0-1]?\d[\/\.\-](?:20)?\d{2})\s*(?:to|-)\s*(?:exp|use\s*by|expiry)/i,
 
-    // 3. Month & Year prefix: "Month & Year of Mfg: 07/26" or "Month & Year of Packing: August 2026"
-    /(?:month\s*(?:and|&)\s*year\s*of\s*(?:mfg|packing|import))\s*[:\-\s]*([0-1]?\d[\/\.\-](?:20)?\d{2}|[a-z]{3,9}\s*(?:20)?\d{2,4})/i,
+    // 3. Month & Year prefix: "Month & Year of Mfg: 07/26", "Month of Mfg: August", "Month of PKG: August", "Month: August 2026"
+    /(?:month\s*(?:and|&)?\s*(?:year)?\s*of\s*(?:mfg|packing|import|pkg))\s*[:\-\s]*([0-1]?\d[\/\.\-](?:20)?\d{2}|(?:january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*(?:[\s\/\.\-]+(?:20)?\d{2,4})?)/i,
 
-    // 4. Standalone DD/MM/YY or DD/MM/YYYY: "06/07/26", "06/07/2026", "06-07-26"
+    // 4. "Month: August" or "Mfg Month: August" or "Month: Aug"
+    /(?:month|mfg\s*month|pkg\s*month)\s*[:\-\s]+((?:january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b(?:[\s\/\.\-]+(?:20)?\d{2,4})?)/i,
+
+    // 5. Prefix + Month name alone: "MFG: AUGUST", "PKD: AUGUST", "MFD: AUG", "MFG. AUG"
+    /(?:mfg|mfd|pkd|pkg|packed|manufacturing|packing)\s*\.?\s*[:\-\s]+((?:january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b(?:[\s\/\.\-]+(?:20)?\d{2,4})?)/i,
+
+    // 6. Standalone DD/MM/YY or DD/MM/YYYY: "06/07/26", "06/07/2026", "06-07-26"
     /\b(?:0[1-9]|[12]\d|3[01])[\/\.\-](?:0[1-9]|1[0-2])[\/\.\-](?:20\d{2}|2[4-9])\b/,
 
-    // 5. Standalone MM/YY or M/YY or MM/YYYY: "01/26", "1/26", "07/26", "08/26"
+    // 7. Standalone MM/YY or M/YY or MM/YYYY: "01/26", "1/26", "07/26", "08/26"
     /\b(?:0?[1-9]|1[0-2])[\/\.\-](?:20\d{2}|2[4-9])\b/,
 
-    // 6. Standalone Mon/YY or Mon YY: "AUG/26", "AUG 26", "AUG-26", "JAN/26"
-    /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s\/\.\-]+(?:20\d{2}|2[4-9])\b/i,
+    // 8. Standalone Mon/YY or Mon YY or Month Year: "AUG/26", "AUG 26", "AUG-26", "JAN/26", "AUGUST 2026", "AUGUST 26"
+    /\b(?:january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s\/\.\-]+(?:20\d{2}|2[4-9])\b/i,
   ];
 
   for (const pat of datePatterns) {
