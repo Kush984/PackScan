@@ -162,12 +162,7 @@ export default function AllergiesThresholdView({
       'gerd', 'pku', 'fatty_liver', 'cholesterol', 'ckd', 'lactose'
     ];
     const custom = conds.filter((c) => !knownIds.includes(c));
-    // Default demo custom condition if none exists
-    if (custom.length === 0 && !conds.includes('hyperuricemia (purines)')) {
-      setCustomConditions(['Hyperuricemia (Purines)']);
-    } else {
-      setCustomConditions(custom);
-    }
+    setCustomConditions(custom);
 
     if (userProfile.sugar_threshold !== undefined) {
       setSugarThreshold(Number(userProfile.sugar_threshold));

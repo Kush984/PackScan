@@ -35,6 +35,8 @@ import {
   AlertTriangle,
   Zap,
   Cpu,
+  UserCheck,
+  Sliders,
 } from 'lucide-react';
 
 const DEVICE_ID_KEY = 'packscan_device_id';
@@ -99,8 +101,8 @@ const sampleInspectionData = {
 export default function App() {
   const [deviceId, setDeviceId] = useState('');
   const [userProfile, setUserProfile] = useState({
-    allergies: ['dairy', 'peanut'],
-    conditions: ['diabetic'],
+    allergies: [],
+    conditions: [],
     sugar_threshold: 15.0,
     sodium_threshold: 400.0,
   });
@@ -166,7 +168,28 @@ export default function App() {
     const savedLocal = safeStorage.getItem(PROFILE_STORAGE_KEY);
     if (savedLocal) {
       try {
-        setUserProfile(JSON.parse(savedLocal));
+        const parsed = JSON.parse(savedLocal);
+        const isLegacy3Flags =
+          parsed &&
+          Array.isArray(parsed.allergies) &&
+          parsed.allergies.includes('dairy') &&
+          parsed.allergies.includes('peanut') &&
+          Array.isArray(parsed.conditions) &&
+          parsed.conditions.includes('diabetic') &&
+          parsed.allergies.length === 2 &&
+          parsed.conditions.length === 1;
+
+        if (isLegacy3Flags) {
+          safeStorage.removeItem(PROFILE_STORAGE_KEY);
+          setUserProfile({
+            allergies: [],
+            conditions: [],
+            sugar_threshold: 15.0,
+            sodium_threshold: 400.0,
+          });
+        } else if (parsed) {
+          setUserProfile(parsed);
+        }
       } catch (e) {}
     }
 
@@ -174,14 +197,25 @@ export default function App() {
     apiFetch(`/api/profile/${encodeURIComponent(id)}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && (data.allergies?.length > 0 || data.conditions?.length > 0)) {
-          setUserProfile((prev) => ({
-            ...prev,
-            allergies: data.allergies || prev.allergies,
-            conditions: data.conditions || prev.conditions,
-            sugar_threshold: data.sugar_threshold !== undefined ? data.sugar_threshold : prev.sugar_threshold,
-            sodium_threshold: data.sodium_threshold !== undefined ? data.sodium_threshold : prev.sodium_threshold,
-          }));
+        if (data) {
+          const isLegacy3Flags =
+            Array.isArray(data.allergies) &&
+            data.allergies.includes('dairy') &&
+            data.allergies.includes('peanut') &&
+            Array.isArray(data.conditions) &&
+            data.conditions.includes('diabetic') &&
+            data.allergies.length === 2 &&
+            data.conditions.length === 1;
+
+          if (!isLegacy3Flags && (data.allergies?.length > 0 || data.conditions?.length > 0)) {
+            setUserProfile((prev) => ({
+              ...prev,
+              allergies: data.allergies || prev.allergies,
+              conditions: data.conditions || prev.conditions,
+              sugar_threshold: data.sugar_threshold !== undefined ? data.sugar_threshold : prev.sugar_threshold,
+              sodium_threshold: data.sodium_threshold !== undefined ? data.sodium_threshold : prev.sodium_threshold,
+            }));
+          }
         }
       })
       .catch((err) => console.warn('Could not sync remote profile:', err.message));
@@ -670,7 +704,104 @@ export default function App() {
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: 0.08, ease: 'easeOut' }}
+                className="space-y-3"
               >
+                {/* Live Presenter Health Profile Switcher */}
+                <div className="bg-white border border-[#e8e2d8] rounded-xl p-3 sm:p-3.5 shadow-xs">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
+                    {/* Active Profile Info */}
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-[#faf7f2] border border-[#e8e2d8] flex items-center justify-center text-[#b8532f] shrink-0">
+                        <UserCheck className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-['Space_Grotesk'] text-[11px] sm:text-xs font-bold text-[#2a2622] uppercase tracking-wider">
+                            Health Profile:
+                          </span>
+                          <span className={`text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full border ${
+                            userProfile?.allergies?.includes('gluten')
+                              ? 'bg-[#fff1f2] border-[#fecdd3] text-[#be123c]'
+                              : userProfile?.conditions?.includes('diabetic')
+                              ? 'bg-[#fdf2ec] border-[#f5d5c6] text-[#b8532f]'
+                              : (userProfile?.allergies?.length > 0 || userProfile?.conditions?.length > 0)
+                              ? 'bg-[#fdf9ee] border-[#f2e5be] text-[#8a651e]'
+                              : 'bg-[#faf7f2] border-[#e8e2d8] text-[#78716c]'
+                          }`}>
+                            {userProfile?.allergies?.includes('gluten')
+                              ? '🌾 Profile 1: Gluten Allergy (Maggi Demo)'
+                              : userProfile?.conditions?.includes('diabetic')
+                              ? '🩸 Profile 2: Diabetic Profile (Coke Demo)'
+                              : (userProfile?.allergies?.length > 0 || userProfile?.conditions?.length > 0)
+                              ? `${userProfile.allergies.length} Allergies, ${userProfile.conditions.length} Conditions`
+                              : 'Standard / 0 Flags (Clean Slate)'}
+                          </span>
+                        </div>
+                        <p className="text-[10.5px] sm:text-[11px] text-[#78716c] truncate mt-0.5">
+                          {userProfile?.allergies?.includes('gluten')
+                            ? 'Flags wheat flour, maida, and wheat gluten in Maggi on scan.'
+                            : userProfile?.conditions?.includes('diabetic')
+                            ? 'Flags high liquid sugar and glycemic load in Coca-Cola on scan.'
+                            : (userProfile?.allergies?.length > 0 || userProfile?.conditions?.length > 0)
+                            ? 'Custom allergen and condition thresholds active.'
+                            : 'No flags preselected. Tap a preset below for presentation, or customize.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Preset Buttons */}
+                    <div className="grid grid-cols-2 sm:flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleSaveProfile({ allergies: [], conditions: [], sugar_threshold: 15.0, sodium_threshold: 400.0 })}
+                        className={`px-2.5 py-1.5 rounded-md text-[11px] sm:text-xs font-semibold border transition-all cursor-pointer text-center truncate ${
+                          userProfile?.allergies?.length === 0 && userProfile?.conditions?.length === 0
+                            ? 'bg-[#2a2622] border-[#2a2622] text-white shadow-2xs'
+                            : 'bg-[#faf7f2] hover:bg-[#f4efe6] border-[#e8e2d8] text-[#5c554e]'
+                        }`}
+                      >
+                        0 Flags (Clean)
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleSaveProfile({ allergies: ['gluten'], conditions: [], sugar_threshold: 15.0, sodium_threshold: 400.0 })}
+                        className={`px-2.5 py-1.5 rounded-md text-[11px] sm:text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1 truncate ${
+                          userProfile?.allergies?.includes('gluten') && userProfile?.conditions?.length === 0
+                            ? 'bg-[#be123c] border-[#be123c] text-white shadow-2xs'
+                            : 'bg-white hover:bg-[#fff1f2] border-[#e8e2d8] text-[#be123c]'
+                        }`}
+                        title="Profile for Presenter 1 (Maggi with Gluten Allergy)"
+                      >
+                        <span>🌾</span>
+                        <span className="truncate">Gluten (Maggi)</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleSaveProfile({ allergies: [], conditions: ['diabetic'], sugar_threshold: 15.0, sodium_threshold: 400.0 })}
+                        className={`px-2.5 py-1.5 rounded-md text-[11px] sm:text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1 truncate ${
+                          userProfile?.conditions?.includes('diabetic') && userProfile?.allergies?.length === 0
+                            ? 'bg-[#b8532f] border-[#b8532f] text-white shadow-2xs'
+                            : 'bg-white hover:bg-[#fdf2ec] border-[#e8e2d8] text-[#b8532f]'
+                        }`}
+                        title="Profile for Presenter 2 (Coca-Cola with Diabetic Condition)"
+                      >
+                        <span>🩸</span>
+                        <span className="truncate">Diabetic (Coke)</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setIsProfileOpen(true)}
+                        className="px-2.5 py-1.5 rounded-md text-[11px] sm:text-xs font-semibold bg-[#faf7f2] hover:bg-[#f4efe6] border border-[#e8e2d8] text-[#2a2622] transition-all cursor-pointer flex items-center justify-center gap-1 truncate"
+                      >
+                        <Sliders className="w-3 h-3 text-[#78716c] shrink-0" />
+                        <span>Customize...</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
                 <Scanner
                   onCompleteMultiStepScan={handleMultiStepScan}
                   onScanDirectBarcode={handleScanBarcode}

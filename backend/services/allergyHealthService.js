@@ -63,7 +63,7 @@ function evaluateAllergiesAndHealth(ingredientsText, nutriments = {}, userProfil
     const allergenId = mapping.allergen.toLowerCase();
 
     const isUserAllergic =
-      userAllergies.length === 0 ||
+      userAllergies.length > 0 &&
       userAllergies.some((userAllergy) => {
         if (userAllergy === allergenId) return true;
         const allergenDef = common_allergens.find((ca) => ca.id === allergenId);
@@ -149,8 +149,29 @@ function evaluateAllergiesAndHealth(ingredientsText, nutriments = {}, userProfil
       // Evaluate based on specific condition rules
       if (catalogEntry.id === 'diabetic') {
         const sugars = nutriments.sugars_100g !== undefined ? Number(nutriments.sugars_100g) : null;
-        if (sugars !== null) {
-          const exceeds = sugars > sugarThreshold;
+        const matchedTriggers = (catalogEntry.flagged_ingredients || []).filter((fi) =>
+          new RegExp(`\\b${escapeRegExp(fi)}\\b`, 'i').test(directIngredientsText)
+        );
+        const isBeverage = /ml\b|beverage|drink|liquid|water|cola|soda|carbonated/i.test(directIngredientsText) ||
+                           /ml\b|beverage|drink|liquid|cola|soda/i.test(text);
+        // Liquid beverages trigger high glycemic spike at >5g/100ml (FSSAI HFSS standard for beverages)
+        const effectiveThreshold = isBeverage ? Math.min(sugarThreshold, 5.0) : sugarThreshold;
+        const exceeds = sugars !== null && (sugars > effectiveThreshold || (isBeverage && sugars >= 5.0) || sugars > sugarThreshold);
+        const hasAddedSugar = matchedTriggers.length > 0;
+
+        if (exceeds || (sugars !== null && sugars >= 10.0) || (hasAddedSugar && sugars !== null && sugars >= 5.0)) {
+          healthConditionAlerts.push({
+            conditionId: catalogEntry.id,
+            condition: catalogEntry.id,
+            conditionName: catalogEntry.name,
+            metric: isBeverage ? 'Liquid Sugar (Beverage)' : 'Total Sugars',
+            value: `${sugars}g / 100${isBeverage ? 'ml' : 'g'}`,
+            threshold: `${effectiveThreshold}g / 100${isBeverage ? 'ml' : 'g'}`,
+            status: 'FLAGGED',
+            severity: 'CRITICAL',
+            message: `High glycemic contraindication for diabetes: Contains ${sugars}g sugar per 100${isBeverage ? 'ml' : 'g'} (${isBeverage ? 'high liquid glycemic load' : 'exceeds threshold'}). Contains added ${matchedTriggers.join(', ') || 'sugars'}.`,
+          });
+        } else if (sugars !== null) {
           healthConditionAlerts.push({
             conditionId: catalogEntry.id,
             condition: catalogEntry.id,
@@ -158,11 +179,9 @@ function evaluateAllergiesAndHealth(ingredientsText, nutriments = {}, userProfil
             metric: 'Total Sugars',
             value: `${sugars}g / 100g`,
             threshold: `${sugarThreshold}g / 100g`,
-            status: exceeds ? 'FLAGGED' : 'SAFE',
-            severity: exceeds ? (sugars > 25 ? 'CRITICAL' : 'WARNING') : 'GOOD',
-            message: exceeds
-              ? `High sugar alert: Contains ${sugars}g sugar per 100g (exceeds your ${sugarThreshold}g threshold). May trigger rapid glycemic spike.`
-              : `Sugar content (${sugars}g/100g) is within your safe threshold of ${sugarThreshold}g/100g.`,
+            status: 'SAFE',
+            severity: 'GOOD',
+            message: `Sugar content (${sugars}g/100g) is within your safe threshold of ${sugarThreshold}g/100g.`,
           });
         }
       } else if (catalogEntry.id === 'hypertension') {

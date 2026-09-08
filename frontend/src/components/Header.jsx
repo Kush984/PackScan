@@ -9,9 +9,7 @@ export default function Header({
   onResetScan,
   hasActiveResult,
 }) {
-  const activeConditionsCount = userProfile?.conditions?.length || 0;
-  const activeAllergiesCount = userProfile?.allergies?.length || 0;
-  const totalFlagsCount = activeConditionsCount + activeAllergiesCount;
+
 
   const navItems = [
     { id: 'scan', label: 'Scan & Verify', mobileLabel: 'Scan & Audit' },
@@ -68,25 +66,6 @@ export default function Header({
               <span className="font-semibold text-[#2a2622]">DL/MH Central</span>
             </div>
 
-            {/* Health Guardian Alert Badge */}
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              type="button"
-              onClick={() => onSelectTab && onSelectTab('medical')}
-              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs sm:text-[13px] font-semibold border transition-all cursor-pointer shrink-0 ${
-                totalFlagsCount > 0
-                  ? 'bg-[#fdf5e6] border-[#eed69e] text-[#926325] hover:bg-[#fbf0d6]'
-                  : 'bg-[#faf7f2] border-[#e8e2d8] text-[#5c554e] hover:bg-[#f4efe6]'
-              }`}
-            >
-              <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#c99a3e] shrink-0" />
-              <span className="whitespace-nowrap">
-                <span className="hidden sm:inline">Health Guardian: </span>
-                <strong className={totalFlagsCount > 0 ? 'text-[#926325] font-bold' : 'text-[#2a2622] font-semibold'}>
-                  {totalFlagsCount > 0 ? `${totalFlagsCount} Flags` : '0 Flags'}
-                </strong>
-              </span>
-            </motion.button>
 
             {/* Officer Avatar */}
             <div

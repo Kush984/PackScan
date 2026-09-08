@@ -20,7 +20,7 @@ export default function DemoPresetBar({ presets = [], onSelectPreset, isLoading 
   const getCardDetails = (preset) => {
     switch (preset.id) {
       case 'maggi-2min-classic':
-        return { meta: 'Net Wt: 70g • Font: 2.8mm', alert: 'ZERO ALLERGEN THREAT', alertColor: 'text-[#c99a3e]' };
+        return { meta: 'Net Wt: 70g • Font: 2.8mm', alert: 'WHEAT GLUTEN (RULE 6 OK)', alertColor: 'text-[#8a651e]' };
       case 'coca-cola-original':
         return { meta: 'Vol: 750ml • Font: 4.0mm', alert: 'SUGAR > 10g WATCH', alertColor: 'text-[#be123c]' };
       case 'coca-cola-zero':
@@ -44,7 +44,7 @@ export default function DemoPresetBar({ presets = [], onSelectPreset, isLoading 
       case 'defective-local-snack':
         return { meta: 'SEC 36 PENALTY: ₹25,000 FINE', alert: 'EXPORT NOTICE', alertColor: 'text-[#be123c]' };
       case 'protein-bar-substitute':
-        return { meta: 'Net Wt: 45g • Polyols Checked', alert: 'HEALTH GUARDIAN: 100% SAFE', alertColor: 'text-[#c99a3e]' };
+        return { meta: 'Net Wt: 45g • Polyols Checked', alert: 'METROLOGY COMPLIANT', alertColor: 'text-[#c99a3e]' };
       default:
         return { meta: 'Standard FMCG SKU', alert: 'METROLOGY VERIFIED', alertColor: 'text-[#c99a3e]' };
     }
