@@ -1,8 +1,8 @@
 const path = require('path');
 const fs = require('fs');
-const sqlite3 = require('./backend/node_modules/sqlite3').verbose();
+const sqlite3 = require('sqlite3').verbose();
 
-const dbPath = path.join(__dirname, 'backend/database/packscan.db');
+const dbPath = path.join(__dirname, 'packscan.db');
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('Failed to open DB:', err);
@@ -10,7 +10,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
-const sampleProducts = JSON.parse(fs.readFileSync(path.join(__dirname, 'backend/data/sample_products.json'), 'utf8'));
+const sampleProducts = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/sample_products.json'), 'utf8'));
 
 db.serialize(() => {
   console.log('Seeding SQLite database with all sample products and barcode variants...');

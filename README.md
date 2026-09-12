@@ -1,17 +1,17 @@
-# 📦 PackScan: Legal Metrology (Packaged Commodities) Rules, 2011 Compliance & Health Guardian
+# PackScan: Legal Metrology (Packaged Commodities) Rules, 2011 Compliance and Health Guardian
 
 **SIH 2026 Problem Statement SIH26034**  
 *Full-Stack Mobile-First Progressive Web Application (PWA)*
 
 ---
 
-## 🌟 Overview
+## Overview
 
 **PackScan** is an automated compliance verification and consumer safety system engineered for India's **Legal Metrology (Packaged Commodities) Rules, 2011**. By scanning packaged commodity barcodes or photographing back-of-pack labels, PackScan conducts a deterministic 8-field statutory audit under Rule 6, combined with personalized single-pass allergen cross-checking, diabetic/hypertension safety thresholds, international regulatory additive comparisons (India FSSAI vs EU EFSA vs Australia FSANZ), and healthier alternative suggestions with substitute nuance caveats.
 
 ---
 
-## 🏛️ Core Features
+## Core Features
 
 ### 1. Legal Metrology Compliance Checker (Core Problem Statement - Top Priority)
 Verifies the presence, formatting, and validity of all **8 mandatory statutory declarations under Rule 6**:
@@ -38,9 +38,9 @@ Verifies the presence, formatting, and validity of all **8 mandatory statutory d
 
 ### 3. Multi-Country Regulatory Additives Comparison
 - Curated structured dataset (`regulatory_dataset.json`) cross-referencing food additives across:
-  - 🇮🇳 **India (FSSAI)**
-  - 🇪🇺 **European Union (EFSA)**
-  - 🇦🇺 **Australia (FSANZ)**
+  - **India (FSSAI)**
+  - **European Union (EFSA)**
+  - **Australia (FSANZ)**
 - Surfaces bans (e.g., Titanium Dioxide E171 banned in EU) and mandatory child hyperactivity warning labels (e.g., Tartrazine E102, Allura Red E129).
 
 ### 4. Safer Alternatives & Substitute Nuance Warnings
@@ -58,7 +58,7 @@ Verifies the presence, formatting, and validity of all **8 mandatory statutory d
 
 ---
 
-## 🛠️ Architecture & Tech Stack
+## Architecture and Technology Stack
 
 ```
 packscan/
@@ -66,6 +66,7 @@ packscan/
 │   ├── server.js                        # Express API & routing
 │   ├── database/
 │   │   ├── db.js                        # SQLite schema & query helper
+│   │   ├── seed_database.js             # Database seeding script
 │   │   └── packscan.db                  # Local SQLite database
 │   ├── data/
 │   │   ├── regulatory_dataset.json      # Multi-country additive standards
@@ -101,7 +102,7 @@ packscan/
 
 ---
 
-## 🚀 Quickstart Guide
+## Quickstart Guide
 
 ### Prerequisites
 - Node.js v18+ (tested on Node v26)
@@ -132,14 +133,14 @@ npm run dev
 
 ---
 
-## 📱 PWA Installation
+## Progressive Web Application (PWA) Deployment
 1. Open `http://localhost:3000` on Chrome or Safari on mobile.
 2. Tap **Add to Home Screen** / **Install PackScan**.
 3. Launch directly as a standalone app with offline asset caching.
 
 ---
 
-## 📋 MVP Scope vs Future Roadmap
+## MVP Scope and Future Roadmap
 
 | Feature Area | MVP Scoped (Hackathon Deliverable) | Future Roadmap (Production Scale) |
 |---|---|---|

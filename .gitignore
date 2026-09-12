@@ -33,3 +33,17 @@ backend/.env
 # Uploads
 backend/uploads/*
 !backend/uploads/.gitkeep
+
+# Scratch presentation, render scripts and root assets
+/*.py
+/*.pdf
+/*.pptx
+/test_*.js
+/render_*.js
+/generate_*.js
+/update_*.py
+/fix_arrow.py
+/screen1_export.html
+/*.svg
+/*.png
+/*.jpg

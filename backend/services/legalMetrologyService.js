@@ -662,27 +662,6 @@ function checkUnitSalePrice(text, meta = {}) {
     };
   }
 
-  // Deterministic calculation fallback: If MRP and Net Quantity are known
-  const mrpMatch = text.match(/(?:mrp|price|₹|rs\.?)\s*[:\-\s]*([0-9]+(?:\.[0-9]{1,2})?)/i);
-  const qtyMatch = text.match(/([0-9]+(?:\.[0-9]+)?)\s*(g|gm|kg|ml|l|ltr)\b/i);
-  if (mrpMatch && qtyMatch) {
-    const p = parseFloat(mrpMatch[1]);
-    const q = parseFloat(qtyMatch[1]);
-    const u = qtyMatch[2].toLowerCase();
-    if (p > 0 && q > 0) {
-      const calcUsp = (p / q).toFixed(3);
-      return {
-        id: 'unit_sale_price',
-        name: ruleName,
-        legalRule,
-        status: 'DETECTED',
-        confidence: 'high',
-        value: `₹ ${calcUsp} per ${u}`,
-        snippet: `MRP ₹${p} / ${q}${u} = ₹${calcUsp}/${u}`,
-        detail: `Unit sale price computed deterministically under Rule 6(11): ₹${calcUsp} per ${u}`,
-      };
-    }
-  }
 
   return {
     id: 'unit_sale_price',
